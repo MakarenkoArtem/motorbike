@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:rotationX="0"
+    android:scrollbarSize="50dp"
+    android:theme="@style/Base.Theme.Bike"
+    tools:context=".MainActivity">
+
+
+    <ImageView
+        android:id="@+id/colorPicker"
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.35"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.7" />
+
+    <Button
+        android:id="@+id/Connect"
+        android:layout_width="104dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="10dp"
+        android:text="Connect"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="1dp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.38"
+        android:layout_marginStart="10sp"
+        android:layout_marginTop="10sp"
+        android:layout_marginEnd="10sp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/colorPicker"
+        tools:ignore="MissingConstraints">
+
+        <LinearLayout
+            android:layout_width="77dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonColor0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton0"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/buttonColor50"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton50"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/buttonColor100"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton100"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/buttonColor150"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton150"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/buttonColor200"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton200"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Button
+                android:id="@+id/buttonColor250"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorButton250"
+                android:text=" "
+                app:cornerRadius="20sp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3sp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+
+        <RadioGroup
+            android:layout_width="156dp"
+            android:layout_height="match_parent">
+
+            <RadioButton
+                android:id="@+id/radioButton1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Основной" />
+
+            <RadioButton
+                android:id="@+id/radioButton2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Цветомузыка" />
+
+            <RadioButton
+                android:id="@+id/radioButton3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Цв.муз(частоты)" />
+
+            <RadioButton
+                android:id="@+id/radioButton4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Стробоскоп" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RadioGroup
+                android:layout_width="158dp"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/radioButton.1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Выкл" />
+
+                <RadioButton
+                    android:id="@+id/radioButton.2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1 цвет" />
+
+                <RadioButton
+                    android:id="@+id/radioButton.3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="2 цвета" />
+
+                <RadioButton
+                    android:id="@+id/radioButton.4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="3 цвета" />
+
+                <RadioButton
+                    android:id="@+id/radioButton.5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="6 цвета"
+                    android:visibility="visible" />
+
+            </RadioGroup>
+
+            <RadioButton
+                android:id="@+id/synchronously"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Синхронно" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/bike_off_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10sp"
+        android:layout_marginTop="15dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="Зажигание"
+        app:layout_constraintStart_toEndOf="@+id/Connect"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:thumbTint="@drawable/thump"
+        app:trackTint="@drawable/track" />
+
+    <SeekBar
+        android:id="@+id/brightness"
+        android:layout_width="250sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="-90dp"
+        android:layout_marginTop="10sp"
+        android:max="255"
+        android:min="0"
+        android:progress="100"
+        android:rotation="270"
+        app:labelBehavior="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/colorPicker"
+        app:layout_constraintStart_toEndOf="@+id/colorPicker"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.481"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
