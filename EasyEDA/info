@@ -1,0 +1,1007 @@
+{
+  "uuid": "794d2d0d52e2c41e95106d711ffaef61",
+  "path": "Offline/Bike(Alpha)",
+  "name": "Bike(Alpha)",
+  "content": "",
+  "created_at": "2023-08-02 21:16:32",
+  "updated_at": "2023-08-02 21:22:26",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "5da687cd41d5ef5d4b0a53a0ab453f41",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "5a9ec2085ad6436d86701332d4451b76": 2,
+        "2f29adc59aa94029b4e47c01c0e119ff": 1,
+        "4f5311c9f90f4bd48696168233f1c422": 1,
+        "c1bf4d0f46294a31af4d88618d23d7ad": 3,
+        "717e48eeda354b1799ee0b54b43e2ba0": 1,
+        "dd9599fb7a894710af7e9e3bf01f7b3f": 1,
+        "fcaba4851eda4ca19d4326a668633a30": 1,
+        "bd72a088a0a544f3b4f4fc2bd2df44e8": 1,
+        "9201937c4edd4404a0bbcf5e0805de74": 1,
+        "1d5c06742c9a411a968ef7d183dc2cd8": 1,
+        "4bdc8a90d3ee48f8b7bdaa1b3bcd4dd4": 3,
+        "bbf84ae60af84068a1046273a2965105": 1,
+        "ececebe837ab446d8a691057f2b68227": 1,
+        "92c32ceaaac84139add7ebda884f0a47": 2,
+        "ce91631041f646fd9775777b794167dd": 1,
+        "93b44d62463c4c9c82dd7108c8ee7d73": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "ARDUINO_NANOG",
+          1,
+          "ARDUINO_NANO2",
+          "A1",
+          {
+            "Manufacturer Part": "Arduino Nano",
+            "Contributor": "eyal89502",
+            "Supplier Part": "",
+            "Supplier": "",
+            "spiceSymbolName": "ARDUINO_NANOG",
+            "puuid": "607f3d7f4b11481891271d9f4dbeee7d",
+            "uuid": "2f29adc59aa94029b4e47c01c0e119ff"
+          }
+        ],
+        [
+          "PJ-320B",
+          1,
+          "AUDIO-SMD_PJ-320B",
+          "AUDIO1",
+          {
+            "Supplier": "LCSC",
+            "Manufacturer": "BOOMELE",
+            "Manufacturer Part": "PJ-320B",
+            "Contributor": "LCSC",
+            "Supplier Part": "C18594",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "PJ-320B",
+            "puuid": "9fec78267e1446ecb3bc60e5588ea91e",
+            "uuid": "1d5c06742c9a411a968ef7d183dc2cd8"
+          }
+        ],
+        [
+          "1000uF",
+          1,
+          "CAP-TH_BD8.0-P3.50-D0.6-FD",
+          "C1",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C311644",
+            "Manufacturer": "Lelon",
+            "Manufacturer Part": "RGA102MOJBK-0811",
+            "Contributor": "LCSC",
+            "spiceSymbolName": "RGA102MOJBK-0811",
+            "puuid": "90d1b58a2d284d63b5d026a0c4e38bab",
+            "uuid": "dd9599fb7a894710af7e9e3bf01f7b3f"
+          }
+        ],
+        [
+          "10nF",
+          1,
+          "CAP-TH_L14.0-W5.0-P7.50-1.2",
+          "C2",
+          {
+            "Supplier": "LCSC",
+            "Manufacturer": "MuRata",
+            "Manufacturer Part": "DE2F3KY103MN3AM02F",
+            "Supplier Part": "C85855",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "DE2F3KY103MN3AM02F",
+            "puuid": "71b8949717074c32a6b77c5c2413b079",
+            "uuid": "9201937c4edd4404a0bbcf5e0805de74"
+          }
+        ],
+        [
+          "HDR-F-2.54_1x15",
+          2,
+          "HDR-F-2.54_1X15",
+          "H1,H2",
+          {
+            "Supplier Part": "C124408",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-F-2.54_1x15",
+            "puuid": "bce4bcfcccfb42a296f7a392ab0b7199",
+            "uuid": "5a9ec2085ad6436d86701332d4451b76"
+          }
+        ],
+        [
+          "R_3386P_EU",
+          1,
+          "RES-ADJ-TH_3386P",
+          "HSV",
+          {
+            "Supplier Part": "",
+            "Supplier": "LCSC",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "Value(Ω)": "10K",
+            "spiceSymbolName": "R_3386P_EU",
+            "puuid": "ce6e0cc9b0684cd986edbf86d7075dfd",
+            "uuid": "fcaba4851eda4ca19d4326a668633a30"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x10",
+          1,
+          "HDR-M-2.54_1X10",
+          "J1",
+          {
+            "Supplier Part": "C57369",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x10",
+            "puuid": "0163104799714461abf84081b4477301",
+            "uuid": "ce91631041f646fd9775777b794167dd"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x8",
+          2,
+          "HDR-M-2.54_1X8",
+          "J2,J3",
+          {
+            "Supplier Part": "C190820",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x8",
+            "puuid": "fb11a1cdebf6433b8a3c664a100689e6",
+            "uuid": "92c32ceaaac84139add7ebda884f0a47"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x6",
+          1,
+          "HDR-M-2.54_1X6",
+          "J4",
+          {
+            "Supplier Part": "C190819",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x6",
+            "puuid": "df3ca37cb13d499cb713e9aa6fdd0c7b",
+            "uuid": "93b44d62463c4c9c82dd7108c8ee7d73"
+          }
+        ],
+        [
+          "UNO_R3",
+          1,
+          "UNO_R3",
+          "P1",
+          {
+            "timeStamp": "1460354705",
+            "sourceId": "1T5FDZYC8",
+            "spiceSymbolName": "UNO_R3",
+            "Manufacturer Part": "",
+            "puuid": "8f9d41f84823451180938dec38867755",
+            "uuid": "ececebe837ab446d8a691057f2b68227"
+          }
+        ],
+        [
+          "300",
+          3,
+          "RES-TH_BD2.4-L6.3-P10.30-D0.6",
+          "R1,R2,R3",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C433735",
+            "Manufacturer": "TyoHM",
+            "Manufacturer Part": "RD 1/4W 300R J T/B A1",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "Resistance": "300Ω",
+            "spiceSymbolName": "RD 1/4W 300R J T/B A1",
+            "puuid": "2915f1f0a54941d7b912decfe617b47f",
+            "uuid": "4bdc8a90d3ee48f8b7bdaa1b3bcd4dd4"
+          }
+        ],
+        [
+          "XY118-5.0-3P",
+          1,
+          "CONN-TH_XY118-5.0-3P",
+          "RGB_LINE",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784923",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-3P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-3P",
+            "puuid": "f7603d6ebf0c4af292b5131f4e614ed9",
+            "uuid": "bbf84ae60af84068a1046273a2965105"
+          }
+        ],
+        [
+          "BUTTON-4X3X2.5",
+          1,
+          "SW-SMD_4P-L4.2-W3.2-P2.15-LS5.2",
+          "SW1",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C9900020294",
+            "Manufacturer": "null",
+            "Manufacturer Part": "BUTTON-4X3X2.5",
+            "JLCPCB Part Class": "Extended Part",
+            "Contributor": "lcsc",
+            "spiceSymbolName": "BUTTON-4X3X2.5",
+            "puuid": "cac280770c814aad97b84c85509c0710",
+            "uuid": "717e48eeda354b1799ee0b54b43e2ba0"
+          }
+        ],
+        [
+          "TEN 5-2411WI",
+          1,
+          "TEN 5-2411WI",
+          "U1",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "andrewys03",
+            "spiceSymbolName": "TEN 5-2411WI",
+            "puuid": "23b2679ae4974245bcc00379f20d0864",
+            "uuid": "bd72a088a0a544f3b4f4fc2bd2df44e8"
+          }
+        ],
+        [
+          "Buck Boost HV-286",
+          1,
+          "BUCK BOOST HW-286",
+          "U2",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Stefano Rossi",
+            "spiceSymbolName": "Buck Boost HV-286",
+            "puuid": "d12e1efa22374568a993a10e22c84993",
+            "uuid": "4f5311c9f90f4bd48696168233f1c422"
+          }
+        ],
+        [
+          "XY118-5.0-2P",
+          3,
+          "CONN-TH_XY118-5.0-2P",
+          "VIN/GND,VIN/GND1,VOLTMETER/AKKUM_+1V",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784922",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-2P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-2P",
+            "puuid": "f21019be0deb405481de00d4523327ae",
+            "uuid": "c1bf4d0f46294a31af4d88618d23d7ad"
+          }
+        ],
+        [
+          "ARDUINO_NANOG",
+          1,
+          "ARDUINO_NANO2",
+          "A10",
+          {
+            "Manufacturer Part": "Arduino Nano",
+            "Contributor": "eyal89502",
+            "Supplier Part": "",
+            "Supplier": "",
+            "spiceSymbolName": "ARDUINO_NANOG",
+            "puuid": "607f3d7f4b11481891271d9f4dbeee7d",
+            "uuid": "2f29adc59aa94029b4e47c01c0e119ff"
+          }
+        ],
+        [
+          "1N4007W",
+          4,
+          "SOD-123_L2.8-W1.8-LS3.7-RD",
+          "D1,D2,D3,D4",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C328592",
+            "Manufacturer": "BLUE ROCKET",
+            "Manufacturer Part": "1N4007W",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "1N4007W",
+            "puuid": "60a676d313ae48718a81c380b73dfe4f",
+            "uuid": "e33cc1be9d5e4d929dda60b4eb023d72"
+          }
+        ],
+        [
+          "HDR-F-2.54_1x15",
+          2,
+          "HDR-F-2.54_1X15",
+          "H20,H30",
+          {
+            "Supplier Part": "C124408",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-F-2.54_1x15",
+            "puuid": "bce4bcfcccfb42a296f7a392ab0b7199",
+            "uuid": "5a9ec2085ad6436d86701332d4451b76"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x16",
+          1,
+          "HDR-M-2.54_1X16",
+          "J5",
+          {
+            "Supplier Part": "",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x16",
+            "puuid": "b811781e2b834ff7927ba9960dacf589",
+            "uuid": "97e3dfd84929426786ec7929e48dfb0d"
+          }
+        ],
+        [
+          "200-500",
+          2,
+          "R0603",
+          "R4,R5",
+          {
+            "Supplier Part": "",
+            "Supplier": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "R_0603_EU",
+            "Manufacturer Part": "",
+            "puuid": "398691f1f785460098bbe5ee6590333c",
+            "uuid": "bb009484ef804a24ac5d18c54b249586"
+          }
+        ],
+        [
+          "HW-286 - DCDC Converter",
+          1,
+          "HW-286 DCDC CONVERTER",
+          "U3",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier": "Aliexpress",
+            "Supplier Part": "HW-286",
+            "link": "",
+            "Contributor": "Guest",
+            "spiceSymbolName": "HW-286 - DCDC Converter",
+            "puuid": "43ae95beb7004070904a6b1806bf1276",
+            "uuid": "fd4d0cc4a85b4fc99525d364f3afa099"
+          }
+        ],
+        [
+          "HC-06",
+          1,
+          "BLUETOOTH HC-06",
+          "U4",
+          {
+            "Contributor": "nico.hampl1999",
+            "timeStamp": "1465607190",
+            "sourceId": "31jdvN5mE",
+            "spiceSymbolName": "HC-06",
+            "Manufacturer Part": "",
+            "puuid": "378852c3e95342d28030bccb9cfd9c02",
+            "uuid": "95623e0fadd64e8ba0c236dc302cac18"
+          }
+        ],
+        [
+          "WS2811B 1P",
+          2,
+          "WS2811B 1P",
+          "U5,U8",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "renesoukup",
+            "spiceSymbolName": "WS2811B 1P",
+            "puuid": "0a2ec53d7d6446bbb98b9ff44b12f324",
+            "uuid": "aec5df1482464794aa48d98a25f18945"
+          }
+        ],
+        [
+          "SP-715 VER1.0",
+          1,
+          "SP-715",
+          "U6",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "SP-715 VER 1.0",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Artempro",
+            "spiceSymbolName": "SP-715 VER1.0",
+            "puuid": "b779a8ebdce5463f94b5a4a3db43b146",
+            "uuid": "6ddf2074b7964ae286527607291d04b8"
+          }
+        ],
+        [
+          "VHM-314 BLUETOOTH",
+          1,
+          "VHM-314",
+          "U7",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "VHM-314",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Alexander_Semenov",
+            "spiceSymbolName": "VHM-314 BLUETOOTH",
+            "puuid": "375e6dcf858341c9a4fec5cb7f465782",
+            "uuid": "0f9f70995e4d4073954e8d604eb38d4c"
+          }
+        ],
+        [
+          "Class D Stereo Amplifier Module",
+          1,
+          "TPA3110 AMPLIFIER MODULE",
+          "U9",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "multiwriter",
+            "spiceSymbolName": "Class D Stereo Amplifier Module",
+            "puuid": "9605d7881dda4aa699cba42accf4c88b",
+            "uuid": "9d77aa70c1b24ea4ade63428d2eea5cf"
+          }
+        ],
+        [
+          "XY118-5.0-2P",
+          1,
+          "CONN-TH_XY118-5.0-2P",
+          "VOLTMETER/AKKUM_+12V",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784922",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-2P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-2P",
+            "puuid": "f21019be0deb405481de00d4523327ae",
+            "uuid": "c1bf4d0f46294a31af4d88618d23d7ad"
+          }
+        ]
+      ],
+      "updateTime": 1690996592,
+      "createTime": 1690996592,
+      "histories": [],
+      "created_at": "2023-08-02 21:16:32",
+      "updated_at": "2023-08-02 21:16:32"
+    },
+    {
+      "uuid": "2035d218199faf26190d09985d6fad23",
+      "title": "Add multi media",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "c1bf4d0f46294a31af4d88618d23d7ad": 1,
+        "5a9ec2085ad6436d86701332d4451b76": 2,
+        "2f29adc59aa94029b4e47c01c0e119ff": 1,
+        "fd4d0cc4a85b4fc99525d364f3afa099": 1,
+        "6ddf2074b7964ae286527607291d04b8": 1,
+        "95623e0fadd64e8ba0c236dc302cac18": 1,
+        "0f9f70995e4d4073954e8d604eb38d4c": 1,
+        "97e3dfd84929426786ec7929e48dfb0d": 1,
+        "aec5df1482464794aa48d98a25f18945": 2,
+        "e33cc1be9d5e4d929dda60b4eb023d72": 4,
+        "bb009484ef804a24ac5d18c54b249586": 2,
+        "9d77aa70c1b24ea4ade63428d2eea5cf": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "ARDUINO_NANOG",
+          1,
+          "ARDUINO_NANO2",
+          "A1",
+          {
+            "Manufacturer Part": "Arduino Nano",
+            "Contributor": "eyal89502",
+            "Supplier Part": "",
+            "Supplier": "",
+            "spiceSymbolName": "ARDUINO_NANOG",
+            "puuid": "607f3d7f4b11481891271d9f4dbeee7d",
+            "uuid": "2f29adc59aa94029b4e47c01c0e119ff"
+          }
+        ],
+        [
+          "PJ-320B",
+          1,
+          "AUDIO-SMD_PJ-320B",
+          "AUDIO1",
+          {
+            "Supplier": "LCSC",
+            "Manufacturer": "BOOMELE",
+            "Manufacturer Part": "PJ-320B",
+            "Contributor": "LCSC",
+            "Supplier Part": "C18594",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "PJ-320B",
+            "puuid": "9fec78267e1446ecb3bc60e5588ea91e",
+            "uuid": "1d5c06742c9a411a968ef7d183dc2cd8"
+          }
+        ],
+        [
+          "1000uF",
+          1,
+          "CAP-TH_BD8.0-P3.50-D0.6-FD",
+          "C1",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C311644",
+            "Manufacturer": "Lelon",
+            "Manufacturer Part": "RGA102MOJBK-0811",
+            "Contributor": "LCSC",
+            "spiceSymbolName": "RGA102MOJBK-0811",
+            "puuid": "90d1b58a2d284d63b5d026a0c4e38bab",
+            "uuid": "dd9599fb7a894710af7e9e3bf01f7b3f"
+          }
+        ],
+        [
+          "10nF",
+          1,
+          "CAP-TH_L14.0-W5.0-P7.50-1.2",
+          "C2",
+          {
+            "Supplier": "LCSC",
+            "Manufacturer": "MuRata",
+            "Manufacturer Part": "DE2F3KY103MN3AM02F",
+            "Supplier Part": "C85855",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "DE2F3KY103MN3AM02F",
+            "puuid": "71b8949717074c32a6b77c5c2413b079",
+            "uuid": "9201937c4edd4404a0bbcf5e0805de74"
+          }
+        ],
+        [
+          "HDR-F-2.54_1x15",
+          2,
+          "HDR-F-2.54_1X15",
+          "H1,H2",
+          {
+            "Supplier Part": "C124408",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-F-2.54_1x15",
+            "puuid": "bce4bcfcccfb42a296f7a392ab0b7199",
+            "uuid": "5a9ec2085ad6436d86701332d4451b76"
+          }
+        ],
+        [
+          "R_3386P_EU",
+          1,
+          "RES-ADJ-TH_3386P",
+          "HSV",
+          {
+            "Supplier Part": "",
+            "Supplier": "LCSC",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "Value(Ω)": "10K",
+            "spiceSymbolName": "R_3386P_EU",
+            "puuid": "ce6e0cc9b0684cd986edbf86d7075dfd",
+            "uuid": "fcaba4851eda4ca19d4326a668633a30"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x10",
+          1,
+          "HDR-M-2.54_1X10",
+          "J1",
+          {
+            "Supplier Part": "C57369",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x10",
+            "puuid": "0163104799714461abf84081b4477301",
+            "uuid": "ce91631041f646fd9775777b794167dd"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x8",
+          2,
+          "HDR-M-2.54_1X8",
+          "J2,J3",
+          {
+            "Supplier Part": "C190820",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x8",
+            "puuid": "fb11a1cdebf6433b8a3c664a100689e6",
+            "uuid": "92c32ceaaac84139add7ebda884f0a47"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x6",
+          1,
+          "HDR-M-2.54_1X6",
+          "J4",
+          {
+            "Supplier Part": "C190819",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x6",
+            "puuid": "df3ca37cb13d499cb713e9aa6fdd0c7b",
+            "uuid": "93b44d62463c4c9c82dd7108c8ee7d73"
+          }
+        ],
+        [
+          "UNO_R3",
+          1,
+          "UNO_R3",
+          "P1",
+          {
+            "timeStamp": "1460354705",
+            "sourceId": "1T5FDZYC8",
+            "spiceSymbolName": "UNO_R3",
+            "Manufacturer Part": "",
+            "puuid": "8f9d41f84823451180938dec38867755",
+            "uuid": "ececebe837ab446d8a691057f2b68227"
+          }
+        ],
+        [
+          "300",
+          3,
+          "RES-TH_BD2.4-L6.3-P10.30-D0.6",
+          "R1,R2,R3",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C433735",
+            "Manufacturer": "TyoHM",
+            "Manufacturer Part": "RD 1/4W 300R J T/B A1",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "Resistance": "300Ω",
+            "spiceSymbolName": "RD 1/4W 300R J T/B A1",
+            "puuid": "2915f1f0a54941d7b912decfe617b47f",
+            "uuid": "4bdc8a90d3ee48f8b7bdaa1b3bcd4dd4"
+          }
+        ],
+        [
+          "XY118-5.0-3P",
+          1,
+          "CONN-TH_XY118-5.0-3P",
+          "RGB_LINE",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784923",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-3P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-3P",
+            "puuid": "f7603d6ebf0c4af292b5131f4e614ed9",
+            "uuid": "bbf84ae60af84068a1046273a2965105"
+          }
+        ],
+        [
+          "BUTTON-4X3X2.5",
+          1,
+          "SW-SMD_4P-L4.2-W3.2-P2.15-LS5.2",
+          "SW1",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C9900020294",
+            "Manufacturer": "null",
+            "Manufacturer Part": "BUTTON-4X3X2.5",
+            "JLCPCB Part Class": "Extended Part",
+            "Contributor": "lcsc",
+            "spiceSymbolName": "BUTTON-4X3X2.5",
+            "puuid": "cac280770c814aad97b84c85509c0710",
+            "uuid": "717e48eeda354b1799ee0b54b43e2ba0"
+          }
+        ],
+        [
+          "TEN 5-2411WI",
+          1,
+          "TEN 5-2411WI",
+          "U1",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "andrewys03",
+            "spiceSymbolName": "TEN 5-2411WI",
+            "puuid": "23b2679ae4974245bcc00379f20d0864",
+            "uuid": "bd72a088a0a544f3b4f4fc2bd2df44e8"
+          }
+        ],
+        [
+          "Buck Boost HV-286",
+          1,
+          "BUCK BOOST HW-286",
+          "U2",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Stefano Rossi",
+            "spiceSymbolName": "Buck Boost HV-286",
+            "puuid": "d12e1efa22374568a993a10e22c84993",
+            "uuid": "4f5311c9f90f4bd48696168233f1c422"
+          }
+        ],
+        [
+          "XY118-5.0-2P",
+          3,
+          "CONN-TH_XY118-5.0-2P",
+          "VIN/GND,VIN/GND1,VOLTMETER/AKKUM_+1V",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784922",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-2P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-2P",
+            "puuid": "f21019be0deb405481de00d4523327ae",
+            "uuid": "c1bf4d0f46294a31af4d88618d23d7ad"
+          }
+        ],
+        [
+          "ARDUINO_NANOG",
+          1,
+          "ARDUINO_NANO2",
+          "A10",
+          {
+            "Manufacturer Part": "Arduino Nano",
+            "Contributor": "eyal89502",
+            "Supplier Part": "",
+            "Supplier": "",
+            "spiceSymbolName": "ARDUINO_NANOG",
+            "puuid": "607f3d7f4b11481891271d9f4dbeee7d",
+            "uuid": "2f29adc59aa94029b4e47c01c0e119ff"
+          }
+        ],
+        [
+          "1N4007W",
+          4,
+          "SOD-123_L2.8-W1.8-LS3.7-RD",
+          "D1,D2,D3,D4",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C328592",
+            "Manufacturer": "BLUE ROCKET",
+            "Manufacturer Part": "1N4007W",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "1N4007W",
+            "puuid": "60a676d313ae48718a81c380b73dfe4f",
+            "uuid": "e33cc1be9d5e4d929dda60b4eb023d72"
+          }
+        ],
+        [
+          "HDR-F-2.54_1x15",
+          2,
+          "HDR-F-2.54_1X15",
+          "H20,H30",
+          {
+            "Supplier Part": "C124408",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-F-2.54_1x15",
+            "puuid": "bce4bcfcccfb42a296f7a392ab0b7199",
+            "uuid": "5a9ec2085ad6436d86701332d4451b76"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x16",
+          1,
+          "HDR-M-2.54_1X16",
+          "J5",
+          {
+            "Supplier Part": "",
+            "Supplier": "LCSC",
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "HDR-M-2.54_1x16",
+            "puuid": "b811781e2b834ff7927ba9960dacf589",
+            "uuid": "97e3dfd84929426786ec7929e48dfb0d"
+          }
+        ],
+        [
+          "200-500",
+          2,
+          "R0603",
+          "R4,R5",
+          {
+            "Supplier Part": "",
+            "Supplier": "",
+            "Contributor": "LCEDA_Lib",
+            "spiceSymbolName": "R_0603_EU",
+            "Manufacturer Part": "",
+            "puuid": "398691f1f785460098bbe5ee6590333c",
+            "uuid": "bb009484ef804a24ac5d18c54b249586"
+          }
+        ],
+        [
+          "HW-286 - DCDC Converter",
+          1,
+          "HW-286 DCDC CONVERTER",
+          "U3",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier": "Aliexpress",
+            "Supplier Part": "HW-286",
+            "link": "",
+            "Contributor": "Guest",
+            "spiceSymbolName": "HW-286 - DCDC Converter",
+            "puuid": "43ae95beb7004070904a6b1806bf1276",
+            "uuid": "fd4d0cc4a85b4fc99525d364f3afa099"
+          }
+        ],
+        [
+          "HC-06",
+          1,
+          "BLUETOOTH HC-06",
+          "U4",
+          {
+            "Contributor": "nico.hampl1999",
+            "timeStamp": "1465607190",
+            "sourceId": "31jdvN5mE",
+            "spiceSymbolName": "HC-06",
+            "Manufacturer Part": "",
+            "puuid": "378852c3e95342d28030bccb9cfd9c02",
+            "uuid": "95623e0fadd64e8ba0c236dc302cac18"
+          }
+        ],
+        [
+          "WS2811B 1P",
+          2,
+          "WS2811B 1P",
+          "U5,U8",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "renesoukup",
+            "spiceSymbolName": "WS2811B 1P",
+            "puuid": "0a2ec53d7d6446bbb98b9ff44b12f324",
+            "uuid": "aec5df1482464794aa48d98a25f18945"
+          }
+        ],
+        [
+          "SP-715 VER1.0",
+          1,
+          "SP-715",
+          "U6",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "SP-715 VER 1.0",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Artempro",
+            "spiceSymbolName": "SP-715 VER1.0",
+            "puuid": "b779a8ebdce5463f94b5a4a3db43b146",
+            "uuid": "6ddf2074b7964ae286527607291d04b8"
+          }
+        ],
+        [
+          "VHM-314 BLUETOOTH",
+          1,
+          "VHM-314",
+          "U7",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "VHM-314",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "Alexander_Semenov",
+            "spiceSymbolName": "VHM-314 BLUETOOTH",
+            "puuid": "375e6dcf858341c9a4fec5cb7f465782",
+            "uuid": "0f9f70995e4d4073954e8d604eb38d4c"
+          }
+        ],
+        [
+          "Class D Stereo Amplifier Module",
+          1,
+          "TPA3110 AMPLIFIER MODULE",
+          "U9",
+          {
+            "Manufacturer": "",
+            "Manufacturer Part": "",
+            "Supplier Part": "",
+            "Supplier": "",
+            "link": "",
+            "Contributor": "multiwriter",
+            "spiceSymbolName": "Class D Stereo Amplifier Module",
+            "puuid": "9605d7881dda4aa699cba42accf4c88b",
+            "uuid": "9d77aa70c1b24ea4ade63428d2eea5cf"
+          }
+        ],
+        [
+          "XY118-5.0-2P",
+          1,
+          "CONN-TH_XY118-5.0-2P",
+          "VOLTMETER/AKKUM_+12V",
+          {
+            "Supplier": "LCSC",
+            "Supplier Part": "C784922",
+            "Manufacturer": "Ningbo Xinlaiya Elec.",
+            "Manufacturer Part": "XY118-5.0-2P",
+            "Contributor": "LCSC",
+            "JLCPCB Part Class": "Extended Part",
+            "spiceSymbolName": "XY118-5.0-2P",
+            "puuid": "f21019be0deb405481de00d4523327ae",
+            "uuid": "c1bf4d0f46294a31af4d88618d23d7ad"
+          }
+        ]
+      ],
+      "updateTime": 1690996946,
+      "createTime": 1690996592,
+      "histories": [],
+      "created_at": "2023-08-02 21:16:32",
+      "updated_at": "2023-08-02 21:22:26"
+    }
+  ],
+  "sort": [
+    "5da687cd41d5ef5d4b0a53a0ab453f41",
+    "2035d218199faf26190d09985d6fad23"
+  ],
+  "title": "Bike(Alpha)",
+  "foldername": "Bike(Alpha)",
+  "schfilename": "Bike(Alpha).json",
+  "schfilemtime": 1690996946872
+}
