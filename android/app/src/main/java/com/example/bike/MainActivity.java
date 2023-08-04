@@ -3,6 +3,7 @@ package com.example.bike;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -11,8 +12,10 @@ import android.bluetooth.BluetoothSocket;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.Base64DataException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     public ImageView colorPicker;
     Bitmap bitmap;
     SeekBar brightness;
+    SeekBar bar;
     //ConnectedThread BT;
     InputStream inputStream;
     OutputStream outputStream;
@@ -85,6 +90,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         setContentView(R.layout.activity_main);
+
+        colorPicker = findViewById(R.id.colorPicker);
+        colorPicker.setDrawingCacheEnabled(true);
+        colorPicker.buildDrawingCache(true);
+        colorPicker.setOnTouchListener(colorPickerTouch);
+
         brightness = findViewById(R.id.brightness);
         brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -96,6 +107,19 @@ public class MainActivity extends AppCompatActivity {
                 BTSend("Br:"+Integer.toString(seekBar.getProgress())+"\n", 10,100,true);
             }
         });
+
+        bar = findViewById(R.id.bar);
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                BTSend("Ot:"+Integer.toString(seekBar.getProgress())+"\n", 10,100,true);
+            }
+        });
+        resize();
 
 
         connectButton = findViewById(R.id.Connect);
@@ -130,22 +154,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        colorPicker = findViewById(R.id.colorPicker);
-        colorPicker.setDrawingCacheEnabled(true);
-        colorPicker.buildDrawingCache(true);
-        colorPicker.setOnTouchListener(colorPickerTouch);
-
-
         bike_off_switch = findViewById(R.id.bike_off_switch);
         bike_off_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton swi, boolean isChecked) {
-                //message = "OFF\n";
                 message = "OFF\n";
-                if (isChecked){
-                    //message = "ON\n";
-                    message = "ON\n";
-                }
+                if (isChecked){message = "ON\n";}
                 ArrayList answer = BTSend(message, 5,200, true);
                 if ((boolean) answer.get(0)) {
                     return;
@@ -185,6 +199,22 @@ public class MainActivity extends AppCompatActivity {
                 //if (((RadioButton) view).isChecked()) {synch = "1";}
             }});
     };
+    public void resize(){
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int screenWidth = displaymetrics.widthPixels;
+        int screenHeight = displaymetrics.heightPixels;
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) colorPicker.getLayoutParams();
+        int height = (int)(params.matchConstraintPercentHeight*screenHeight);
+        params = (ConstraintLayout.LayoutParams) brightness.getLayoutParams();
+        params.width = (int) (height*0.95);
+        params.setMarginStart((int) (-params.width*0.4));
+        brightness.setLayoutParams(params);
+        params = (ConstraintLayout.LayoutParams) bar.getLayoutParams();
+        params.width = (int) (height*0.95);
+        params.setMarginEnd((int) (-params.width*0.4));
+        bar.setLayoutParams(params);
+    }
     View.OnClickListener changeType_ = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
