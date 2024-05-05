@@ -16,6 +16,7 @@
 #define BRIGHT 4
 #define TYPE 5
 #define COLORS 6
+#define WAIT_INPUT 101
 
 class BTSerial : public SoftwareSerial {
     const unsigned int maxSz = 100;

@@ -5,11 +5,15 @@
 #include "BTSerial.h"
 
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
+    this->begin(9600);
     this->setTimeout(timeOut);
 }
 
 int BTSerial::getSocket(byte *bright, int *curMode, byte **colors) {
-    if (!this->available()) { return OK; }
+    if (!this->available()){
+      if(timer<millis()) { return WAIT_INPUT; }
+      return OK;
+    }
     char ch;
     do {
         ch = this->read();
@@ -23,6 +27,7 @@ int BTSerial::getSocket(byte *bright, int *curMode, byte **colors) {
     }
     int ans = OK;
     buf[sz] = '\0';
+            Serial.println(buf);
     if (compareStr((char*)&buf, (char*)&"OFF")) {
         ans = OFF;
     } else if (compareStr((char*)&buf, (char*)&"ON")) {
@@ -44,6 +49,7 @@ int BTSerial::getSocket(byte *bright, int *curMode, byte **colors) {
             }
             timer += delay;
         } else if (compareStr(t, (char*)&"Con")) {
+            Serial.println(buf);
             timer += delay;
         }// else { BTtimer += DELAY_BT; }
         free(t);

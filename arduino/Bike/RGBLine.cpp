@@ -4,11 +4,13 @@
 
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count) : pin(pin), count(count) {
+RGBLine::RGBLine(int pin, int count, byte *colors, float *sound) : pin(pin), count(count),
+                                                                   colors(colors), sound(sound) {
     line[count];
-    switch (pin) {/*
-            FastLED.addLeds<WS2811, pin, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            найти реализацию addLeds с переменной pin, а не заданным при компиляции значением*/
+    /*switch (pin) {
+            //FastLED.addLeds<WS2811, pin, BRG>(&line, count).setCorrection(TypicalLEDStrip);
+            //найти реализацию addLeds с переменной pin, а не заданным при компиляции значением
+            //https://community.alexgyver.ru/threads/fastled-nastraivaem-piny-i-porjadok-cvetov-na-letu-ili-kak-rabotat-s-nasledovaniem-klassov-v-c.9732/
         case 1: {
             FastLED.addLeds<WS2811, 1, BRG>(&line, count).setCorrection(TypicalLEDStrip);
             break;
@@ -61,7 +63,7 @@ RGBLine::RGBLine(int pin, int count) : pin(pin), count(count) {
             FastLED.addLeds<WS2811, 13, BRG>(&line, count).setCorrection(TypicalLEDStrip);
             break;
         }
-    }
+    }*/
 };
 
 void RGBLine::setColors(byte *newColors) {
@@ -72,87 +74,127 @@ void RGBLine::setColors(byte *newColors) {
     myPal.loadDynamicGradientPalette(newColors);
 }
 
-void RGBLine::load() {
-    
+void RGBLine::changeMode() {
+    bright = 255;
+    switch (mode) {
+        case 11:
+            this->setColors(colors);
+            break;
+        case 12:
+            this->changeGradientAB();
+            break;
+        case 13:
+            this->changeGradientAC();
+            break;
+        case 14:
+            this->changeGradientAD();
+            break;
+    }
+    oldMode = mode;
+}
+
+void RGBLine::changeGradientAB() {
+    byte colors_[] = {};
+    int c = 0;
+    for (int j = 2; j; --j) {
+        for (int i = 0; i < 4; i++) {
+            colors_[c++] = colors[i];
+        }
+    }
+    colors_[--c] = colors[23];
+    myPal.loadDynamicGradientPalette(colors_);
+    delete colors_;
+}
+
+void RGBLine::changeGradientAC() {
+    byte colors_[] = {};
+    int c = 0;
+    for (int i = 0; i < 4; i++) {
+        colors_[c++] = colors[i];
+    }
+    for (int i = 20; i < 24; i++) {
+        colors_[c++] = colors[i];
+    }
+    myPal.loadDynamicGradientPalette(colors_);
+    delete colors_;
+}
+
+void RGBLine::changeGradientAD() {
+    byte colors_[] = {};
+    int c = 0;
+    for (int i = 0; i < 4; i++) {
+        colors_[c++] = colors[i];
+    }
+    for (int i = 8; i < 16; i++) {
+        colors_[c++] = colors[i];
+    }
+    for (int i = 20; i < 24; i++) {
+        colors_[c++] = colors[i];
+    }
+    myPal.loadDynamicGradientPalette(colors_);
+    delete colors_;
+}
+
+
+void RGBLine::regGradient() {
+    byte j, t = 255 * (mode / 100);
+    for (int i = 0; i < count; i++) {
+        j = 255 - (byte) millis() - i * 255 / count;
+        line+i = ColorFromPalette(myPal, j - t);        
+    }
+}
+
+void RGBLine::regHSV() {
+    int t = 255 * (mode / 100);
+    for (int i = 0; i < count; i++) {
+        line+i = CHSV((byte) millis(), STROBE_SAT, bright);
+        //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
+    }
+}
+
+void RGBLine::blick() {
+    if ((long) millis() - strobe_timer > STROBE_PERIOD) {
+        strobe_timer = millis();
+        strobeUp_flag = true;
+        strobeDwn_flag = false;
+    }
+    strobeDwn_flag = ((long) millis() - strobe_timer > light_time);
+    if (strobeUp_flag) {                    // если настало время пыхнуть
+        if (bright < 255)              // если яркость не максимальная
+            bright += STROBE_SMOOTH;     // увелчить
+        if (bright > 255) {            // если пробили макс. яркость
+            bright = 255;                // оставить максимум
+            strobeUp_flag = false;              // флаг опустить
+        }
+    }
+    if (strobeDwn_flag) {                   // гаснем
+        if (bright > 0)                // если яркость не минимальная
+            bright -= STROBE_SMOOTH;     // уменьшить
+        if (bright < 0) {              // если пробили мин. яркость
+            strobeDwn_flag = false;
+            bright = 0;                  // оставить 0
+        }
+    }
 }
 
 void RGBLine::show() {
+    if (oldMode != mode) {
+        this->changeMode();
+    }
     int c = 0;
     byte j;
     byte colors_[] = {};
-    FastLED.clear();          // очистить массив пикселей
-    /*switch (mode / 10 == 4) {
-        case 2:
+    switch (mode / 10) {
+        /*case 2:
             level_size();
-            break;
+            break;*/
         case 4:
             blick();
             break;
     }
     int t = 255 * (mode / 100);
-    //if (this_mode/100==1){t=0;}
-    switch (mode % 100) {
-        case 11:
-            myPal.loadDynamicGradientPalette(colors);
-            for (int i = 0; i < NUM_LEDS; i++) {
-                j = 255 - hue - i * 255 / NUM_LEDS;
-                LLine[i] = ColorFromPalette(myPal, j - t);
-                RLine[i] = ColorFromPalette(myPal, j - t);
-            }
-            FastLED.show();
-            return;
-        case 41:
-            for (int i = 0; i < NUM_LEDS; i++) {
-                LLine[i] = CHSV(hue, STROBE_SAT, strobe_bright);
-                RLine[i] = CHSV(hue - t, STROBE_SAT, t - strobe_bright);
-            }
-            FastLED.show();
-            return;
-        case 12:
-            for (int i = 0; i < num; i++) {
-                RLine[i] = CRGB(colors[1], colors[2],
-                                colors[3]);   // заливка по палитре " от зелёного к красному"
-                LLine[i] = CRGB(colors[1], colors[2],
-                                colors[3]);   // заливка по палитре " от зелёного к красному"
-            }
-            FastLED.show();
-            return;
-        case 13:
-            //byte colors_[8];
-            for (int i = 0; i < 4; i++) {
-                colors_[c] = colors[i];
-                ++c;
-            }
-            for (int i = 20; i < 24; i++) {
-                colors_[c] = colors[i];
-                ++c;
-            }
-            break;
-        case 14:
-            //byte colors_[16]={};
-            for (int i = 0; i < 4; i++) {
-                colors_[c] = colors[i];
-                ++c;
-            }
-            for (int i = 8; i < 16; i++) {
-                colors_[c] = colors[i];
-                ++c;
-            }
-            for (int i = 20; i < 24; i++) {
-                colors_[c] = colors[i];
-                ++c;
-            }
-            break;
-        case 15:
-            byte colors_ = colors;
-            break;
+    for (int i = 0; i < count; i++) {//!!!!!
+        line+i = ColorFromPalette(myPal,
+                                   (i * 255 / count));   // заливка по палитре " от зелёного к красному"
     }
-    myPal.loadDynamicGradientPalette(colors_);
-    for (int i = 0; i < num; i++) {
-        RLine[i] = ColorFromPalette(myPal, (i * 255 /
-                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
-        LLine[i] = ColorFromPalette(myPal, (i * 255 /
-                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
-    }*/
-    FastLED.show();
 }
