@@ -1,5 +1,7 @@
 package com.example.bike;
 
+import static android.widget.CompoundButton.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -21,6 +23,7 @@ import android.view.MotionEvent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -54,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
     public RadioButton type_5;
     public RadioButton synchronously;
     public RadioButton[] types_;
-    public SwitchCompat bike_off_switch;
+    public ImageButton sound_button;
+    public ImageButton bike_off_button;
     public Button activButton = null;
     public Button colorButton0;
     public Button colorButton50;
@@ -83,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
     String type_="1";
     String synch = "0";
     String[] texts;
+    String bike_start = "ON\n";
+    String sound_val = "LOW\n";
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -116,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                BTSend("Ot:"+Integer.toString(seekBar.getProgress())+"\n", 10,100,true);
+                BTSend("CF:"+Integer.toString(seekBar.getProgress())+"\n", 10,100,true);
             }
         });
         resize();
@@ -154,17 +160,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        bike_off_switch = findViewById(R.id.bike_off_switch);
-        bike_off_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        bike_off_button = findViewById(R.id.bike_off_button);
+        bike_off_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton swi, boolean isChecked) {
-                message = "OFF\n";
-                if (isChecked){message = "ON\n";}
-                ArrayList answer = BTSend(message, 5,200, true);
+            public void onClick(View view) {
+                if (bike_start == "ON\n"){
+                    bike_start = "OFF\n";
+                    bike_off_button.setImageResource(R.drawable.start);
+                }else{bike_start = "ON\n";
+                    bike_off_button.setImageResource(R.drawable.stop);}
+                ArrayList answer = BTSend(bike_start, 5,200, true);
                 if ((boolean) answer.get(0)) {
                     return;
                 }
-                swi.setChecked(!isChecked);
+                if (bike_start == "ON\n"){
+                    bike_start = "OFF\n";
+                    bike_off_button.setImageResource(R.drawable.start);
+                }else{bike_start = "ON\n";
+                    bike_off_button.setImageResource(R.drawable.stop);}
+            }
+        });
+
+
+        sound_button = findViewById(R.id.sound_button);
+        sound_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (sound_val == "HIGH\n"){
+                    sound_val = "LOW\n";
+                    sound_button.setImageResource(R.drawable.sound);
+                }else{sound_val = "HIGH\n";
+                    sound_button.setImageResource(R.drawable.mute);}
+                ArrayList answer = BTSend(sound_val, 5,200, true);
+                if ((boolean) answer.get(0)) {
+                    return;
+                }
+                if (sound_val == "HIGH\n"){
+                    sound_val = "LOW\n";
+                    sound_button.setImageResource(R.drawable.sound);
+                }else{sound_val = "HIGH\n";
+                    bike_off_button.setImageResource(R.drawable.mute);}
             }
         });
 
@@ -235,13 +270,13 @@ public class MainActivity extends AppCompatActivity {
             RadioButton rb = (RadioButton)v;
             message = "Type:";
             if (type1 == rb) {type = "1";
-                texts = new String[]{"Выкл", "1 цвет", "2 цвета", "3 цвета", "6 цвета", ""};
+                texts = new String[]{"Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно"};
             } else if (type2 == rb) {type = "2";
-                texts = new String[]{"1 цвет", "2 цвета", "3 цвета", "6 цвета", "", ""};
+                texts = new String[]{"1 цвет", "2 цвета", "3 цвета", "6 цвета", "", "Без градиента"};
             } else if (type3 == rb) {type = "3";
-                texts = new String[]{"1 цвет", "2 цвета", "3 цвета", "6 цвета", "", ""};
+                texts = new String[]{"1 цвет", "2 цвета", "3 цвета", "6 цвета", "", "Без градиента"};
             } else if (type4 == rb) {type = "4";
-                texts = new String[]{"Тип 1", "Тип 2", "Тип 3", "Тип 4", "","Синхронно"};}
+                texts = new String[]{"Тип 1", "Тип 2", "Тип 3", "Тип 4", "","Асинхронно"};}
             for (int i=0;i<6;i++){
                 types_[i].setClickable(!texts[i].equals(""));
                 types_[i].setVisibility(!texts[i].equals("") ? View.VISIBLE : View.INVISIBLE);
@@ -253,6 +288,8 @@ public class MainActivity extends AppCompatActivity {
             type_1.toggle();
             message = "Ty:";
             type_ = "1";
+            synch = "0";
+            synchronously.setChecked(false);
             message += synch + type + type_ + "\n";
             BTSend(message,6,100,true);
         }
@@ -260,12 +297,10 @@ public class MainActivity extends AppCompatActivity {
     View.OnTouchListener colorPickerTouch =new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent event) {
-            if ((activButton != null) && (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_UP)) {
+            if ((activButton != null) && (event.getAction() == MotionEvent.ACTION_UP)) {
                 colorPickerSend(event);
-                if (event.getAction() == MotionEvent.ACTION_UP){
-                    BTSend(message, 3, 100,false);
-                    BTSend("END\n", 1, 0,false);
-                }
+                BTSend(message, 3, 100,false);
+                BTSend("END\n", 1, 0,false);
             }
             return true;}
     };
@@ -284,7 +319,6 @@ public class MainActivity extends AppCompatActivity {
             //Log.d("myLogs", "!" + Integer.toString(pixels) + "!");
             //Log.d("myLogs", "!" + Integer.toHexString(pixels) + "!");
             activButton.setBackgroundTintList(ColorStateList.valueOf(pixels));
-            if (System.currentTimeMillis() - timerBT > 500){
                 message = "Co:";
                 //message = "C";
                 for (int i = 0; i < 6; ++i) {
@@ -294,15 +328,14 @@ public class MainActivity extends AppCompatActivity {
                     String r_ = String.format("%03d", Color.red(colors[i]));
                     String g_ = String.format("%03d", Color.green(colors[i]));
                     String b_ = String.format("%03d", Color.blue(colors[i]));
-                    message += String.format("%03d", 51 * i) + "," + r_ + "," + g_ + "," + b_ + ",";
+                    message += String.format("%03d", 51 * i + "," + r_ + "," + g_ + "," + b_ + ",");
                 }
                 message += "\n";
                 Log.d("myLogs", message);
-                timerBT = System.currentTimeMillis();
-                BTSend(message, 1, 0,false);
+                /*timerBT = System.currentTimeMillis();
+                BTSend(message, 1, 0,false);*/
                 //outputStream.write(message.getBytes());
                 //SystemClock.sleep(1000);
-            }
         } catch (Exception e) {
             System.out.println("Error " + e.getMessage());
         }
@@ -395,7 +428,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }*/
-        bike_off_switch.setClickable(true);
+        bike_off_button.setClickable(true);
+        sound_button.setClickable(true);
         return 0;
     }
     public ArrayList BTSend(String mes, int count, int time, boolean wait_answer){
@@ -467,6 +501,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e){}
         Toast.makeText(getApplicationContext(), "DISCONNECTED", Toast.LENGTH_SHORT).show();
         connectButton.setText("Connect");
-        bike_off_switch.setClickable(false);
+        sound_button.setClickable(false);
+        bike_off_button.setClickable(false);
     }
 }

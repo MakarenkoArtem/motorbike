@@ -22,7 +22,7 @@ unsigned long hue_timer=0;
 #define STROBE_SAT 255                // насыщенность. Если 0 - цвет будет БЕЛЫЙ при любом цвете (0 - 255)
 #define STROBE_SMOOTH 255           // скорость нарастания/угасания вспышки (0 - 255)
 unsigned long main_timer, strobe_timer, pass_timer;
-int thisBright[3], strobe_bright = 0;
+byte strobe_bright = 0;
 unsigned int light_time = STROBE_PERIOD * STROBE_DUTY / 100;
 boolean colorMusicFlash[3], strobeUp_flag, strobeDwn_flag;
 
