@@ -1,3 +1,5 @@
+//#define OLDVERSION 1
+#ifdef OLDVERSION
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 // #include <c++/11/iostream>
@@ -34,6 +36,7 @@ CRGB LLine[NUM_LEDS];
 CRGB RLine[NUM_LEDS];
 int RLen = NUM_LEDS;
 int LLen = NUM_LEDS;
+#ifdef FFFFFFFF
 
 void setup() {
     Serial.begin(9600);
@@ -49,8 +52,10 @@ void setup() {
 #endif
     sbi(ADCSRA, ADPS0);
 
-    FastLED.addLeds<WS2811, LLine_pin, BRG>(LLine, NUM_LEDS).setCorrection(TypicalLEDStrip);
-    FastLED.addLeds<WS2811, RLine_pin, BRG>(RLine, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<WS2811, LLine_pin, BRG>(LLine, NUM_LEDS).setCorrection(
+            TypicalLEDStrip);
+    FastLED.addLeds<WS2811, RLine_pin, BRG>(RLine, NUM_LEDS).setCorrection(
+            TypicalLEDStrip);
     FastLED.setBrightness(100);
 
     pinMode(BIKE_OFF, OUTPUT);
@@ -86,8 +91,6 @@ void blick() {
 }
 
 
-
-
 void regims() {
     int c = 0;
     byte j;
@@ -103,7 +106,7 @@ void regims() {
     }
     int t = 255 * (this_mode / 100);
     //if (this_mode/100==1){t=0;}
-    switch (ththis_mode % 100) {
+    switch (this_mode % 100) {
         case 11:
             myPal.loadDynamicGradientPalette(colors);
             for (int i = 0; i < NUM_LEDS; i++) {
@@ -114,16 +117,18 @@ void regims() {
             FastLED.show();
             return;
         case 41:
-          for (int i = 0; i < NUM_LEDS; i++) {
-            LLine[i] = CHSV(hue, STROBE_SAT, strobe_bright);
-            RLine[i] = CHSV(hue-t, STROBE_SAT, t - strobe_bright);
-          }
-          FastLED.show();
-          return;
+            for (int i = 0; i < NUM_LEDS; i++) {
+                LLine[i] = CHSV(hue, STROBE_SAT, strobe_bright);
+                RLine[i] = CHSV(hue - t, STROBE_SAT, t - strobe_bright);
+            }
+            FastLED.show();
+            return;
         case 12:
             for (int i = 0; i < num; i++) {
-                RLine[i] = CRGB(colors[1], colors[2], colors[3]);   // заливка по палитре " от зелёного к красному"
-                LLine[i] = CRGB(colors[1], colors[2], colors[3]);   // заливка по палитре " от зелёного к красному"
+                RLine[i] = CRGB(colors[1], colors[2],
+                                colors[3]);   // заливка по палитре " от зелёного к красному"
+                LLine[i] = CRGB(colors[1], colors[2],
+                                colors[3]);   // заливка по палитре " от зелёного к красному"
             }
             FastLED.show();
             return;
@@ -159,8 +164,10 @@ void regims() {
     }
     myPal.loadDynamicGradientPalette(colors_);
     for (int i = 0; i < num; i++) {
-        RLine[i] = ColorFromPalette(myPal, (i * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
-        LLine[i] = ColorFromPalette(myPal, (i * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+        RLine[i] = ColorFromPalette(myPal, (i * 255 /
+                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+        LLine[i] = ColorFromPalette(myPal, (i * 255 /
+                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
     }
     FastLED.show();
 }
@@ -223,7 +230,8 @@ void BlueTooth_socket() {
 
 void loop() {
     if (btSerial.available()) {
-        BTtimer = millis()-DELAY_BT+WAIT_BT;
+        BTtimer = millis() - DELAY_BT
+        +WAIT_BT;
         BlueTooth_socket();
     }
     if (millis() - BTtimer < DELAY_BT) { return; }
@@ -234,7 +242,7 @@ void loop() {
         hue_timer = millis();
     }
 }
-
+#endif
 
 #define TX_BLUETOOTH 4  //0
 #define RX_BLUETOOTH 5  //1
@@ -385,8 +393,10 @@ void setup() {
 #endif
     Serial.println(F("start"));
     myPal.loadDynamicGradientPalette(colors);
-    FastLED.addLeds<WS2811, Lrgb, BRG>(LLine, NUM_LEDS).setCorrection(TypicalLEDStrip);
-    FastLED.addLeds<WS2811, Rrgb, BRG>(RLine, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<WS2811, Lrgb, BRG>(LLine, NUM_LEDS).setCorrection(
+            TypicalLEDStrip);
+    FastLED.addLeds<WS2811, Rrgb, BRG>(RLine, NUM_LEDS).setCorrection(
+            TypicalLEDStrip);
     FastLED.setBrightness(100);
 
     pinMode(BIKE_OFF, OUTPUT);
@@ -399,10 +409,13 @@ int Rlenght_last = 0;
 void level_size() {
     for (int i = 0; i < 100; i++) {
         //try{                               // делаем 100 измерений
-        RcurrentLevel = analogRead(SOUND_R);                            // с правого
+        RcurrentLevel = analogRead(
+                SOUND_R);                            // с правого
         LcurrentLevel = analogRead(SOUND_L);                 // и левого каналов
-        if (RsoundLevel < RcurrentLevel) RsoundLevel = RcurrentLevel;   // ищем максимальное
-        if (LsoundLevel < LcurrentLevel) LsoundLevel = LcurrentLevel;   // ищем максимальное
+        if (RsoundLevel < RcurrentLevel)
+            RsoundLevel = RcurrentLevel;   // ищем максимальное
+        if (LsoundLevel < LcurrentLevel)
+            LsoundLevel = LcurrentLevel;   // ищем максимальное
     }// фильтруем по нижнему порогу шумов
     //Serial.print(RsoundLevel);
     //Serial.print(" ");
@@ -425,7 +438,8 @@ void level_size() {
 
         // расчёт общей средней громкости с обоих каналов, фильтрация.
         // Фильтр очень медленный, сделано специально для автогромкости
-        averageLevel = (float) (RsoundLevel_f + LsoundLevel_f) / 2 * averK + averageLevel * (1 - averK);
+        averageLevel = (float) (RsoundLevel_f + LsoundLevel_f) / 2 * averK +
+                       averageLevel * (1 - averK);
 
         // принимаем максимальную громкость шкалы как среднюю, умноженную на некоторый коэффициент MAX_COEF
         maxLevel = (float) averageLevel * MAX_COEF;
@@ -520,9 +534,11 @@ void animation() {
             count = 0;
             for (int i = 0; i < Rlenght; ++i) {
                 RLine[i] = ColorFromPalette(myPal,
-                                            (count * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+                                            (count * 255 /
+                                             NUM_LEDS));   // заливка по палитре " от зелёного к красному"
                 LLine[i] = ColorFromPalette(myPal,
-                                            (count * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+                                            (count * 255 /
+                                             NUM_LEDS));   // заливка по палитре " от зелёного к красному"
                 count++;
             }
             /*count = 0;
@@ -535,34 +551,45 @@ void animation() {
             count = 0;
             for (int i = (NUM_LEDS - 1); i > ((NUM_LEDS - 1) - Rlenght); i--) {
                 LLine[i] = ColorFromPalette(RainbowColors_p,
-                                            (count * 255 / NUM_LEDS) / 2 - hue);  // заливка по палитре радуга
+                                            (count * 255 / NUM_LEDS) / 2 -
+                                            hue);  // заливка по палитре радуга
                 count++;
             }
             count = 0;
             for (int i = (NUM_LEDS); i < (NUM_LEDS + Llenght); i++) {
                 LLine[i] = ColorFromPalette(RainbowColors_p,
-                                            (count * 255 / NUM_LEDS) / 2 - hue); // заливка по палитре радуга
+                                            (count * 255 / NUM_LEDS) / 2 -
+                                            hue); // заливка по палитре радуга
                 count++;
             }
             break;
         case 2:
             for (int i = 0; i < NUM_LEDS; i++) {
                 if (i < STRIPE) LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
-                else if (i < STRIPE * 2) LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
-                else if (i < STRIPE * 3) LLine[i] = CHSV(LOW_COLOR, 255, thisBright[0]);
-                else if (i < STRIPE * 4) LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
-                else if (i < STRIPE * 5) LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
+                else if (i < STRIPE * 2)
+                    LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
+                else if (i < STRIPE * 3)
+                    LLine[i] = CHSV(LOW_COLOR, 255, thisBright[0]);
+                else if (i < STRIPE * 4)
+                    LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
+                else if (i < STRIPE * 5)
+                    LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
             }
             break;
         case 3:
             for (int i = 0; i < NUM_LEDS; i++) {
-                if (i < NUM_LEDS / 3) LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
-                else if (i < NUM_LEDS * 2 / 3) LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
-                else if (i < NUM_LEDS) LLine[i] = CHSV(LOW_COLOR, 255, thisBright[0]);
+                if (i < NUM_LEDS / 3)
+                    LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
+                else if (i < NUM_LEDS * 2 / 3)
+                    LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
+                else if (i < NUM_LEDS)
+                    LLine[i] = CHSV(LOW_COLOR, 255, thisBright[0]);
             }
             break;
         case 4:
-            if (colorMusicFlash[2]) for (int i = 0; i < NUM_LEDS; i++) LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
+            if (colorMusicFlash[2])
+                for (int i = 0; i < NUM_LEDS; i++)
+                    LLine[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
             else if (colorMusicFlash[1])
                 for (int i = 0; i < NUM_LEDS; i++)
                     LLine[i] = CHSV(MID_COLOR, 255, thisBright[1]);
@@ -572,7 +599,8 @@ void animation() {
             else for (int i = 0; i < NUM_LEDS; i++) LLine[i] = BLACK;
             break;
         case 5:
-            for (int i = 0; i < NUM_LEDS; i++) LLine[i] = CHSV(STROBE_COLOR, STROBE_SAT, strobe_bright);
+            for (int i = 0; i < NUM_LEDS; i++)
+                LLine[i] = CHSV(STROBE_COLOR, STROBE_SAT, strobe_bright);
             break;
     }
     //Serial.println(this_mode);
@@ -695,8 +723,10 @@ void regims() {
                     rainbow_speed = rainbow_speed * 10;
                     myPal.loadDynamicGradientPalette(colors);
                     for (int i = 0; i < NUM_LEDS; i++) {
-                        LLine[i] = ColorFromPalette(myPal, (hue * 255 / NUM_LEDS));
-                        RLine[i] = ColorFromPalette(myPal, (hue * 255 / NUM_LEDS));
+                        LLine[i] = ColorFromPalette(myPal,
+                                                    (hue * 255 / NUM_LEDS));
+                        RLine[i] = ColorFromPalette(myPal,
+                                                    (hue * 255 / NUM_LEDS));
                     }
                     break;
                 case 41:
@@ -712,8 +742,10 @@ void regims() {
                     num = Rlenght;
                     myPal.loadDynamicGradientPalette(colors);
                     for (int i = 0; i < num; i++) {
-                        LLine[i] = ColorFromPalette(myPal, (hue * 255 / NUM_LEDS));
-                        RLine[i] = ColorFromPalette(myPal, (hue * 255 / NUM_LEDS));
+                        LLine[i] = ColorFromPalette(myPal,
+                                                    (hue * 255 / NUM_LEDS));
+                        RLine[i] = ColorFromPalette(myPal,
+                                                    (hue * 255 / NUM_LEDS));
                     }
                     break;
             }
@@ -731,8 +763,10 @@ void regims() {
                     break;
             }
             for (int i = 0; i < num; i++) {
-                RLine[i] = CRGB(colors[1], colors[2], colors[3]);   // заливка по палитре " от зелёного к красному"
-                LLine[i] = CRGB(colors[1], colors[2], colors[3]);   // заливка по палитре " от зелёного к красному"
+                RLine[i] = CRGB(colors[1], colors[2],
+                                colors[3]);   // заливка по палитре " от зелёного к красному"
+                LLine[i] = CRGB(colors[1], colors[2],
+                                colors[3]);   // заливка по палитре " от зелёного к красному"
             }
             FastLED.show();
             /*for (int i = 0s; i < 4; i++){// LLine[i] = colors[0];
@@ -804,8 +838,10 @@ void regims() {
     }
     myPal.loadDynamicGradientPalette(colors_);
     for (int i = 0; i < num; i++) {
-        RLine[i] = ColorFromPalette(myPal, (i * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
-        LLine[i] = ColorFromPalette(myPal, (i * 255 / NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+        RLine[i] = ColorFromPalette(myPal, (i * 255 /
+                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
+        LLine[i] = ColorFromPalette(myPal, (i * 255 /
+                                            NUM_LEDS));   // заливка по палитре " от зелёного к красному"
     }
     FastLED.show();
 }
@@ -895,11 +931,12 @@ void autoLowPass() {
             thisMax = thisLevel;                  // запоминаем
         delay(4);                               // ждём 4мс
     }
-    LOW_PASS = (thisMax + LOW_PASS_ADD);        // нижний порог как максимум тишины + некая величина
+    LOW_PASS = (thisMax +
+                LOW_PASS_ADD);        // нижний порог как максимум тишины + некая величина
 
     /*// для режима спектра
     thisMax = 0;
-    for (byte i = 0; i < 100; i++) {          // делаем 100 измерений
+    for (byte i = 0; i < 100;s i++) {          // делаем 100 измерений
       analyzeAudio();                         // разбить в спектр
       for (byte j = 2; j < 32; j++) {         // первые 2 канала - хлам
         thisLevel = fht_log_out[j];
@@ -908,10 +945,107 @@ void autoLowPass() {
       }
       delay(4);                               // ждём 4мс
     }*/
-    SPEKTR_LOW_PASS = thisMax + LOW_PASS_FREQ_ADD;  // нижний порог как максимум тишины
+    SPEKTR_LOW_PASS =
+            thisMax + LOW_PASS_FREQ_ADD;  // нижний порог как максимум тишины
 
     /*if (EEPROM_LOW_PASS && !AUTO_LOW_PASS) {
       EEPROM.updateInt(0, LOW_PASS);
       EEPROM.updateInt(2, SPEKTR_LOW_PASS);
     }*/
 }
+#else
+
+
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#define TX_BLUETOOTH 4  //0
+#define RX_BLUETOOTH 5  //1
+#define LLine_pin 2
+#define RLine_pin 3
+//#define MISO_STICK 4
+//#define CLK_STICK 5
+#define MOSI_STICK 6
+#define CS_STICK 7
+#define VRx_STICK 8
+#define VRy_STICK 9
+#define BTN_STICK 10
+#define CLK_CLOCK 11
+#define DATA_CLOCK 12
+#define RST_CLOCK 13
+#define BIKE_OFF A2
+#define SOUND_R A6
+#define SOUND_L A7
+#define NUM_LEDS 50
+
+#define WAIT_INPUT 101
+#pragma once
+
+#include "SoundLevelMeter.h"
+
+SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
+
+
+#include "IgnitionKey.h"
+
+IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
+
+
+// градиент-палитра от зелёного к красному
+byte colors[] = {
+        0, 0, 255, 0,
+        50, 0, 255, 100,
+        100, 0, 200, 100,
+        150, 0, 100, 200,
+        200, 0, 100, 255,
+        255, 0, 0, 255};
+
+#include "RGBLine.h"
+#include <FastLED.h>
+
+RGBLine LeftLine(LLine_pin, NUM_LEDS, (byte*)&colors, &sound.LsoundLevel);//объект класса работы с лентой
+RGBLine RightLine(RLine_pin, NUM_LEDS, (byte*)&colors, &sound.LsoundLevel);//объект класса работы с лентой
+
+//----------------------Bluetooth--------------
+#include "BTSerial.h"
+BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
+
+void setup() {
+    sbi(ADCSRA, ADPS2);
+    cbi(ADCSRA, ADPS1);
+    //-------------audio------------------
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    analogReference(INTERNAL1V1);
+#else
+    analogReference(INTERNAL);
+#endif
+    sbi(ADCSRA, ADPS0);
+    Serial.begin(9600);
+    FastLED.addLeds<WS2811, LLine_pin, BRG>(&LeftLine.line, LeftLine.count).setCorrection(
+            TypicalLEDStrip);
+    LeftLine.setFastLED(&FastLED);
+    FastLED.addLeds<WS2811, RLine_pin, BRG>(&RightLine.line, RightLine.count).setCorrection(
+            TypicalLEDStrip);
+    RightLine.setFastLED(&FastLED);
+};
+
+
+void loop() {
+    int resp = serial.getSocket(&LeftLine.bright, &LeftLine.mode, (byte * *) & colors);//проверяем блютуз
+    if (resp != OK) {
+        switch (resp) {
+            case ON:
+                ignKey.setVal(true);
+            case OFF:
+                ignKey.setVal(false);
+
+        }
+        return;
+    }
+    sound.fhtSound();
+    FastLED.clear();//очищаем адресную ленту
+    LeftLine.show();
+    RightLine.show();
+    FastLED.show();//обновляем адресную ленту
+}
+
+#endif
