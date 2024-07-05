@@ -13,15 +13,25 @@
 
     <ImageView
         android:id="@+id/colorPicker"
+        android:src="@drawable/color"
         android:layout_width="0px"
         android:layout_height="0px"
         android:scaleType="centerInside"
-        android:src="@drawable/color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.35"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.7" />
+        app:layout_constraintWidth_percent="0.7"
+        />
+        <!--app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        <!-android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.8"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        <!-android:scaleType="centerCrop"-->
 
     <Button
         android:id="@+id/Connect"

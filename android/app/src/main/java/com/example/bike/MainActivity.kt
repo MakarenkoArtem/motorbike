@@ -1,18 +1,23 @@
 package com.example.bike
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.View.OnTouchListener
 import android.widget.Button
 import android.widget.ImageButton
@@ -21,15 +26,18 @@ import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.toBitmap
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.reflect.InvocationTargetException
 import java.util.UUID
-import kotlin.collections.mutableListOf
+import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
     var timerBT: Long = 0
@@ -61,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var bar: SeekBar
 
     //ConnectedThread BT;
-    var BTAdapter: BluetoothAdapter? = null
+    var BTAdapter=BluetoothAdapter.getDefaultAdapter()
     var inputStream: InputStream? = null
     var outputStream: OutputStream? = null
     private val BTdevice: BluetoothDevice? = null
@@ -70,7 +78,7 @@ class MainActivity : AppCompatActivity() {
     var colors: IntArray = intArrayOf(0, 0, 0, 0, 0, 0)
     var message: String? = null
     lateinit var buffer: ByteArray
-    var answer: ArrayList<*>? = null
+    var answer: MutableList<String>? = null
     var type: String = "1"
     var type_: String = "1"
     var synch: String = "0"
@@ -81,7 +89,30 @@ class MainActivity : AppCompatActivity() {
     fun init(): Int {
         //String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;10001000
         //startActivityForResult(new Intent(enableBT), 0);
-        BTAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (BTAdapter == null) {
+            Toast.makeText(applicationContext, "На устройстве нет блютуз или нет доступа", Toast.LENGTH_LONG).show()
+            return -1
+        }
+        if (!BTAdapter.isEnabled) {
+            Toast.makeText(applicationContext, "Включаю блютуз", Toast.LENGTH_LONG).show()
+            /*if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            BTAdapter.enable()*/}
+        //BTAdapter.startDiscovery()
+        //BTAdapter.bondedDevices
+
         try {
             //Устройство с данным адресом - наш Bluetooth Bee
             //Адрес опредеяется следующим образом: установите соединение
@@ -162,7 +193,7 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("myLogs", message!!)
         Toast.makeText(applicationContext, "CONNECTED", Toast.LENGTH_SHORT).show()
-        connectButton!!.text = "BIKE(HC-06)"
+        connectButton!!.text = "BIKE(HC-06label)"
         /*break;
             } catch (Exception e) {
                 Log.d("myLogs", e.toString());
@@ -175,6 +206,7 @@ class MainActivity : AppCompatActivity() {
         return 0
     }
 
+    var BTAddress: String?=null;
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -206,13 +238,30 @@ class MainActivity : AppCompatActivity() {
         })
         resize()
 
-
+        var builder= AlertDialog.Builder(this)
+        builder.setTitle("Выберите устройство")
+        builder.setSingleChoiceItems(arrayOf("1", "2", "3"), -1){
+            dialog, item-> Toast.makeText(applicationContext, "Любимое имя кота:  ${item}",
+            Toast.LENGTH_LONG).show()
+        }
+        var dial=builder.create()
+        builder.setSingleChoiceItems(arrayOf("python", "c++", "vba"), -1){
+                dialog, item-> Toast.makeText(applicationContext, "Любимое имя собаки:  ${item}",
+            Toast.LENGTH_LONG).show()
+        }
         connectButton = findViewById(R.id.Connect)
-        connectButton.setOnClickListener(View.OnClickListener {
-            if (init() != 0) {
-                disconnect()
+        connectButton.setOnClickListener(object: OnClickListener {
+            override fun onClick(p: View?) {
+                Log.d("myLogs", "!0")
+                BTAddress = BTAddress?:"d"
+                Log.d("myLogs", "!1")
+                dial.show()
+                Log.d("myLogs", "!2")
+                if(init() != 0) {
+                    Log.d("myLogs", "init")
+                    disconnect()
             }
-        })
+        }})
 
 
         colorButton0 = findViewById(R.id.buttonColor0)
@@ -388,17 +437,30 @@ class MainActivity : AppCompatActivity() {
     }
     var colorPickerTouch: OnTouchListener = OnTouchListener { view, event ->
         if ((activButton != null) && (event.action == MotionEvent.ACTION_UP)) {
+            Log.d("myLogs", "colorPicker")
             colorPickerSend(event)
+            Log.d("myLogs", "colorPicker1")
             BTSend(message, 3, 100, false)
+            Log.d("myLogs", "colorPicker2")
             BTSend("END\n", 1, 0, false)
         }
         true
     }
 
     fun colorPickerSend(event: MotionEvent) {
-        bitmap = colorPicker!!.drawingCache
+        Log.d("myLogs", "bitmap")
+        bitmap = colorPicker!!.drawable.toBitmap()//?:Bitmap.createBitmap(null)
+        Log.d("myLogs", "bitmap")
         try {
-            val pixels = bitmap.getPixel(event.x.toInt(), event.y.toInt())
+
+            Log.d(
+                "myLOgs",
+                "${event.x}, ${event.y}, ${colorPicker.width}, ${colorPicker.height} ${bitmap.width}, ${bitmap.height}"
+            )
+            val pixels = bitmap.getPixel(
+                (event.x / min(colorPicker.width, colorPicker.height) * bitmap.width).toInt(),
+                (event.y / min(colorPicker.width, colorPicker.height) * bitmap.height).toInt()
+            )
             if (pixels == 0) {
                 return
             }
@@ -441,8 +503,9 @@ class MainActivity : AppCompatActivity() {
 
 
     fun BTSend(mes: String?, count: Int, time: Int, wait_answer: Boolean): MutableList<Any> {
+        Log.d("myLogs", "BTSend")
         var mes = mes
-        var answer = MutableList<Any>(2,{true; ""})
+        var answer = MutableList<Any>(2, { true; "" })
         if (inputStream == null) {
             answer.set(0, false)
             return answer
@@ -451,7 +514,7 @@ class MainActivity : AppCompatActivity() {
             outputStream?.write("READY?\n".toByteArray())
             if (inputStream?.available() != 0) {
                 buffer = ByteArray(1024) // буферный массив
-                val size = inputStream?.read(buffer) ?:0
+                val size = inputStream?.read(buffer) ?: 0
                 message = String(buffer, 0, size)
             }
         } catch (e: IOException) {
@@ -469,7 +532,7 @@ class MainActivity : AppCompatActivity() {
                 if (inputStream?.available() == 0) {
                     continue
                 }
-                val size = inputStream?.read(buffer)?:0
+                val size = inputStream?.read(buffer) ?: 0
                 message = String(buffer, 0, size)
                 Log.d("myLogs", message!!)
                 if (message?.substring(0, 2) == "OK") {
@@ -496,7 +559,7 @@ class MainActivity : AppCompatActivity() {
                 if (inputStream!!.available() == 0) {
                     continue
                 }
-                val size = inputStream?.read(buffer)?:0
+                val size = inputStream?.read(buffer) ?: 0
                 message = String(buffer, 0, size)
                 if (message?.substring(0, 2) == "OK") {
                     answer.set(1, message!!.substring(2))
@@ -512,7 +575,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun disconnect() {
-        Log.d("myLogs", "11")
+        Log.d("myLogs", "12")
         try {
             bTSocket.close()
             inputStream = null
