@@ -65,13 +65,14 @@ int BTSerial::getSocket(byte &bright, int &curMode, byte (&colors)[24], char* &b
     for(int i=0;i!=sz+1;Serial.print(buf[i++]));
     Serial.println(F("VAL"));
     if (compareStr(buf, (char*)&"OFF")) {
+        this->println("OK");
         ans = OFF;
     } else if (compareStr(buf, (char*)&"ON")) {
+        this->println("OK");
         ans = ON;
     } else if (compareStr(buf, (char*)&"END")) {
         ans = END;
     } else {
-        Serial.println("VAL1");
         char *t = subStr(buf, 0, 3);
         Serial.println("TTTTTTTTTTt");
         for(int i=0;i!=3;Serial.print(t[i++]));

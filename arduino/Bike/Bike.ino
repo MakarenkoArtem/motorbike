@@ -1,8 +1,7 @@
 #define VERSION 2
 #if VERSION==0
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+  #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
   #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-  // #include <c++/11/iostream>
   #define LLine_pin 2
   #define RLine_pin 3
   #define TX_BLUETOOTH 4  //0
@@ -1025,7 +1024,7 @@ void setup() {
     Serial.println("Setup");
 };
 
-char* buf=static_cast<char*>(calloc(0,50*sizeof(char)));
+char buf[50];
 int sz=0;
 void loop() {
     int resp = serial.getSocket(LeftLine.bright, LeftLine.mode, colors, buf, sz);//проверяем блютуз
@@ -1039,7 +1038,9 @@ void loop() {
         }
         return;
     }
+    Serial.println("1111111111111111111111111111111111111");
     sound.fhtSound();
+    Serial.println("2222222222222222222222222222222222222");
     FastLED.clear();//очищаем адресную ленту
     LeftLine.show();
     RightLine.show();
