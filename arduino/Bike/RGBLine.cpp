@@ -4,7 +4,7 @@
 
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte *colors, float *sound) : pin(pin), count(count),
+RGBLine::RGBLine(int pin, int count, byte (&colors)[24], float &sound) : pin(pin), count(count),
                                                                    colors(colors), sound(sound) {
     line[count];
     /*switch (pin) {
@@ -69,17 +69,14 @@ RGBLine::RGBLine(int pin, int count, byte *colors, float *sound) : pin(pin), cou
 void RGBLine::setColors(byte *newColors) {
     /*if (colors != newColors) {
         free(colors);
-    }
-    colors = newColors;*/
+        colors = newColors;
+    }*/
     myPal.loadDynamicGradientPalette(newColors);
 }
 
 void RGBLine::changeMode() {
     bright = 255;
     switch (mode) {
-        case 11:
-            this->setColors(colors);
-            break;
         case 12:
             this->changeGradientAB();
             break;
@@ -89,6 +86,8 @@ void RGBLine::changeMode() {
         case 14:
             this->changeGradientAD();
             break;
+        default:
+            this->setColors(colors);
     }
     oldMode = mode;
 }
@@ -147,32 +146,30 @@ void RGBLine::regGradient() {
 void RGBLine::regHSV() {
     int t = 255 * (mode / 100);
     for (int i = 0; i < count; i++) {
-        line+i = CHSV((byte) millis(), STROBE_SAT, bright);
+        line+i = CHSV(static_cast<byte>(millis()), STROBE_SAT, bright);
         //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
     }
 }
 
 void RGBLine::blick() {
-    if ((long) millis() - strobe_timer > STROBE_PERIOD) {
+    if (millis() - strobe_timer > STROBE_PERIOD) {
         strobe_timer = millis();
-        strobeUp_flag = true;
         strobeDwn_flag = false;
     }
-    strobeDwn_flag = ((long) millis() - strobe_timer > light_time);
-    if (strobeUp_flag) {                    // если настало время пыхнуть
-        if (bright < 255)              // если яркость не максимальная
-            bright += STROBE_SMOOTH;     // увелчить
-        if (bright > 255) {            // если пробили макс. яркость
-            bright = 255;                // оставить максимум
-            strobeUp_flag = false;              // флаг опустить
-        }
-    }
+    strobeDwn_flag = (millis() - strobe_timer > light_time);
     if (strobeDwn_flag) {                   // гаснем
-        if (bright > 0)                // если яркость не минимальная
-            bright -= STROBE_SMOOTH;     // уменьшить
-        if (bright < 0) {              // если пробили мин. яркость
+        if (bright <= STROBE_SMOOTH) {              // если пробили мин. яркость
             strobeDwn_flag = false;
             bright = 0;                  // оставить 0
+        }else{
+          bright -= STROBE_SMOOTH;
+          }
+    }else {                    // если настало время пыхнуть
+        if (bright > 255-STROBE_SMOOTH) {            // если пробили макс. яркость
+            bright = 255;                // оставить максимум
+            strobeDwn_flag = true;              // флаг опустить
+        }else{
+          bright += STROBE_SMOOTH;
         }
     }
 }

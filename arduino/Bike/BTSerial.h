@@ -1,8 +1,6 @@
 //
 // Created by artem on 02.05.24.
 //
-#ifndef BIKE_BTSERIAL_H
-#define BIKE_BTSERIAL_H
 //#include "c++/11/execution"
 //#include "exception"
 #include <Arduino.h>
@@ -19,18 +17,17 @@
 #define COLORS 6
 #define WAIT_INPUT 101
 
+#define TIMEOUT 300//200
+#define DELAY 1000
+#define MAXSZ 100
+
 class BTSerial : public SoftwareSerial {
-    const unsigned int maxSz = 100;
-    char buf[100];
-    unsigned int sz = 0;
-    char endChar = '\n';
-    unsigned int timeOut = 200;//200;
-    unsigned int delay = 1000;
+    char buf[MAXSZ];
+    unsigned short sz = 0;
     unsigned long int timer;
+    
 public:
     BTSerial(int RX, int TX);
 
-    int getSocket(byte &bright, int &curMode, byte (&colors)[24], char* &buf, int &sz);
+    short getSocket(byte &bright, unsigned short &curMode, byte (&colors)[24]);
 };
-
-#endif //BIKE_BTSERIAL_H

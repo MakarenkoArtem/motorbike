@@ -6,105 +6,73 @@
 
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
     this->begin(9600);
-    this->setTimeout(timeOut);
+    this->setTimeout(TIMEOUT);
     timer=millis();
 }
 
-int BTSerial::getSocket(byte &bright, int &curMode, byte (&colors)[24], char* &buf, int &sz) {
-    /*Serial.print(this->available());
+short BTSerial::getSocket(byte &bright, unsigned short &curMode, byte (&colors)[24]) {
+    if (sz!=this->available() || !sz){
+        sz=this->available();
+        return OK;//(timer>millis())?WAIT_INPUT:OK;
+    }   
+    Serial.print(sz!=this->available());
     Serial.print(" ");
-    Serial.print(timer);
+    Serial.print(!sz);
     Serial.print(" ");
-    Serial.println(millis());*/
-    //Serial.println(timer);
-    if (!this->available()){
-        return (timer>millis())?WAIT_INPUT:OK;
-    }
-    Serial.print(this->available());
-
+    Serial.print(sz);
+    Serial.print(" ");
+    Serial.println(available());
     //this->flush();//ожидать конца передачи данных
-    /*Serial.print(1);
-    Serial.print(this->readBytesUntil('\n', buf, maxSz));
-    Serial.print(2);
-    Serial.println(buf);
-    Serial.println("adasdsf!!!!!!!");*/
-    /*char g[maxSz];
-    *str="buf:"+String(this->readBytesUntil('\n', (char*)&g, maxSz));
-    *str+=String(g)+"\n";
-    Serial.println(*str);
-    return WAIT_INPUT;*/
-    char ch;
-    Serial.println("BT");
+    sz = -1;
+    *buf=0;
     do {
-        ch = this->read();
-        Serial.print((byte)ch);
-        Serial.print(" ");
-        Serial.println(ch);
-        /*Serial.print(ch);
-        Serial.print(" ");*/
-        //Serial.println(buf);
-        if (ch == '\n' || !ch) {
-            buf[sz] = '\0';
-            break; }
-        buf[sz++] = ch;
-        //Serial.print(this->available());
-        //Serial.print(ch);
-        //Serial.println(sz);
-    } while (this->available() and ch and sz <= maxSz);
-    //*str=String(buf)+" sz:"+String(sz);
-    if (!this->available() && buf[sz]){
+        buf[++sz] = this->read();
+    } while (this->available() and buf[sz] and sz <= MAXSZ);
+    /*if (!this->available() && buf[sz]){
         timer=millis()+delay;
         return WAIT_INPUT;
-    }
-    if (maxSz < sz) {
-        sz = 0;
-        //throw std::out_of_range("");
+    }*/
+    if (MAXSZ < sz) {
         return ERROR;
     }
-    int ans = OK;
-    for(int i=0;i!=sz+1;Serial.print(buf[i++]));
-    Serial.println(F("VAL"));
-    if (compareStr(buf, (char*)&"OFF")) {
+    short ans = OK;
+    if (compareStr(buf, "OFF")) {
+        this->println(F("OK"));
         ans = OFF;
-    } else if (compareStr(buf, (char*)&"ON")) {
+    } else if (compareStr(buf, "ON")) {
         ans = ON;
-    } else if (compareStr(buf, (char*)&"END")) {
+    } else if (compareStr(buf, "END")) {
         ans = END;
     } else {
-        Serial.println("VAL1");
         char *t = subStr(buf, 0, 3);
-        Serial.println("TTTTTTTTTTt");
-        for(int i=0;i!=3;Serial.print(t[i++]));
-        if (compareStr(t, (char*)&"Br:")) {
-            bright = strToInt((char*)&buf[3]);
-        } else if (compareStr(t, (char*)&"Ty:")) {
-            curMode = strToInt((char*)&buf[3]);
-        } else if (compareStr(t, (char*)&"Co:") && sz == 99) {
+        if (compareStr(t, "Br:")) {
+            bright = static_cast<byte>(strToLongInt(buf+3));
+        } else if (compareStr(t, "Ty:")) {
+            curMode = static_cast<unsigned short >(strToLongInt(buf+3));
+        } else if (compareStr(t, "Co:") && sz == 99) {
             char *val;
             for (int i = 0; i < 24; ++i) {
-                val = subStr(&buf[3 + i * 4], 0, 3);
-                colors[i] = strToInt(val);
+                val = subStr(buf+3 + i * 4, 0, 3);
+                colors[i] = static_cast<byte>(strToLongInt(val));
                 free(val);
             }
-            timer += delay;
-        } else if (compareStr(t, (char*)&"Con")) {
-            this->println("OK ");
+            //timer += DELAY;
+        } else if (compareStr(t, "Con")) {
+            this->println(F("OK "));
             for (int x = 0; x < 6; ++x) {
                 this->print(colors[x * 4]);
-                this->print(", ");
+                this->print(F(", "));
                 this->print(colors[x * 4 + 1]);
-                this->print(", ");
+                this->print(F(", "));
                 this->print(colors[x * 4 + 2]);
-                this->print(", ");
+                this->print(F(", "));
                 this->print(colors[x * 4 + 3]);
-                this->print(", ");
+                this->print(F(", "));
             }
-            timer += delay;
+            //timer += DELAY;
         }// else { BTtimer += DELAY_BT; }
         free(t);
     }
-    Serial.println("Repeat");
-    sz = 0;
-    *buf=0;
+    Serial.println(buf);
     return ans;
 }
