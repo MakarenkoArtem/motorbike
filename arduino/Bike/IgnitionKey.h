@@ -2,9 +2,6 @@
 // Created by artem on 02.05.24.
 //
 
-#define OUTPUT 0
-#define LOW 0
-#define HIGH 1
 
 class IgnitionKey {
     int pin;
