@@ -1,120 +1,153 @@
-package com.example.bike
+package com.example.bike.BT
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
+import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.os.Bundle
-import android.os.SystemClock
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import android.view.View.OnClickListener
-import android.view.View.OnTouchListener
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.RadioButton
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toBitmap
-import com.example.bike.BT.BTClient
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.reflect.InvocationTargetException
-import java.util.UUID
-import kotlin.math.min
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-    var timerBT: Long = 0
-    lateinit var type1: RadioButton
-    lateinit var type2: RadioButton
-    lateinit var type3: RadioButton
-    lateinit var type4: RadioButton
-    lateinit var type_1: RadioButton
-    lateinit var type_2: RadioButton
-    lateinit var type_3: RadioButton
-    lateinit var type_4: RadioButton
-    lateinit var type_5: RadioButton
-    lateinit var synchronously: RadioButton
-    lateinit var types_: Array<RadioButton>
-    lateinit var sound_button: ImageButton
-    lateinit var bike_off_button: ImageButton
-    var activButton: Button? = null
-    var colorButton0: Button? = null
-    var colorButton50: Button? = null
-    var colorButton100: Button? = null
-    var colorButton150: Button? = null
-    var colorButton200: Button? = null
-    var colorButton250: Button? = null
-    lateinit var colorButtons: Array<Button?>
-    lateinit var connectButton: Button
-    lateinit var colorPicker: ImageView
-    lateinit var bitmap: Bitmap
-    lateinit var brightness: SeekBar
-    lateinit var bar: SeekBar
+class BTService(private val context: Context, private val activity: Activity) {
+    lateinit var btAdapter: BluetoothAdapter
 
-    //ConnectedThread BT;
-    var BTAdapter = BluetoothAdapter.getDefaultAdapter()
-    var inputStream: InputStream? = null
-    var outputStream: OutputStream? = null
-    private val BTdevice: BluetoothDevice? = null
-    lateinit var bTSocket: BluetoothSocket
-    private val myUUID: UUID? = null
-    var colors: IntArray = intArrayOf(0, 0, 0, 0, 0, 0)
-    var message: String? = null
-    lateinit var buffer: ByteArray
-    var answer: MutableList<String>? = null
-    var type: String = "1"
-    var type_: String = "1"
-    var synch: String = "0"
-    lateinit var texts: Array<String>
-    var bike_start: String = "ON\n"
-    var sound_val: String = "LOW\n"
 
-    fun init(): Int {
-        //String enableBT = BluetoothAdapter.ACTION_REQUEST_ENABLE;10001000
-        //startActivityForResult(new Intent(enableBT), 0);
-        if (BTAdapter == null) {
-            Toast.makeText(
-                applicationContext, "На устройстве нет блютуз или нет доступа", Toast.LENGTH_LONG
-            ).show()
-            return -1
-        }
-        if (!BTAdapter.isEnabled) {
-            Toast.makeText(applicationContext, "Включаю блютуз", Toast.LENGTH_LONG).show()/*if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
+    private val _flow: MutableStateFlow<List<BluetoothDevice>> = MutableStateFlow(emptyList())
+    private val flow: StateFlow<List<BluetoothDevice>> = _flow
+
+    val finder = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+            Log.d("BikeBluetooth", action.toString())
+            if (BluetoothDevice.ACTION_FOUND == action) {
+                val device =
+                    intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                device?.let {
+                    val list = _flow.value.toMutableList()
+                    list.add(it)
+                    intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    Log.d("BikeBluetooth", "$device")
+                    CoroutineScope(Dispatchers.Default).launch {
+                        _flow.emit(list.toList())
+                        Log.d("BikeBluetooth", "$this")
+                    }
+                }
             }
-            BTAdapter.enable()*/
         }
-        //BTAdapter.startDiscovery()
-        //BTAdapter.bondedDevices
+
+    }
+
+    init {
+        connectBTModule()
+    }
+
+    fun connectBTModule(): Result<Unit> {
+        // Check permissions
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            val permissions = arrayOf(Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(activity, permissions, 0)
+            Log.d("BikeBluetooth", "permissions ")
+        }
+        val btManager = getSystemService(context, BluetoothManager::class.java)
+        if (btManager?.adapter == null) {
+            Toast.makeText(
+                context,
+                "На устройстве нет блютуз или у приложения нет доступа",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+            return Result.failure(IllegalStateException("На устройстве нет блютуз или у приложения нет доступа"))
+        }
+        btAdapter = btManager.adapter
+        if (!btAdapter.isEnabled) {
+            //Toast.makeText(context, "Включаю блютуз", Toast.LENGTH_LONG).show()
+            return Result.failure(IllegalStateException("Блютуз выключен"))
+        }
+        //btAdapter.startDiscovery()
+        // Register receiver
+        //registerReceiver()
+        return Result.success(Unit)
+    }
+    /*fun registerReceiver() {
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        context.registerReceiver(finder, filter)
+    }*/
+    /*
+        init {
+            startDiscoverPairedDevices()
+        }
+
+        private fun startDiscoverPairedDevices() {
+            val job = CoroutineScope(Dispatchers.IO).launch {
+                while (true) {
+                    Log.d("BikeBluetooth", "cycle ${flow.value}")
+                    _flow.emit(getPairedDevices())
+                    Log.d("BikeBluetooth", "cycle1 ${flow.value}")
+                    //_flow.value = getPairedDevices()
+                    delay(10000)
+                }
+
+            }
+        }*/
+
+
+    fun getPairedDevicesFlow(): StateFlow<List<BluetoothDevice>> = flow
+
+    fun getPairedDevices(): List<BluetoothDevice> {
+        try {
+            val pairedDevices: Set<BluetoothDevice> = btAdapter.bondedDevices
+            /*val devices = mutableListOf<BluetoothDevice>()
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    val action = intent?.action
+                    if (BluetoothDevice.ACTION_FOUND == action) {
+                        val device =
+                            intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                        Log.d("BikeBluetooth", "$device")
+                        device?.let {
+                            devices.add(it)
+                            val list = flow.value.toMutableList()
+                            list.add(it)
+                            //_flow.emit(list.toList())
+                        }
+                    }
+                }
+            }*/
+            if (pairedDevices == null) {
+                return emptyList<BluetoothDevice>()
+            }
+            pairedDevices.forEach() { item ->
+                Log.d("myLogs", item.name)
+                Log.d("myLogs", item.toString())
+            }
+            return pairedDevices.toList()
+            //return devices
+        } catch (e: SecurityException) {
+            Log.d("myLogs", e.toString())
+        }
+        return emptyList<BluetoothDevice>()
+    }
+
+    fun getClient(device: BluetoothDevice): BTClient {
+        return BTClient(device = device)
+    }
+    /*
 
         try {
             //Устройство с данным адресом - наш Bluetooth Bee
@@ -169,7 +202,8 @@ class MainActivity : AppCompatActivity() {
         //Log.d("myLogs", String.valueOf(answer.get(0)));
         if (!(answer[0] as Boolean)) {
             return 1
-        }/*buffer=new byte[1024];// буферный массив
+        }
+        /*buffer=new byte[1024];// буферный массив
         int bytes;// bytes return//BTAdapter.startDiscovery()
         //BTAdapter.bondedDevices
 
@@ -205,8 +239,8 @@ class MainActivity : AppCompatActivity() {
                     continue;}
                 int size=inputStream.read(buffer);
                 message=new String(buffer, 0, size);*/
-        val data =
-            answer[1].toString().split(", ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val data = answer[1].toString().split(", ".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray()
         for (i in 0..5) {
             val r = data[i * 4 + 1].toInt()
             val g = data[i * 4 + 2].toInt()
@@ -217,7 +251,8 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("myLogs", message!!)
         Toast.makeText(applicationContext, "CONNECTED", Toast.LENGTH_SHORT).show()
-        connectButton!!.text = "BIKE(HC-06label)"/*break;
+        connectButton!!.text = "BIKE(HC-06label)"
+        /*break;
             } catch (Exception e) {
                 Log.d("myLogs", e.toString());
                 e.printStackTrace();
@@ -229,8 +264,7 @@ class MainActivity : AppCompatActivity() {
         return 0
     }
 
-    var BTAddress: String? = null;
-    lateinit var getResult:ActivityResultLauncher<Intent>
+    var BTAddress: String?=null;
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -260,31 +294,36 @@ class MainActivity : AppCompatActivity() {
                 BTSend("CF:" + seekBar.progress.toString() + "\n", 10, 100, true)
             }
         })
-        val getResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result->
-            if (result.resultCode== RESULT_OK){
-                val selectedDevice = result.data?.getStringExtra("SELECTED_DEVICE")
-            }
-        }
-        connectButton = findViewById(R.id.Connect)
-        connectButton.setOnClickListener(object : OnClickListener {
-            override fun onClick(p: View?) {
-                val selectedDevice=""
-                try{
-                    val btClient=BTClient(context = applicationContext)
-                    val pairedDevices=btClient.getPairedDevices().map{it.name}
-                    val intent =Intent(applicationContext, ListDeviceDialog::class.java)
-                    intent.putStringArrayListExtra("DEVICE_NAMES", ArrayList(pairedDevices))
-                    getResult.launch(intent)
-                }catch(e:Exception){
-                    Log.d("myLogs", e.toString())
-                }
-                if(selectedDevice!=""){Toast.makeText(applicationContext, selectedDevice, Toast.LENGTH_LONG).show()
-            }}
-        })
-
         resize()
 
-        colorButton0 = findViewById(R.id.buttonColor0)/*colorButton0.setOnClickListener(new View.OnClickListener() {
+        var builder= AlertDialog.Builder(this)
+        builder.setTitle("Выберите устройство")
+        builder.setSingleChoiceItems(arrayOf("1", "2", "3"), -1){
+                dialog, item-> Toast.makeText(applicationContext, "Любимое имя кота:  ${item}",
+            Toast.LENGTH_LONG).show()
+        }
+        var dial=builder.create()
+        builder.setSingleChoiceItems(arrayOf("python", "c++", "vba"), -1){
+                dialog, item-> Toast.makeText(applicationContext, "Любимое имя собаки:  ${item}",
+            Toast.LENGTH_LONG).show()
+        }
+        connectButton = findViewById(R.id.Connect)
+        connectButton.setOnClickListener(object: OnClickListener {
+            override fun onClick(p: View?) {
+                Log.d("myLogs", "!0")
+                BTAddress = BTAddress?:"d"
+                Log.d("myLogs", "!1")
+                dial.show()
+                Log.d("myLogs", "!2")
+                if(init() != 0) {
+                    Log.d("myLogs", "init")
+                    disconnect()
+                }
+            }})
+
+
+        colorButton0 = findViewById(R.id.buttonColor0)
+        /*colorButton0.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 activButton = (Button) view;
@@ -386,21 +425,6 @@ class MainActivity : AppCompatActivity() {
             }
             //if (((RadioButton) view).isChecked()) {synch = "1";}
         })
-        val PERMISSIONS_LOCATION = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_PRIVILEGED
-        )
-        val permission2 =
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN);
-        if (permission2 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this, PERMISSIONS_LOCATION, 1
-            )
-        }
     }
 
     fun resize() {
@@ -455,7 +479,8 @@ class MainActivity : AppCompatActivity() {
         }
         for (i in 0..5) {
             types_[i].isClickable = texts[i] != ""
-            types_[i].visibility = if (texts[i] != "") View.VISIBLE else View.INVISIBLE/*if texts[i].equals(""){
+            types_[i].visibility = if (texts[i] != "") View.VISIBLE else View.INVISIBLE
+            /*if texts[i].equals(""){
                     types_[i].setClickable(false);
                 }else{types_[i].setClickable(true);}*/
             types_[i].text = texts[i]
@@ -519,11 +544,13 @@ class MainActivity : AppCompatActivity() {
                 val g_ = String.format("%03d", Color.green(colors[i]))
                 val b_ = String.format("%03d", Color.blue(colors[i]))
                 message += String.format(
-                    "%03d", (51 * i).toString() + "," + r_ + "," + g_ + "," + b_ + ","
+                    "%03d",
+                    (51 * i).toString() + "," + r_ + "," + g_ + "," + b_ + ","
                 )
             }
             message += "\n"
-            Log.d("myLogs", message!!)/*timerBT = System.currentTimeMillis();
+            Log.d("myLogs", message!!)
+            /*timerBT = System.currentTimeMillis();
                 BTSend(message, 1, 0,false);*/
             //outputStream.write(message.getBytes());
             //SystemClock.sleep(1000);
@@ -617,5 +644,5 @@ class MainActivity : AppCompatActivity() {
         connectButton.text = "Connect"
         sound_button.isClickable = false
         bike_off_button.isClickable = false
-    }
+    }*/
 }
