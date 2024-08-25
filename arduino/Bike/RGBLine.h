@@ -7,7 +7,7 @@
 //#include <vector>
 //#include <map>
 #include <FastLED.h>
-
+#define StrobePeriod 150
 class RGBLine {
     unsigned short oldMode = 11;
     const int pin;
@@ -22,33 +22,49 @@ class RGBLine {
                                               nullptr,};
     /*std::map<int, void (RGBLine::*)()> funcs = {{11, &RGBLine::regAA}};/*,
                                              {2, &RGBLine::params}};*/
-    long int STROBE_PERIOD = 100;
-    int STROBE_SMOOTH = 10;
-    long int strobe_timer = 0;
-    bool strobeUp_flag = true, strobeDwn_flag = false;
-    long int light_time = STROBE_PERIOD / 2;
+    long int strobePeriod = StrobePeriod;
+    //int STROBE_SMOOTH = 75;
+    //long int strobeTimer = 0;
+    //bool strobeUp_flag = true, strobeDwn_flag = false;
+    //long int light_time = STROBE_PERIOD / 2;
     int STROBE_SAT = 255;
+    byte strobeBright=0;
+    byte id;
+    byte hue=0;
+    byte hueStep=2;
+    int hueSpeed=3;
+    int hueTimer = millis();
 public:
-    CRGB line;
+    CRGB* line;
     byte bright = 0;
-    //byte* colors;
     int count;
     unsigned short mode = 11;
+    byte frequency=0;
     CFastLED *fastLED = nullptr;
 
-    RGBLine(int pin, int count, byte (&colors)[24], float &sound);
+    RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id);
 
-    void setFastLED(CFastLED *fastLED) { this->fastLED = fastLED; };
+    void setFastLED(CFastLED *fastLED) { 
+      this->fastLED = fastLED;
+      setBrightness(bright); };
 
-    void setMode(unsigned short mode) { this->mode = mode; };
+    void setMode(unsigned short mode);
 
-    void setBright(int bright) { this->bright = bright; };
+    void setBrightness(byte bright);
 
     void setColors(byte *newColors);
+
+    void setFrequency(byte frequency);
 
     void changeMode();
 
     void regGradient();
+
+    void strobeHSV();
+
+    void strobe();
+
+    void moveEffect();
 
     void regHSV();
 
@@ -67,4 +83,12 @@ public:
     void changeGradientAD();
 
     void blick();
+
+    void data(){
+    Serial.print(mode);
+    Serial.print(" ");
+    Serial.print(bright);
+    Serial.print(" ");
+    Serial.println(count);
+    }
 };
