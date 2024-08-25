@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/layoutBt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bgDialog"
+        android:gravity="center"
         android:orientation="vertical"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:scrollbarSize="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints">
-
 
         <Switch
             android:id="@+id/btSwitch"
@@ -28,14 +32,19 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2.dp"
-            android:background="@color/white"></View>
+            android:background="@color/white"
+            ></View>
 
-        <ListView
+        <TextView
             android:id="@+id/listDevices"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:textColor="@color/white" />
+            android:gravity="center"
+            android:paddingVertical="16.dp"
+            android:text=" Нет устройств для подключения"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
