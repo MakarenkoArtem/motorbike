@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Bike</string>
+    <string name="connect">Connect</string>
+    <string name="connectionNotEstablished">Соединение не установлено</string>
+    <string name="connectionEstablished">Соединение установлено</string>
+    <string name="soundbutton">soundButton</string>
+    <string name="bikeoffbutton">bikeOffButton</string>
+    <string name="synchronously">Синхронно</string>
+    <string name="basic">Основной</string>
 </resources>
