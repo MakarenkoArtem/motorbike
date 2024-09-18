@@ -5,107 +5,116 @@
 #include "BTSerial.h"
 
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
-    this->begin(9600);
-    this->setTimeout(timeOut);
+    this->begin(SPEED);
+    this->setTimeout(TIMEOUT);
     timer=millis();
 }
 
-int BTSerial::getSocket(byte &bright, int &curMode, byte (&colors)[24], char* &buf, int &sz) {
-    /*Serial.print(this->available());
-    Serial.print(" ");
-    Serial.print(timer);
-    Serial.print(" ");
-    Serial.println(millis());*/
-    //Serial.println(timer);
-    if (!this->available()){
-        return (timer>millis())?WAIT_INPUT:OK;
+short BTSerial::getSocket(byte &bright, unsigned short &curMode, byte (&colors)[24], byte &frequency) {
+    /*не ставить тайм ауты, тк по умолчанию размер буфера составляет 64 байта и при переполнении старые данные будут зетерты
+    if(!available() || (sz==-1 && millis()-timer<100)){//если ввод пуст или время с начала ввода меньше тайм аута
+        return OK;      
+    } else if(sz==-2){ //если начался прием
+        sz=-1;
+        timer = millis();
+        return OK;     
+    } else*/
+    if(!available()){
+        return OK;
     }
-    Serial.print(this->available());
-
-    //this->flush();//ожидать конца передачи данных
-    /*Serial.print(1);
-    Serial.print(this->readBytesUntil('\n', buf, maxSz));
-    Serial.print(2);
-    Serial.println(buf);
-    Serial.println("adasdsf!!!!!!!");*/
-    /*char g[maxSz];
-    *str="buf:"+String(this->readBytesUntil('\n', (char*)&g, maxSz));
-    *str+=String(g)+"\n";
-    Serial.println(*str);
-    return WAIT_INPUT;*/
-    char ch;
-    Serial.println("BT");
+    if (millis()-timer > DELAY){ //если пора очищать ввод
+        sz=-1;
+    }
+    if (sz==-1) {
+        timer = millis();
+    }
+     /*
+    Serial.print("Size:");
+    Serial.print(sz);
+    Serial.print(" buf:");
+    Serial.print(buf);
+    Serial.print(" avaliable:");
+    Serial.println(available());*/
     do {
-        ch = this->read();
-        Serial.print((byte)ch);
-        Serial.print(" ");
-        Serial.println(ch);
-        /*Serial.print(ch);
-        Serial.print(" ");*/
-        //Serial.println(buf);
-        if (ch == '\n' || !ch) {
-            buf[sz] = '\0';
-            break; }
-        buf[sz++] = ch;
-        //Serial.print(this->available());
-        //Serial.print(ch);
-        //Serial.println(sz);
-    } while (this->available() and ch and sz <= maxSz);
-    //*str=String(buf)+" sz:"+String(sz);
-    if (!this->available() && buf[sz]){
-        timer=millis()+delay;
+        buf[++sz] = this->read();
+    } while (available() and buf[sz]!='\n' and sz < MAXSZ);
+    if (MAXSZ == sz) {
+        sz=-1;
+        return ERROR; 
+    }
+    if(buf[sz]=='\n'){
+        buf[sz]=0;
+    }else{
+        buf[sz+1]=0;
+        /*Serial.print(F("Part: "));
+        Serial.print(buf);
+        Serial.print(" avaliable:");
+        Serial.println(available());*/
+        timer = millis()-TIMEOUT;
         return WAIT_INPUT;
     }
-    if (maxSz < sz) {
-        sz = 0;
-        //throw std::out_of_range("");
-        return ERROR;
-    }
-    int ans = OK;
-    for(int i=0;i!=sz+1;Serial.print(buf[i++]));
-    Serial.println(F("VAL"));
-    if (compareStr(buf, (char*)&"OFF")) {
-        this->println("OK");
+    Serial.print(F("Command:"));
+    Serial.print(buf);
+    Serial.print(F(" size:"));
+    Serial.print(sz);
+    Serial.print(F(" avaliable:"));
+    Serial.println(available());
+    short ans = OK;
+    if (compareStr(buf, "GC")) {
+          for (int x = 0; x < 6; ++x) {
+                this->print(colors[x * 4]);
+                this->print(F(","));
+                this->print(colors[x * 4 + 1]);
+                this->print(F(","));
+                this->print(colors[x * 4 + 2]);
+                this->print(F(","));
+                this->print(colors[x * 4 + 3]);
+                this->print(F(","));
+          }
+    }else if (compareStr(buf, "Con")) {
+        this->print(F("OK"));
+    } else if (compareStr(buf, "OFF")) {
+        this->print(F("OK"));
         ans = OFF;
-    } else if (compareStr(buf, (char*)&"ON")) {
-        this->println("OK");
+    } else if (compareStr(buf, "ON")) {
+        this->print(F("OK"));
         ans = ON;
-    } else if (compareStr(buf, (char*)&"END")) {
+    } else if (compareStr(buf, "LOW")) {
+        this->print(F("OK"));
+        ans = SOUND_OFF;
+    } else if (compareStr(buf, "HIGH")) {
+        this->print(F("OK"));
+        ans = SOUND_ON;
+    } else if (compareStr(buf, "END")) {
         ans = END;
     } else {
         char *t = subStr(buf, 0, 3);
-        Serial.println("TTTTTTTTTTt");
-        for(int i=0;i!=3;Serial.print(t[i++]));
-        if (compareStr(t, (char*)&"Br:")) {
-            bright = strToInt((char*)&buf[3]);
-        } else if (compareStr(t, (char*)&"Ty:")) {
-            curMode = strToInt((char*)&buf[3]);
-        } else if (compareStr(t, (char*)&"Co:") && sz == 99) {
-            char *val;
-            for (int i = 0; i < 24; ++i) {
-                val = subStr(&buf[3 + i * 4], 0, 3);
-                colors[i] = strToInt(val);
-                free(val);
+        if (compareStr(t, "Br:")) {
+            bright = static_cast<byte>(strToLongInt(buf+3));
+            ans = BRIGHT;
+        } else if (compareStr(t, "Ty:")) {
+            curMode = static_cast<unsigned short>(strToLongInt(buf+3));
+            ans = MODE;
+        } else if (compareStr(t, "CF:")) {
+            frequency = static_cast<unsigned short>(strToLongInt(buf+3));
+            ans = FREQUENCY;
+        } else if (compareStr(t, "Co:")){
+            if(sz != 99) {
+                Serial.println(F("Damaged message"));
+                this->print(F("Damaged message"));
+            }else{
+                char *val;
+                for (int i = 0; i < 24; ++i) {
+                    val = subStr(buf+3 + i * 4, 0, 3);
+                    colors[i] = static_cast<byte>(strToLongInt(val));
+                    free(val);
+                }
+                ans = COLORS;
+                this->print(F("OK"));
             }
-            timer += delay;
-        } else if (compareStr(t, (char*)&"Con")) {
-            this->println("OK ");
-            for (int x = 0; x < 6; ++x) {
-                this->print(colors[x * 4]);
-                this->print(", ");
-                this->print(colors[x * 4 + 1]);
-                this->print(", ");
-                this->print(colors[x * 4 + 2]);
-                this->print(", ");
-                this->print(colors[x * 4 + 3]);
-                this->print(", ");
-            }
-            timer += delay;
-        }// else { BTtimer += DELAY_BT; }
+        }
         free(t);
     }
-    Serial.println("Repeat");
-    sz = 0;
-    *buf=0;
+    sz=-1;
     return ans;
 }

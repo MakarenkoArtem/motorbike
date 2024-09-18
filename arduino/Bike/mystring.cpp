@@ -1,7 +1,7 @@
 //
 // Created by artem on 02.05.24.
 //
-
+//#include <iostream>
 #include "mystring.h"
 #include "mystring.h"
 //#include <cstdlib>
@@ -19,16 +19,16 @@
 #define LineFeedSymbol '\n'
 #define CarriageReturnSymbol '\r'
 */
-void *freeTwiceList(void **list, int n) {
-    for (; n; freeStr((char *) list[--n]));
+void freeTwiceList(void **list, int n) {
+    for (; n; freeStr(static_cast<char*>(list[--n])));
     free(list);
 }
 
-void *freeListStr(char **list, int n) {
+void freeListStr(char **list, int n) {
     freeTwiceList((void **) list, n);
 }
 
-void *freeStr(char *str) {
+void freeStr(char *str) {
     //qDebug("freeStr %s", str);
     free(str);
     //qDebug("freeStr");
@@ -173,10 +173,11 @@ char *subStr(char *str, int start, int end) {
     return slice;
 }
 
-int compareStr(char *a, char *b) {
-    int i = 0;
-    for (; a[i] && a[i] == b[i]; ++i);
-    return !(a[i] || b[i]);
+bool compareStr(const char *a, const char *b) {
+    for (; *a && *a == *b; ++a) {
+        ++b;
+    }
+    return !(*a || *b);
 }
 
 char **delStrInList(char **list, int index, int n) {
@@ -194,8 +195,8 @@ char **delThisStr(char **list, char *delStr, int *n) {
     return list;
 }
 
-int strToInt(char *str) {
-    return (int) strToLongInt(str);
+int strToInt(const char *str) {
+    return static_cast<int>(strToLongInt(str));
 }
 
 char *intToStr(int i) {
@@ -362,14 +363,14 @@ char **getListStrFromFile(FILE *file, int *k) {
     return list;
 }
 
-long int strToLongInt(char *str) {
+long int strToLongInt(const char *str) {
     long int j = 0, z = 1;
     if (*str == '-') {
         ++str;
         z = -1;
     }
     while (*str) {
-        j = j * 10 + (long int) *str++ - (long int) '0';
+        j = j * 10 + (*str++ - '0');
     }
     return j * z;
 }
