@@ -13,6 +13,10 @@
 #define SOUND_L A7
 #define NUM_LEDS 50
 
+
+#define StrobePeriod 150
+
+
 #define WAIT_INPUT 101
 
 

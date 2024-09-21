@@ -43,14 +43,14 @@ iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для мо
 IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
 
 
-//----------------------Bluetooth--------------
+//----------------------Bluetooth--создания------------
 #include "BTSerial.h"
 
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
 
-RGBLine leftLine(LLine_pin, NUM_LEDS, colors);//&sound.LsoundLevel);//объект класса работы с лентой
+RGBLine leftLine(LLine_pin, NUM_LEDS, 0);//&sound.LsoundLevel);//объект класса работы с лентой
 
-RGBLine rightLine(RLine_pin, NUM_LEDS, colors);//&sound.LsoundLevel);//объект класса работы с лентой
+RGBLine rightLine(RLine_pin, NUM_LEDS, 1);//&sound.LsoundLevel);//объект класса работы с лентой
 
 void setup() {
     initAssembly();
@@ -111,10 +111,9 @@ void loop() {
         FastLED.clear();//очищаем адресную ленту
         leftLine.show();
         rightLine.show();
-        //rightLine.data();
+        rightLine.data();
         FastLED.show();//обновляем адресную ленту
         //printMemoryUsage();
-        //Serial.println();
     }
     iteration = ++iteration%2500;
 }

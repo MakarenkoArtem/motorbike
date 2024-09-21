@@ -4,10 +4,8 @@
 
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id) : 
-                                                              pin(pin), count(count),
-                                                              colors(colors), sound(sound), 
-                                                              id(id) {
+RGBLine::RGBLine(int pin, int count, byte id) : pin(pin), count(count), id(id) {
+    Serial.println("Init");
     line = new CRGB[count];
     changeMode();
     /*switch (pin) {
@@ -68,9 +66,11 @@ RGBLine::RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id) 
         }
     }*/
 };
-void RGBLine::setFrequency(byte frequency){
-    strobePeriod= StrobePeriod + frequency*1.5;
+
+void RGBLine::setFrequency(byte frequency) {
+    strobePeriod = StrobePeriod + frequency * 1.5;
 }
+
 void RGBLine::setColors(byte *newColors) {
     if (colors != newColors) {
         free(colors);
@@ -78,17 +78,23 @@ void RGBLine::setColors(byte *newColors) {
     }
     myPal.loadDynamicGradientPalette(colors);
 }
-void RGBLine::setMode(unsigned short mode) { 
-      this->mode = mode;
-      changeMode();
+
+void RGBLine::setMode(unsigned short mode) {
+    this->mode = mode;
+    changeMode();
 };
-void RGBLine::setBrightness(byte bright) { 
-      this->bright = bright;
-      this->fastLED->setBrightness(bright);
-     }
+
+void RGBLine::setBrightness(byte bright) {
+    this->bright = bright;
+    this->fastLED->setBrightness(bright);
+}
 
 void RGBLine::changeMode() {
-    switch (mode%100) {
+    for(int i=0;i<24;++i){
+        Serial.print(colors[i]);
+        Serial.print(" ");
+    }
+    switch (mode % 100) {
         case 12:
             this->changeGradientAB();
             break;
@@ -101,24 +107,24 @@ void RGBLine::changeMode() {
         default:
             this->setColors(colors);
     }
-    switch (mode/10%10){
-      case 4:
+    switch (mode / 10 % 10) {
+        case 4:
             this->fastLED->setBrightness(255);
             break;
     }
     oldMode = mode;
 }
 
-void RGBLine::strobeHSV(){
-    byte t = 255 * (mode / 100) * (id%2);
+void RGBLine::strobeHSV() {
+    byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
-        line[i] = CHSV(hue-t, STROBE_SAT, strobeBright);
+        line[i] = CHSV(hue - t, STROBE_SAT, strobeBright);
     }
 }
 
-void RGBLine::strobe(){
+void RGBLine::strobe() {
     for (int i = 0; i < count; i++) {
-      line[i] = ColorFromPalette(myPal, i * 255 / count); 
+        line[i] = ColorFromPalette(myPal, i * 255 / count);
     }
     this->fastLED->setBrightness(strobeBright);
 }
@@ -164,15 +170,15 @@ void RGBLine::changeGradientAD() {
 
 
 void RGBLine::regGradient() {
-    byte j, t = 255 * (mode / 100) * (id%2);
+    byte j, t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
         j = 255 - (byte) millis() - i * 255 / count;
-        line[i] = ColorFromPalette(myPal, j - t);        
+        line[i] = ColorFromPalette(myPal, j - t);
     }
 }
 
 void RGBLine::regHSV() {
-    byte t = 255 * (mode / 100) * (id%2);
+    byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
         line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - bright);
         //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
@@ -200,15 +206,15 @@ void RGBLine::blick() {
           bright += STROBE_SMOOTH;
         }
     }*/
-    int t = strobePeriod/2 * (mode / 100) * (id%2);
-    strobeBright = (((t+millis())%strobePeriod>100)*255);
+    int t = strobePeriod / 2 * (mode / 100) * (id % 2);
+    strobeBright = (((t + millis()) % strobePeriod > 100) * 255);
 }
 
-void RGBLine::moveEffect(){
-    byte j, t = 255 * (mode / 100) * (id%2);
-        /*j = 255 - hue ;
-        Serial.print("Start: ");
-        Serial.println( j - t);*/
+void RGBLine::moveEffect() {
+    byte j, t = 255 * (mode / 100) * (id % 2);
+    /*j = 255 - hue ;
+    Serial.print("Start: ");
+    Serial.println( j - t);*/
     for (int i = 0; i < count; i++) {
         j = 255 - hue - i * 255 / count;
         line[i] = ColorFromPalette(myPal, j - t);
@@ -222,7 +228,7 @@ void RGBLine::show() {
     if (oldMode != mode) {
         this->changeMode();
     }*/
-    switch (mode / 10%10) {
+    switch (mode / 10 % 10) {
         /*case 2:
             level_size();
             break;*/
@@ -230,26 +236,29 @@ void RGBLine::show() {
             blick();
             break;
     }
-    switch (mode%100) {
-      case 11:
-          this->moveEffect();
-          break;
-      case 41:
-          this->strobeHSV();
-          break;
-      case 42:
-          this->strobe();
-          break;
-      default:
-          for (int i = 0; i < count; i++) {//!!!!!
-              line[i] = ColorFromPalette(myPal,
-                                        (i * 255 / count));   // заливка по палитре " от зелёного к красному"
-          }
-          break;
+    switch (mode % 100) {
+        case 11:
+            this->moveEffect();
+            break;
+        case 41:
+            this->strobeHSV();
+            break;
+        case 42:
+            this->strobe();
+            break;
+        default:
+            for (int i = 0; i < count; i++) {//!!!!!
+                line[i] = ColorFromPalette(myPal,
+                                           (i * 255 /
+                                            count));   // заливка по палитре " от зелёного к красному"
+            }
+            break;
     }
-    if(millis() - hueTimer > hueSpeed){
-      hue+=hueStep;
-      hueTimer = millis();
+    if (millis() - hueTimer > hueSpeed) {
+        hue += hueStep;
+        hueTimer = millis();
     }
     //hue += hueStep;
 }
+
+float stubLink = 0;

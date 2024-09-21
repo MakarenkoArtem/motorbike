@@ -5,48 +5,43 @@
 
 //#include <StandardCplusplus.h>//https://roboticsbackend.com/arduino-stl-library/
 //#include <vector>
-//#include <map>
+#include "config.h"
 #include <FastLED.h>
-#define StrobePeriod 150
+
+extern float stubLink;
+
 class RGBLine {
     unsigned short oldMode = 11;
     const int pin;
     CRGBPalette32 myPal;
-    byte *colors;
-    float sound;
-    /*std::vector<void (RGBLine::*)()> changeGradient = {nullptr, nullptr, nullptr, nullptr, nullptr,
-                                                       nullptr, nullptr, nullptr, nullptr, nullptr,
-                                                       nullptr,};
-    std::vector<void (RGBLine::*)()> funcs = {nullptr, nullptr, nullptr, nullptr, nullptr,
-                                              nullptr, nullptr, nullptr, nullptr, nullptr,
-                                              nullptr,};
-    /*std::map<int, void (RGBLine::*)()> funcs = {{11, &RGBLine::regAA}};/*,
-                                             {2, &RGBLine::params}};*/
+    byte *colors = colors;
+    float &sound = stubLink;
     long int strobePeriod = StrobePeriod;
     //int STROBE_SMOOTH = 75;
     //long int strobeTimer = 0;
     //bool strobeUp_flag = true, strobeDwn_flag = false;
     //long int light_time = STROBE_PERIOD / 2;
     int STROBE_SAT = 255;
-    byte strobeBright=0;
+    byte strobeBright = 0;
     byte id;
-    byte hue=0;
-    byte hueStep=2;
-    int hueSpeed=3;
+    byte hue = 0;
+    byte hueStep = 2;
+    int hueSpeed = 3;
     int hueTimer = millis();
 public:
-    CRGB* line;
+    CRGB *line;
     byte bright = 0;
     int count;
     unsigned short mode = 11;
-    byte frequency=0;
+    byte frequency = 0;
     CFastLED *fastLED = nullptr;
 
-    RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id);
+    RGBLine(int pin, int count, byte id);
 
-    void setFastLED(CFastLED *fastLED) { 
-      this->fastLED = fastLED;
-      setBrightness(bright); };
+    void setFastLED(CFastLED *fastLED) {
+        this->fastLED = fastLED;
+        setBrightness(bright);
+    };
 
     void setMode(unsigned short mode);
 
@@ -84,11 +79,11 @@ public:
 
     void blick();
 
-    void data(){
-    Serial.print(mode);
-    Serial.print(" ");
-    Serial.print(bright);
-    Serial.print(" ");
-    Serial.println(count);
+    void data() {
+        Serial.print(mode);
+        Serial.print(" ");
+        Serial.print(bright);
+        Serial.print(" ");
+        Serial.println(count);
     }
 };
