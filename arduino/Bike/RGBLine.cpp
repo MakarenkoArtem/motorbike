@@ -4,8 +4,8 @@
 
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte id) : pin(pin), count(count), id(id) {
-    Serial.println("Init");
+RGBLine::RGBLine(int pin, int count, byte *colors, byte id) : pin(pin), count(count), colors(colors),
+                                                              id(id) {
     line = new CRGB[count];
     changeMode();
     /*switch (pin) {
@@ -16,56 +16,17 @@ RGBLine::RGBLine(int pin, int count, byte id) : pin(pin), count(count), id(id) {
             FastLED.addLeds<WS2811, 1, BRG>(&line, count).setCorrection(TypicalLEDStrip);
             break;
         }
-        case 2: {
-            FastLED.addLeds<WS2811, 2, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 3: {
-            FastLED.addLeds<WS2811, 3, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 4: {
-            FastLED.addLeds<WS2811, 4, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 5: {
-            FastLED.addLeds<WS2811, 5, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 6: {
-            FastLED.addLeds<WS2811, 6, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 7: {
-            FastLED.addLeds<WS2811, 7, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 8: {
-            FastLED.addLeds<WS2811, 8, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 9: {
-            FastLED.addLeds<WS2811, 9, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 10: {
-            FastLED.addLeds<WS2811, 10, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 11: {
-            FastLED.addLeds<WS2811, 11, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 12: {
-            FastLED.addLeds<WS2811, 12, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 13: {
-            FastLED.addLeds<WS2811, 13, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
     }*/
-};
+}
+
+void RGBLine::setFastLED(CFastLED *fastLED) {
+    this->fastLED = fastLED;
+    setBrightness(bright);
+}
+
+int RGBLine::getPin(){
+    return pin;
+}
 
 void RGBLine::setFrequency(byte frequency) {
     strobePeriod = StrobePeriod + frequency * 1.5;
@@ -82,7 +43,7 @@ void RGBLine::setColors(byte *newColors) {
 void RGBLine::setMode(unsigned short mode) {
     this->mode = mode;
     changeMode();
-};
+}
 
 void RGBLine::setBrightness(byte bright) {
     this->bright = bright;
@@ -90,10 +51,6 @@ void RGBLine::setBrightness(byte bright) {
 }
 
 void RGBLine::changeMode() {
-    for(int i=0;i<24;++i){
-        Serial.print(colors[i]);
-        Serial.print(" ");
-    }
     switch (mode % 100) {
         case 12:
             this->changeGradientAB();
@@ -261,4 +218,13 @@ void RGBLine::show() {
     //hue += hueStep;
 }
 
-float stubLink = 0;
+void RGBLine::data() {
+    Serial.print(mode);
+    Serial.print(" ");
+    Serial.print(bright);
+    Serial.print(" ");
+    Serial.println(count);
+}
+
+float fStubLink = 0;
+byte bStubLink = 0;

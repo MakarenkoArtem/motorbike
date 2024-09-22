@@ -1,21 +1,17 @@
-//
-// Created by artem on 02.05.24.
-//
+#pragma once
 
-
-//#include <StandardCplusplus.h>//https://roboticsbackend.com/arduino-stl-library/
-//#include <vector>
 #include "config.h"
 #include <FastLED.h>
 
-extern float stubLink;
+extern float fStubLink;
+extern byte bStubLink;
 
 class RGBLine {
     unsigned short oldMode = 11;
     const int pin;
     CRGBPalette32 myPal;
-    byte *colors = colors;
-    float &sound = stubLink;
+    byte *colors = &bStubLink;
+    float &sound = fStubLink;
     long int strobePeriod = StrobePeriod;
     //int STROBE_SMOOTH = 75;
     //long int strobeTimer = 0;
@@ -36,12 +32,11 @@ public:
     byte frequency = 0;
     CFastLED *fastLED = nullptr;
 
-    RGBLine(int pin, int count, byte id);
+    RGBLine(int pin, int count, byte *colors, byte id);
 
-    void setFastLED(CFastLED *fastLED) {
-        this->fastLED = fastLED;
-        setBrightness(bright);
-    };
+    void setFastLED(CFastLED *fastLED);
+
+    int getPin();
 
     void setMode(unsigned short mode);
 
@@ -79,11 +74,5 @@ public:
 
     void blick();
 
-    void data() {
-        Serial.print(mode);
-        Serial.print(" ");
-        Serial.print(bright);
-        Serial.print(" ");
-        Serial.println(count);
-    }
+    void data();
 };

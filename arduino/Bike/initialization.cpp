@@ -24,14 +24,28 @@ void initSwitchAudio() {
     digitalWrite(AUDIO_OFF, LOW);
 }
 
-void initLedLine(RGBLine& line) {
-    float sound;
-    FastLED.addLeds<WS2811, LLine_pin, BRG>(line.line, line.count)
-            .setCorrection(TypicalLEDStrip);
-    line.setFastLED(&FastLED);
+void addLedsInFastLED(RGBLine &line) {
+    switch (line.getPin()) {
+        //FastLED.addLeds<WS2811, pin, BRG>(&line, count).setCorrection(TypicalLEDStrip);
+        //найти реализацию addLeds с переменной pin, а не заданным при компиляции значением
+        //https://community.alexgyver.ru/threads/fastled-nastraivaem-piny-i-porjadok-cvetov-na-letu-ili-kak-rabotat-s-nasledovaniem-klassov-v-c.9732/
+        case LLine_pin: {
+            FastLED.addLeds<WS2811, LLine_pin, BRG>(line.line, line.count);
+            break;
+        }
+        case RLine_pin: {
+            FastLED.addLeds<WS2811, RLine_pin, BRG>(line.line, line.count);
+            break;
+        }
+    }
 }
 
-void initClock(iarduino_RTC& time) {
+void initLedLine(RGBLine &line) {
+    addLedsInFastLED(line);
+    line.setFastLED(&FastLED);  
+}
+
+void initClock(iarduino_RTC &time) {
     time.settime(SECONDS, MINUTES, HOURS, DAY, MONTH, YEAR,
                  DAY_OF_WEEK);//(сек, мин, час, день, мес, год, день_недели)
     time.period(1);
