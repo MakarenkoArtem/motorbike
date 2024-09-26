@@ -4,9 +4,7 @@
 
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id) : 
-                                                              pin(pin), count(count),
-                                                              colors(colors), sound(sound), 
+RGBLine::RGBLine(int pin, int count, byte *colors, byte id) : pin(pin), count(count), colors(colors),
                                                               id(id) {
     line = new CRGB[count];
     changeMode();
@@ -18,59 +16,22 @@ RGBLine::RGBLine(int pin, int count, byte (&colors)[24], float &sound, byte id) 
             FastLED.addLeds<WS2811, 1, BRG>(&line, count).setCorrection(TypicalLEDStrip);
             break;
         }
-        case 2: {
-            FastLED.addLeds<WS2811, 2, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 3: {
-            FastLED.addLeds<WS2811, 3, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 4: {
-            FastLED.addLeds<WS2811, 4, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 5: {
-            FastLED.addLeds<WS2811, 5, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 6: {
-            FastLED.addLeds<WS2811, 6, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 7: {
-            FastLED.addLeds<WS2811, 7, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 8: {
-            FastLED.addLeds<WS2811, 8, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 9: {
-            FastLED.addLeds<WS2811, 9, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 10: {
-            FastLED.addLeds<WS2811, 10, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 11: {
-            FastLED.addLeds<WS2811, 11, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 12: {
-            FastLED.addLeds<WS2811, 12, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
-        case 13: {
-            FastLED.addLeds<WS2811, 13, BRG>(&line, count).setCorrection(TypicalLEDStrip);
-            break;
-        }
     }*/
-};
-void RGBLine::setFrequency(byte frequency){
-    strobePeriod= StrobePeriod + frequency*1.5;
 }
+
+void RGBLine::setFastLED(CFastLED *fastLED) {
+    this->fastLED = fastLED;
+    setBrightness(bright);
+}
+
+int RGBLine::getPin(){
+    return pin;
+}
+
+void RGBLine::setFrequency(byte frequency) {
+    strobePeriod = StrobePeriod + frequency * 1.5;
+}
+
 void RGBLine::setColors(byte *newColors) {
     if (colors != newColors) {
         free(colors);
@@ -78,17 +39,19 @@ void RGBLine::setColors(byte *newColors) {
     }
     myPal.loadDynamicGradientPalette(colors);
 }
-void RGBLine::setMode(unsigned short mode) { 
-      this->mode = mode;
-      changeMode();
-};
-void RGBLine::setBrightness(byte bright) { 
-      this->bright = bright;
-      this->fastLED->setBrightness(bright);
-     }
+
+void RGBLine::setMode(unsigned short mode) {
+    this->mode = mode;
+    changeMode();
+}
+
+void RGBLine::setBrightness(byte bright) {
+    this->bright = bright;
+    this->fastLED->setBrightness(bright);
+}
 
 void RGBLine::changeMode() {
-    switch (mode%100) {
+    switch (mode % 100) {
         case 12:
             this->changeGradientAB();
             break;
@@ -101,24 +64,24 @@ void RGBLine::changeMode() {
         default:
             this->setColors(colors);
     }
-    switch (mode/10%10){
-      case 4:
+    switch (mode / 10 % 10) {
+        case 4:
             this->fastLED->setBrightness(255);
             break;
     }
     oldMode = mode;
 }
 
-void RGBLine::strobeHSV(){
-    byte t = 255 * (mode / 100) * (id%2);
+void RGBLine::strobeHSV() {
+    byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
-        line[i] = CHSV(hue-t, STROBE_SAT, strobeBright);
+        line[i] = CHSV(hue - t, STROBE_SAT, strobeBright);
     }
 }
 
-void RGBLine::strobe(){
+void RGBLine::strobe() {
     for (int i = 0; i < count; i++) {
-      line[i] = ColorFromPalette(myPal, i * 255 / count); 
+        line[i] = ColorFromPalette(myPal, i * 255 / count);
     }
     this->fastLED->setBrightness(strobeBright);
 }
@@ -164,15 +127,15 @@ void RGBLine::changeGradientAD() {
 
 
 void RGBLine::regGradient() {
-    byte j, t = 255 * (mode / 100) * (id%2);
+    byte j, t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
         j = 255 - (byte) millis() - i * 255 / count;
-        line[i] = ColorFromPalette(myPal, j - t);        
+        line[i] = ColorFromPalette(myPal, j - t);
     }
 }
 
 void RGBLine::regHSV() {
-    byte t = 255 * (mode / 100) * (id%2);
+    byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
         line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - bright);
         //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
@@ -200,15 +163,15 @@ void RGBLine::blick() {
           bright += STROBE_SMOOTH;
         }
     }*/
-    int t = strobePeriod/2 * (mode / 100) * (id%2);
-    strobeBright = (((t+millis())%strobePeriod>100)*255);
+    int t = strobePeriod / 2 * (mode / 100) * (id % 2);
+    strobeBright = (((t + millis()) % strobePeriod > 100) * 255);
 }
 
-void RGBLine::moveEffect(){
-    byte j, t = 255 * (mode / 100) * (id%2);
-        /*j = 255 - hue ;
-        Serial.print("Start: ");
-        Serial.println( j - t);*/
+void RGBLine::moveEffect() {
+    byte j, t = 255 * (mode / 100) * (id % 2);
+    /*j = 255 - hue ;
+    Serial.print("Start: ");
+    Serial.println( j - t);*/
     for (int i = 0; i < count; i++) {
         j = 255 - hue - i * 255 / count;
         line[i] = ColorFromPalette(myPal, j - t);
@@ -222,7 +185,7 @@ void RGBLine::show() {
     if (oldMode != mode) {
         this->changeMode();
     }*/
-    switch (mode / 10%10) {
+    switch (mode / 10 % 10) {
         /*case 2:
             level_size();
             break;*/
@@ -230,26 +193,38 @@ void RGBLine::show() {
             blick();
             break;
     }
-    switch (mode%100) {
-      case 11:
-          this->moveEffect();
-          break;
-      case 41:
-          this->strobeHSV();
-          break;
-      case 42:
-          this->strobe();
-          break;
-      default:
-          for (int i = 0; i < count; i++) {//!!!!!
-              line[i] = ColorFromPalette(myPal,
-                                        (i * 255 / count));   // заливка по палитре " от зелёного к красному"
-          }
-          break;
+    switch (mode % 100) {
+        case 11:
+            this->moveEffect();
+            break;
+        case 41:
+            this->strobeHSV();
+            break;
+        case 42:
+            this->strobe();
+            break;
+        default:
+            for (int i = 0; i < count; i++) {//!!!!!
+                line[i] = ColorFromPalette(myPal,
+                                           (i * 255 /
+                                            count));   // заливка по палитре " от зелёного к красному"
+            }
+            break;
     }
-    if(millis() - hueTimer > hueSpeed){
-      hue+=hueStep;
-      hueTimer = millis();
+    if (millis() - hueTimer > hueSpeed) {
+        hue += hueStep;
+        hueTimer = millis();
     }
     //hue += hueStep;
 }
+
+void RGBLine::data() {
+    Serial.print(mode);
+    Serial.print(" ");
+    Serial.print(bright);
+    Serial.print(" ");
+    Serial.println(count);
+}
+
+float fStubLink = 0;
+byte bStubLink = 0;
