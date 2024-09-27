@@ -1,15 +1,13 @@
+#pragma once
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
 #include <avr/io.h>
 #include <Arduino.h>
-#include "RGBLine.h"
-#include <FastLED.h>
 #include <iarduino_RTC.h>
 
-#pragma once
 #include "config.h"
-
+#include "RGBLine.h"
 
 
 void initAssembly();
@@ -20,6 +18,6 @@ void initSerial();
 
 void initSwitchAudio();
 
-void initLedLine(RGBLine& line);
+RGBLine *initLedLine(int pin, int count, byte *colors, byte id);
 
-void initClock(iarduino_RTC& time);
+void initClock(iarduino_RTC &time);

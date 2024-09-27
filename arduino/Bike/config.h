@@ -1,5 +1,7 @@
 #pragma once
 #include <Arduino.h>
+#define CONFIG true
+
 #define LLine_pin 2
 #define RLine_pin 3
 #define TX_BLUETOOTH 4  //0
@@ -13,11 +15,34 @@
 #define SOUND_L A7
 #define NUM_LEDS 50
 
-
-#define StrobePeriod 150
-
-
+//BTSerial part
+//      Messages
+#define ERROR -1
+#define OK 0
+#define OFF 1
+#define ON 2
+#define END 3
+#define BRIGHT 4
+#define TYPE 5
+#define COLORS 6
+#define SOUND_OFF 7
+#define SOUND_ON 8
+#define BRIGHT 9
+#define MODE 10
+#define FREQUENCY 11
 #define WAIT_INPUT 101
+
+//      SETTINGS
+#define TIMEOUT 200
+#define SPEED 9600
+#define DELAY 1000
+#define MAXSZ 100
+
+
+//RGBLine part
+#define MIN_STROBE_PERIOD 150
+
+
 
 
 #define YEAR  ((__DATE__[12] - '0') * 1000 + (__DATE__[13] - '0') * 100 + (__DATE__[14] - '0') * 10 + (__DATE__[15] - '0'))

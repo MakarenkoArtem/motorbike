@@ -1,6 +1,3 @@
-#include <Wire.h>
-#include <iarduino_RTC.h>
-
 #include "BTSerial.h"
 #include "IgnitionKey.h"
 #include "initialization.h"
@@ -41,8 +38,8 @@ void printMemoryUsage() {
 
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
 
-RGBLine leftLine(LLine_pin, NUM_LEDS, colors, 0);//объект класса работы с лентой
-RGBLine rightLine(RLine_pin, NUM_LEDS, colors, 1);
+RGBLine* leftLine;//указатель на объект класса работы с лентой
+RGBLine* rightLine;
 
 iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для модуля DS1302 - RST, CLK, DAT
 
@@ -53,18 +50,16 @@ void setup() {
     initAudio();
     initSerial();
     initSwitchAudio();
-    initLedLine(leftLine);
-    initLedLine(rightLine);
+    leftLine = initLedLine(LLine_pin, NUM_LEDS, colors, 0);
+    rightLine = initLedLine(RLine_pin, NUM_LEDS, colors, 1);
     initClock(time);
 };
 
-byte bright = leftLine.bright;
-unsigned short mode = leftLine.mode;
-byte frequency = leftLine.frequency;
+Parameters parameters(*leftLine);
 unsigned int iteration = 0;
 
 void loop() {
-    int resp = serial.getSocket(bright, mode, colors, frequency);//проверяем блютуз
+    int resp = serial.getCommands(parameters);
     switch (resp) {
         case ON: {
             Serial.println(F("ON"));
@@ -87,24 +82,24 @@ void loop() {
             break;
         }
         case COLORS: {
-            rightLine.setColors(colors);
-            leftLine.setColors(colors);
+            rightLine->setColors(parameters.colors);
+            leftLine->setColors(parameters.colors);
             break;
         }
         case BRIGHT: {
-            Serial.println(bright);
-            rightLine.setBrightness(bright);
-            leftLine.setBrightness(bright);
+            Serial.println(parameters.bright);
+            rightLine->setBrightness(parameters.bright);
+            leftLine->setBrightness(parameters.bright);
             break;
         }
         case MODE: {
-            rightLine.setMode(mode);
-            leftLine.setMode(mode);
+            rightLine->setMode(parameters.mode);
+            leftLine->setMode(parameters.mode);
             break;
         }
         case FREQUENCY: {
-            rightLine.setFrequency(frequency);
-            leftLine.setFrequency(frequency);
+            rightLine->setFrequency(parameters.frequency);
+            leftLine->setFrequency(parameters.frequency);
             break;
         }
         case WAIT_INPUT: {
@@ -114,9 +109,9 @@ void loop() {
     if (!iteration) {
         //printMemoryUsage();
         FastLED.clear();//очищаем адресную ленту
-        leftLine.show();
-        rightLine.show();
-        //rightLine.data();
+        leftLine->show();
+        rightLine->show();
+        //rightLine->data();
         FastLED.show();//обновляем адресную ленту
         //printMemoryUsage();
     }
