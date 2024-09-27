@@ -40,11 +40,11 @@ void addLedsInFastLED(RGBLine &line) {
     }
 }
 
-RGBLine* initLedLine(int pin, int count, byte *colors, byte id) {
-    RGBLine line(pin, count, colors, id);
-    addLedsInFastLED(line);
-    line.setFastLED(&FastLED);
-    return &line;
+RGBLine *initLedLine(int pin, int count, byte *colors, byte id) {
+    RGBLine* line = new RGBLine(pin, count, colors, id);
+    addLedsInFastLED(*line);
+    line->setFastLED(&FastLED);
+    return line;
 }
 
 void initClock(iarduino_RTC &time) {

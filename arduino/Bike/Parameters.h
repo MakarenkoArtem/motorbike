@@ -12,5 +12,5 @@ public:
 
     Parameters(RGBLine &line);
 
-    Parameters(byte bright, unsigned short mode, byte (&colors)[24], byte frequency);
+    Parameters(byte bright, unsigned short mode, byte *colors, byte frequency);
 };

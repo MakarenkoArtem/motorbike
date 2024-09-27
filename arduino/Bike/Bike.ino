@@ -38,12 +38,14 @@ void printMemoryUsage() {
 
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
 
-RGBLine* leftLine;//указатель на объект класса работы с лентой
-RGBLine* rightLine;
+RGBLine *leftLine;//указатель на объект класса работы с лентой
+RGBLine *rightLine;
 
 iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для модуля DS1302 - RST, CLK, DAT
 
 IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
+
+Parameters *parameters;
 
 void setup() {
     initAssembly();
@@ -53,13 +55,13 @@ void setup() {
     leftLine = initLedLine(LLine_pin, NUM_LEDS, colors, 0);
     rightLine = initLedLine(RLine_pin, NUM_LEDS, colors, 1);
     initClock(time);
+    parameters = new Parameters(*leftLine);
 };
 
-Parameters parameters(*leftLine);
 unsigned int iteration = 0;
 
 void loop() {
-    int resp = serial.getCommands(parameters);
+    int resp = serial.getCommands(*parameters);
     switch (resp) {
         case ON: {
             Serial.println(F("ON"));
@@ -82,24 +84,23 @@ void loop() {
             break;
         }
         case COLORS: {
-            rightLine->setColors(parameters.colors);
-            leftLine->setColors(parameters.colors);
+            rightLine->setColors(parameters->colors);
+            leftLine->setColors(parameters->colors);
             break;
         }
         case BRIGHT: {
-            Serial.println(parameters.bright);
-            rightLine->setBrightness(parameters.bright);
-            leftLine->setBrightness(parameters.bright);
+            rightLine->setBrightness(parameters->bright);
+            leftLine->setBrightness(parameters->bright);
             break;
         }
         case MODE: {
-            rightLine->setMode(parameters.mode);
-            leftLine->setMode(parameters.mode);
+            rightLine->setMode(parameters->mode);
+            leftLine->setMode(parameters->mode);
             break;
         }
         case FREQUENCY: {
-            rightLine->setFrequency(parameters.frequency);
-            leftLine->setFrequency(parameters.frequency);
+            rightLine->setFrequency(parameters->frequency);
+            leftLine->setFrequency(parameters->frequency);
             break;
         }
         case WAIT_INPUT: {
