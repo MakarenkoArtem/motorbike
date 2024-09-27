@@ -1,11 +1,7 @@
-//
-// Created by artem on 02.05.24.
-//
-
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte *colors, byte id) : pin(pin), count(count), colors(colors),
-                                                              id(id) {
+RGBLine::RGBLine(int pin, int count, byte *colors, byte id) :
+        pin(pin), count(count), colors(colors), id(id) {
     line = new CRGB[count];
     changeMode();
     /*switch (pin) {
@@ -24,17 +20,17 @@ void RGBLine::setFastLED(CFastLED *fastLED) {
     setBrightness(bright);
 }
 
-int RGBLine::getPin(){
+int RGBLine::getPin() {
     return pin;
 }
 
 void RGBLine::setFrequency(byte frequency) {
-    strobePeriod = StrobePeriod + frequency * 1.5;
+    strobePeriod = MIN_STROBE_PERIOD + frequency * 1.5;
 }
 
 void RGBLine::setColors(byte *newColors) {
     if (colors != newColors) {
-        free(colors);
+        free(colors);         //опасный момент
         colors = newColors;
     }
     myPal.loadDynamicGradientPalette(colors);
@@ -138,7 +134,6 @@ void RGBLine::regHSV() {
     byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
         line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - bright);
-        //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
     }
 }
 
@@ -169,9 +164,6 @@ void RGBLine::blick() {
 
 void RGBLine::moveEffect() {
     byte j, t = 255 * (mode / 100) * (id % 2);
-    /*j = 255 - hue ;
-    Serial.print("Start: ");
-    Serial.println( j - t);*/
     for (int i = 0; i < count; i++) {
         j = 255 - hue - i * 255 / count;
         line[i] = ColorFromPalette(myPal, j - t);
@@ -179,12 +171,6 @@ void RGBLine::moveEffect() {
 }
 
 void RGBLine::show() {
-    /*Serial.print(oldMode);
-    Serial.print(" ");
-    Serial.print(mode);
-    if (oldMode != mode) {
-        this->changeMode();
-    }*/
     switch (mode / 10 % 10) {
         /*case 2:
             level_size();
@@ -204,10 +190,8 @@ void RGBLine::show() {
             this->strobe();
             break;
         default:
-            for (int i = 0; i < count; i++) {//!!!!!
-                line[i] = ColorFromPalette(myPal,
-                                           (i * 255 /
-                                            count));   // заливка по палитре " от зелёного к красному"
+            for (int i = 0; i < count; i++) {
+                line[i] = ColorFromPalette(myPal, (i * 255 / count));
             }
             break;
     }
@@ -215,7 +199,6 @@ void RGBLine::show() {
         hue += hueStep;
         hueTimer = millis();
     }
-    //hue += hueStep;
 }
 
 void RGBLine::data() {
