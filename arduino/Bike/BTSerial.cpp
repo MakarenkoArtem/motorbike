@@ -1,56 +1,34 @@
-//
-// Created by artem on 02.05.24.
-//
-
 #include "BTSerial.h"
 
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
     this->begin(SPEED);
     this->setTimeout(TIMEOUT);
-    timer=millis();
+    timer = millis();
 }
 
-short BTSerial::getSocket(byte &bright, unsigned short &curMode, byte (&colors)[24], byte &frequency) {
-    /*не ставить тайм ауты, тк по умолчанию размер буфера составляет 64 байта и при переполнении старые данные будут зетерты
-    if(!available() || (sz==-1 && millis()-timer<100)){//если ввод пуст или время с начала ввода меньше тайм аута
-        return OK;      
-    } else if(sz==-2){ //если начался прием
-        sz=-1;
-        timer = millis();
-        return OK;     
-    } else*/
-    if(!available()){
+short BTSerial::getCommands(Parameters &parameters) {
+    if (!available()) {
         return OK;
     }
-    if (millis()-timer > DELAY){ //если пора очищать ввод
-        sz=-1;
+    //не ставить тайм ауты, тк по умолчанию размер буфера составляет 64 байта и при переполнении старые данные будут зетерты
+    if (millis() - timer > DELAY) { //если пора очищать ввод
+        sz = -1;
     }
-    if (sz==-1) {
+    if (sz == -1) {
         timer = millis();
     }
-     /*
-    Serial.print("Size:");
-    Serial.print(sz);
-    Serial.print(" buf:");
-    Serial.print(buf);
-    Serial.print(" avaliable:");
-    Serial.println(available());*/
     do {
         buf[++sz] = this->read();
-    } while (available() and buf[sz]!='\n' and sz < MAXSZ);
+    } while (available() and buf[sz] != '\n' and sz < MAXSZ);
     if (MAXSZ == sz) {
-        sz=-1;
-        return ERROR; 
+        sz = -1;
+        return ERROR;
     }
-    if(buf[sz]=='\n'){
-        buf[sz]=0;
-    }else{
-        buf[sz+1]=0;
-        /*Serial.print(F("Part: "));
-        Serial.print(buf);
-        Serial.print(" avaliable:");
-        Serial.println(available());*/
-        timer = millis()-TIMEOUT;
+    if (buf[sz] == '\n') {
+        buf[sz] = 0;
+    } else {
+        buf[sz + 1] = 0;
+        timer = millis() - TIMEOUT;
         return WAIT_INPUT;
     }
     Serial.print(F("Command:"));
@@ -59,19 +37,17 @@ short BTSerial::getSocket(byte &bright, unsigned short &curMode, byte (&colors)[
     Serial.print(sz);
     Serial.print(F(" avaliable:"));
     Serial.println(available());
+    return messageProcessing(parameters);
+}
+
+short BTSerial::messageProcessing(Parameters &parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
-          for (int x = 0; x < 6; ++x) {
-                this->print(colors[x * 4]);
-                this->print(F(","));
-                this->print(colors[x * 4 + 1]);
-                this->print(F(","));
-                this->print(colors[x * 4 + 2]);
-                this->print(F(","));
-                this->print(colors[x * 4 + 3]);
-                this->print(F(","));
-          }
-    }else if (compareStr(buf, "Con")) {
+        for (int x = 0; x < 6 * 4; ++x) {
+            this->print(parameters.colors[x]);
+            this->print(F(","));
+        }
+    } else if (compareStr(buf, "Con")) {
         this->print(F("OK"));
     } else if (compareStr(buf, "OFF")) {
         this->print(F("OK"));
@@ -88,33 +64,38 @@ short BTSerial::getSocket(byte &bright, unsigned short &curMode, byte (&colors)[
     } else if (compareStr(buf, "END")) {
         ans = END;
     } else {
-        char *t = subStr(buf, 0, 3);
-        if (compareStr(t, "Br:")) {
-            bright = static_cast<byte>(strToLongInt(buf+3));
+        char *firstPart = subStr(buf, 0, 3);
+        if (compareStr(firstPart, "Br:")) {
+            parameters.bright = static_cast<byte>(strToLongInt(buf + 3));
             ans = BRIGHT;
-        } else if (compareStr(t, "Ty:")) {
-            curMode = static_cast<unsigned short>(strToLongInt(buf+3));
+        } else if (compareStr(firstPart, "Ty:")) {
+            parameters.mode = static_cast<unsigned short>(strToLongInt(buf + 3));
             ans = MODE;
-        } else if (compareStr(t, "CF:")) {
-            frequency = static_cast<unsigned short>(strToLongInt(buf+3));
+        } else if (compareStr(firstPart, "CF:")) {
+            parameters.frequency = static_cast<unsigned short>(strToLongInt(buf + 3));
             ans = FREQUENCY;
-        } else if (compareStr(t, "Co:")){
-            if(sz != 99) {
-                Serial.println(F("Damaged message"));
-                this->print(F("Damaged message"));
-            }else{
-                char *val;
-                for (int i = 0; i < 24; ++i) {
-                    val = subStr(buf+3 + i * 4, 0, 3);
-                    colors[i] = static_cast<byte>(strToLongInt(val));
-                    free(val);
-                }
-                ans = COLORS;
-                this->print(F("OK"));
-            }
+        } else if (compareStr(firstPart, "Co:")) {
+            ans = changeColors(buf + 3, parameters.colors);
         }
-        free(t);
+        free(firstPart);
     }
-    sz=-1;
+    sz = -1;
     return ans;
 }
+
+short BTSerial::changeColors(char *buf, byte *colors) {
+    if (sz != 99) {
+        Serial.println(F("Damaged message"));
+        this->print(F("Damaged message"));
+        return ERROR;
+    }
+    char *val;
+    for (int i = 0; i < 24; ++i) {
+        val = subStr(buf + i * 4, 0, 3);
+        colors[i] = static_cast<byte>(strToLongInt(val));
+        free(val);
+    }
+    this->print(F("OK"));
+    return COLORS;
+}
+
