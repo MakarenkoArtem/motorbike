@@ -26,13 +26,21 @@ class SoundLevelMeter {
 
     int (*analogRead)(int);
     float LsoundLevel_f, RsoundLevel_f;
+    int filterValue=15;
+    float amplitude=0.5;
+    int currentTimer=0;
+    int avegareTimeLight=200;
 public:
     float LsoundLevel, RsoundLevel;
-    float averageLevel;
+    float averageLevel=0;
     float maxLevel;
     short Rlenght, Llenght;
 
     SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int));
+
+    int currentLevelOfSound();
+    
+    float amplitudeLight();
 
     void fhtSound();
 };

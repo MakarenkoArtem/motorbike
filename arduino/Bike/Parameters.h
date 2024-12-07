@@ -5,12 +5,12 @@
 
 class Parameters {
 public:
-    byte bright;
+    byte maxBright;
     unsigned short mode;
     byte frequency;
     byte *colors;
 
     Parameters(RGBLine &line);
 
-    Parameters(byte bright, unsigned short mode, byte *colors, byte frequency);
+    Parameters(byte maxBright, unsigned short mode, byte *colors, byte frequency);
 };
