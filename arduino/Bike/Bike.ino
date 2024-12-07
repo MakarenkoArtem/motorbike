@@ -4,39 +4,6 @@
 #include "SoundLevelMeter.h"
 
 
-void printMemoryUsage() {
-    // Определение использования стека
-    volatile char stack_dummy;
-    char *stack_ptr = &stack_dummy;
-    extern char __stack;  // Объявление переменной, указывающей на конец стека
-
-    // Определение конца кучи
-    extern char __heap_start, *__brkval;
-    char *heap_ptr = (char *) __brkval == 0 ? (char *) &__heap_start : (char *) __brkval; //конец кучи
-
-    // Находим адреса памяти
-    int stack_usage = static_cast<int>((char *) &__stack - stack_ptr); // Использование стека
-    int heap_usage = static_cast<int>(heap_ptr - (char *) &__heap_start); // Использование памяти кучи
-
-    // Расчет общего размера стека и кучи
-    int total_stack_size = static_cast<int>((char *) &__stack - (char *) 0); // Размер стека
-    int total_heap_size = 2048; // Примерный общий размер кучи (проверьте для вашего устройства)
-
-    // Свободная память
-    int free_heap = total_heap_size - heap_usage;
-    int free_stack = total_stack_size - stack_usage;
-
-    Serial.print(F("Stack Usage: "));
-    Serial.print(stack_usage);
-    Serial.print(F(" Free Stack: "));
-    Serial.print(free_stack);
-    Serial.print(F(" Heap Usage: "));
-    Serial.print(heap_usage);
-    Serial.print(F(" Free Heap: "));
-    Serial.println(free_heap);
-}
-
-
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
 
 RGBLine *leftLine;//указатель на объект класса работы с лентой
@@ -62,7 +29,7 @@ void setup() {
     parameters = new Parameters(*leftLine);
 };
 
-unsigned int timer = 0;
+unsigned long timer = 0;
 float amplitude=1.0;
 
 int resultProcessing(int resp) {
@@ -115,10 +82,10 @@ int resultProcessing(int resp) {
 }
 
 void updateRGBLine(){
-    FastLED.clear();//очищаем адресную ленту
     if(leftLine->needAmplitude) {
         amplitude = sound.amplitudeLight();
     }
+    FastLED.clear();//очищаем адресную ленту
     leftLine->show(amplitude);
     rightLine->show(amplitude);
     //rightLine->data();
@@ -131,7 +98,6 @@ void loop() {
         return;
     }
     if (timer < millis()-50 || timer > millis()) {
-        //printMemoryUsage();
         updateRGBLine();
         timer = millis();
     }
