@@ -9,6 +9,65 @@ void setADCPrescaler(uint8_t prescaler){
 
 SoundLevelMeter::SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int))
         : pinR(pinR), pinL(pinL), pinMode(pinMode), analogRead(analogRead) {
+          pinMode(pinR, INPUT);
+          pinMode(pinL, INPUT);
+}
+
+
+int SoundLevelMeter::currentLevelOfSound(){
+  int m=0,cur;
+  for(int i=0;i<100;++i){
+    cur=analogRead(pinR);
+    if(cur>m){
+      m=cur;
+    }
+  }
+  averageLevel=(averageLevel*100+m*5)/105;
+  return m;
+}
+
+
+float SoundLevelMeter::amplitudeLight(){
+  int cur=currentLevelOfSound();
+  Serial.print(" cur:");
+  Serial.print(cur);
+  Serial.print(" averageLevel:");
+  Serial.print(averageLevel);
+  Serial.print(" filter:");
+  Serial.println(averageLevel-filterValue);
+  if(averageLevel>100){
+    if(avegareTimeLight<100){
+      if(filterValue<10){
+      ++filterValue;
+      }
+    }else if(filterValue>-5){
+      --filterValue;
+    }
+    Serial.print(" bef:");
+    Serial.print(amplitude*100);
+    if(cur-averageLevel>filterValue){
+          if(!amplitude){
+            currentTimer=millis();
+          }
+          amplitude+=1;
+          if(amplitude>1){
+            amplitude=1;
+          }
+    } else{         
+          if(amplitude==1){
+            avegareTimeLight=(avegareTimeLight*100+(millis()-currentTimer)*2.5)/102.5;
+          }
+          amplitude-=1;
+          if(amplitude<0){
+              amplitude=0;
+            }
+    }
+  }else{
+    amplitude=0;
+  }
+  Serial.print(" after:");
+  Serial.print(amplitude*100);
+  return amplitude;
 }
 
 void SoundLevelMeter::fhtSound() {

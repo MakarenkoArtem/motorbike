@@ -66,7 +66,7 @@ short BTSerial::messageProcessing(Parameters &parameters) {
     } else {
         char *firstPart = subStr(buf, 0, 3);
         if (compareStr(firstPart, "Br:")) {
-            parameters.bright = static_cast<byte>(strToLongInt(buf + 3));
+            parameters.maxBright = static_cast<byte>(strToLongInt(buf + 3));
             ans = BRIGHT;
         } else if (compareStr(firstPart, "Ty:")) {
             parameters.mode = static_cast<unsigned short>(strToLongInt(buf + 3));

@@ -17,7 +17,7 @@ RGBLine::RGBLine(int pin, int count, byte *colors, byte id) :
 
 void RGBLine::setFastLED(CFastLED *fastLED) {
     this->fastLED = fastLED;
-    setBrightness(bright);
+    setBrightness(maxBright);
 }
 
 int RGBLine::getPin() {
@@ -25,7 +25,7 @@ int RGBLine::getPin() {
 }
 
 void RGBLine::setFrequency(byte frequency) {
-    strobePeriod = MIN_STROBE_PERIOD + frequency * 1.5;
+    strobePeriod = MIN_STROBE_PERIOD + frequency * 2;
 }
 
 void RGBLine::setColors(byte *newColors) {
@@ -41,12 +41,17 @@ void RGBLine::setMode(unsigned short mode) {
     changeMode();
 }
 
+void RGBLine::setMaxBrightness(byte bright) {
+    this->maxBright = bright;
+    this->fastLED->setBrightness(bright);
+}
+
 void RGBLine::setBrightness(byte bright) {
-    this->bright = bright;
     this->fastLED->setBrightness(bright);
 }
 
 void RGBLine::changeMode() {
+    needAmplitude = mode % 100 / 10 == 2;
     switch (mode % 100) {
         case 12:
             this->changeGradientAB();
@@ -60,11 +65,12 @@ void RGBLine::changeMode() {
         default:
             this->setColors(colors);
     }
-    switch (mode / 10 % 10) {
+    setBrightness(maxBright);
+    /*switch (mode / 10 % 10) {
         case 4:
             this->fastLED->setBrightness(255);
             break;
-    }
+    }*/
     oldMode = mode;
 }
 
@@ -133,7 +139,7 @@ void RGBLine::regGradient() {
 void RGBLine::regHSV() {
     byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
-        line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - bright);
+        line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - maxBright);
     }
 }
 
@@ -170,17 +176,18 @@ void RGBLine::moveEffect() {
     }
 }
 
-void RGBLine::show() {
+void RGBLine::show(float amplitude) {
     switch (mode / 10 % 10) {
-        /*case 2:
-            level_size();
-            break;*/
+        case 2:
+            setBrightness(maxBright * amplitude);
+            break;
         case 4:
             blick();
             break;
     }
     switch (mode % 100) {
         case 11:
+        case 21:
             this->moveEffect();
             break;
         case 41:
@@ -201,11 +208,16 @@ void RGBLine::show() {
     }
 }
 
+void RGBLine::show() {
+    show(1.0);
+}
+
 void RGBLine::data() {
+    Serial.print("Mode: ");
     Serial.print(mode);
-    Serial.print(" ");
-    Serial.print(bright);
-    Serial.print(" ");
+    Serial.print(" maxBright:");
+    Serial.print(maxBright);
+    Serial.print(" count:");
     Serial.println(count);
 }
 

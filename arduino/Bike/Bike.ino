@@ -1,6 +1,7 @@
 #include "BTSerial.h"
 #include "IgnitionKey.h"
 #include "initialization.h"
+#include "SoundLevelMeter.h"
 
 
 void printMemoryUsage() {
@@ -47,6 +48,9 @@ IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
 
 Parameters *parameters;
 
+
+SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
+
 void setup() {
     initAssembly();
     initAudio();
@@ -58,10 +62,10 @@ void setup() {
     parameters = new Parameters(*leftLine);
 };
 
-unsigned int iteration = 0;
+unsigned int timer = 0;
+float amplitude=1.0;
 
-void loop() {
-    int resp = serial.getCommands(*parameters);
+int resultProcessing(int resp) {
     switch (resp) {
         case ON: {
             Serial.println(F("ON"));
@@ -89,8 +93,8 @@ void loop() {
             break;
         }
         case BRIGHT: {
-            rightLine->setBrightness(parameters->bright);
-            leftLine->setBrightness(parameters->bright);
+            rightLine->setMaxBrightness(parameters->maxBright);
+            leftLine->setMaxBrightness(parameters->maxBright);
             break;
         }
         case MODE: {
@@ -104,17 +108,31 @@ void loop() {
             break;
         }
         case WAIT_INPUT: {
-            return;
+            return 1;
         }
     }
-    if (!iteration) {
-        //printMemoryUsage();
-        FastLED.clear();//очищаем адресную ленту
-        leftLine->show();
-        rightLine->show();
-        //rightLine->data();
-        FastLED.show();//обновляем адресную ленту
-        //printMemoryUsage();
+    return 0;
+}
+
+void updateRGBLine(){
+    FastLED.clear();//очищаем адресную ленту
+    if(leftLine->needAmplitude) {
+        amplitude = sound.amplitudeLight();
     }
-    iteration = ++iteration % 2500;
+    leftLine->show(amplitude);
+    rightLine->show(amplitude);
+    //rightLine->data();
+    FastLED.show();//обновляем адресную ленту
+}
+
+void loop() {
+    int resp = serial.getCommands(*parameters);
+    if(resultProcessing(resp)){
+        return;
+    }
+    if (timer < millis()-50 || timer > millis()) {
+        //printMemoryUsage();
+        updateRGBLine();
+        timer = millis();
+    }
 }
