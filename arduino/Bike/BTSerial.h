@@ -7,6 +7,8 @@
 #include "mystring.h"
 #include "Parameters.h"
 
+#define COMMAND "Co"
+
 #ifndef CONFIG
 #define ERROR -1
 #define OK 0

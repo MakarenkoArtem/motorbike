@@ -29,6 +29,7 @@ short BTSerial::getCommands(Parameters &parameters) {
     } else {
         buf[sz + 1] = 0;
         timer = millis() - TIMEOUT;
+        if (buf[0] == COMMAND[0] && buf[1] == COMMAND[1]) { delay(10); }
         return WAIT_INPUT;
     }
     Serial.print(F("Command:"));
