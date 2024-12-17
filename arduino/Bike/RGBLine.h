@@ -1,58 +1,68 @@
-//
-// Created by artem on 02.05.24.
-//
+#pragma once
 
-#ifndef BIKE_RGBLINE_H
-#define BIKE_RGBLINE_H
-
-//#include <StandardCplusplus.h>//https://roboticsbackend.com/arduino-stl-library/
-//#include <vector>
-//#include <map>
 #include <FastLED.h>
 
+#include "config.h"
+
+#ifndef CONFIG
+#define MIN_STROBE_PERIOD 150
+#endif
+
+extern float fStubLink;
+extern byte bStubLink;
+
 class RGBLine {
-    int oldMode = 11;
+    unsigned short oldMode = 11;
     const int pin;
     CRGBPalette32 myPal;
-    byte *colors;
-    float* sound;
-    /*std::vector<void (RGBLine::*)()> changeGradient = {nullptr, nullptr, nullptr, nullptr, nullptr,
-                                                       nullptr, nullptr, nullptr, nullptr, nullptr,
-                                                       nullptr,};
-    std::vector<void (RGBLine::*)()> funcs = {nullptr, nullptr, nullptr, nullptr, nullptr,
-                                              nullptr, nullptr, nullptr, nullptr, nullptr,
-                                              nullptr,};
-    /*std::map<int, void (RGBLine::*)()> funcs = {{11, &RGBLine::regAA}};/*,
-                                             {2, &RGBLine::params}};*/
-    long int STROBE_PERIOD=100;
-    int STROBE_SMOOTH=10;
-    long int strobe_timer=0;
-    bool strobeUp_flag = true, strobeDwn_flag=false;
-    long int light_time=STROBE_PERIOD/2;
-    int STROBE_SAT=255;
+    float &sound = fStubLink;
+    long int strobePeriod = MIN_STROBE_PERIOD;
+    int STROBE_SAT = 255;
+    byte strobeBright = 0;
+    byte id;
+    byte hue = 0;
+    byte hueStep = 2;
+    int hueSpeed = 3;
+    int hueTimer = millis();
 public:
-    CRGB line;
-    byte bright = 255;
-    //byte* colors;
+    bool needAmplitude = false;
+    byte *colors = &bStubLink;
+    CRGB *line;
+    byte maxBright = 0;
     int count;
-    int mode = 11;
+    unsigned short mode = 11;
+    byte frequency = 0;
     CFastLED *fastLED = nullptr;
 
-    RGBLine(int pin, int count, byte *colors, float* sound);
+    RGBLine(int pin, int count, byte *colors, byte id);
 
-    void setFastLED(CFastLED *fastLED) { this->fastLED = fastLED; };
+    void setFastLED(CFastLED *fastLED);
 
-    void setMode(int mode) { this->mode = mode; };
+    int getPin();
 
-    void setBright(int bright) { this->bright = bright; };
+    void setMode(unsigned short mode);
+
+    void setMaxBrightness(byte bright);
+
+    void setBrightness(byte bright);
 
     void setColors(byte *newColors);
+
+    void setFrequency(byte frequency);
 
     void changeMode();
 
     void regGradient();
 
+    void strobeHSV();
+
+    void strobe();
+
+    void moveEffect();
+
     void regHSV();
+
+    void show(float amplitude);
 
     void show();
 
@@ -67,8 +77,8 @@ public:
     void changeGradientAC();
 
     void changeGradientAD();
+
     void blick();
+
+    void data();
 };
-
-
-#endif //BIKE_RGBLINE_H

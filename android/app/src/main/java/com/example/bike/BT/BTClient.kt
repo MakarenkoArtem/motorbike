@@ -10,7 +10,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -30,7 +29,7 @@ class BTClient(
         }
     }
 
-    fun connect(): Result<Unit> {
+    fun connect(check: Boolean = true): Result<Unit> {
         try {//Инициируем соединение с устройством
             Log.d("BikeBluetooth", "!!!connect")
             /*bTSocket =
@@ -51,7 +50,11 @@ class BTClient(
             Log.d("BikeBluetooth", e.message!!)
             return Result.failure(e)
         }
-        return connectRequest(5, 300, true)
+        if (check) {
+            return connectRequest(5, 300, true)
+        } else {
+            return Result.success(Unit)
+        }
     }
 
     fun connectRequest(
@@ -66,8 +69,10 @@ class BTClient(
                 sendMessage("Con\n")
                 SystemClock.sleep(time)
                 if (wait_answer) {
-                    message = takeMessage().getOrNull() ?: ""
-                    Log.d("BikeBluetooth", message)
+                    val f = takeMessage()
+                    Log.d("BikeBluetooth", f.toString())
+                    message = f.getOrNull() ?: ""
+                    Log.d("BikeBluetooth", "message: $message")
                     if (message.substring(0, 2) == "OK") {
                         Log.d("BikeBluetooth", "Connect")
                         return Result.success(Unit)
@@ -126,36 +131,49 @@ class BTClient(
         }
     }
 
-
     fun takeMessage(
         repeat: Int = 1,
-        timeWait: Long = 100
+        timeWait: Long = 200
     ): Result<String> {
-        val buffer = ByteArray(1024)// буферный массив
-        val executor = Executors.newSingleThreadExecutor()
+        val buffer = ByteArray(1024) // буферный массив
+        val executor = Executors.newSingleThreadExecutor() // создаем executor
         return runCatching {
-            for (i in 0..repeat) {
-                val future: Future<*> = executor.submit {
-                    inputStream?.read(buffer) ?: throw IllegalStateException("Нет входного потока")
+            for (i in 0 until repeat) {
+                val future = executor.submit<String> {
+                    inputStream?.read(buffer)?.let { size ->
+                        if (size > 0) {
+                            String(buffer, 0, size)
+                        } else {
+                            null
+                        }
+                    } ?: throw IllegalStateException("Нет входного потока")
                 }
+
                 try {
-                    val size = future.get(timeWait, TimeUnit.MILLISECONDS) as Int// Тайм-аут
-                    if (size != 0) {
-                        return@runCatching String(buffer, 0, size)
+                    // Ждем ответа с тайм-аутом
+                    val result = future.get(timeWait, TimeUnit.MILLISECONDS)
+                    if (result != null) {
+                        return@runCatching result
                     }
                 } catch (e: TimeoutException) {
-                    // Обработка сценария, когда время ожидания истекло
-                    return@runCatching "Время ожидания истекло"
-                } finally {
-                    future.cancel(true) // Отменяем задачу, если она еще выполняется
+                    Log.d("BikeBluetooth", "3")
+                    //throw IllegalStateException("Время ожидания истекло")
+                } catch (e: Exception) {
+                    // Обработка других исключений, если они возникают
+                    Log.d("BikeBluetooth", "Ошибка: ${e.message}")
                 }
-                if (i != repeat) {
+                /*
+                // Задержка перед следующим чтением, если это не последний раз
+                if (i != repeat - 1) {
                     SystemClock.sleep(timeWait)
-                }
+                }*/
             }
-            return@runCatching ""
+            throw IllegalStateException("Время ожидания истекло")
+        }.also {
+            executor.shutdown() // Закрываем executor
         }
     }
+
 
     fun colorsSend(colors: List<Int>): Result<Unit> {
         var message = "Co:"
@@ -168,7 +186,9 @@ class BTClient(
             }
             message += "\n"
             sendMessage(message)
-            //takeMessage()
+            if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
+                throw IllegalStateException("Damaged message")
+            }
         }
     }
 

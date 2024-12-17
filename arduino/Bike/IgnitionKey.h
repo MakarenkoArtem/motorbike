@@ -1,12 +1,5 @@
-//
-// Created by artem on 02.05.24.
-//
-
-#ifndef BIKE_IGNITIONKEY_H
-#define BIKE_IGNITIONKEY_H
-#define OUTPUT 0
-#define LOW 0
-#define HIGH 1
+#define LOW 0x0
+#define HIGH 0x1
 
 class IgnitionKey {
     int pin;
@@ -24,6 +17,3 @@ public:
 
     void setVal(bool val);
 };
-
-
-#endif //BIKE_IGNITIONKEY_H

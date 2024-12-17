@@ -1,23 +1,15 @@
-//
-// Created by artem on 02.05.24.
-//
-
-#ifndef BIKE_MYSTRING_H
-#define BIKE_MYSTRING_H
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 
 #include<stdlib.h>
 #include<stdio.h>
-//#include <conio.h>
-//#include<tgmath.h>
 #include<math.h>
 
-void *freeListStr(char **list, int n);
+void freeListStr(char **list, int n);
 
-void *freeTwiceList(void **list, int n);
+void freeTwiceList(void **list, int n);
 
-int strToInt(char *str);
+int strToInt(const char *str);
 
 char **getListStrFromFile(FILE *file, int *k);
 
@@ -61,9 +53,9 @@ char *delChar(char *str, int index);
 
 char *subStr(char *str, int start, int end);
 
-int lenStr(char *str);
+int lenStr(const char *str);
 
-int compareStr(char *a, char *b);
+bool compareStr(const char* a, const char *b);
 
 char *addChar(char *str, int index, char addChar);
 
@@ -71,13 +63,13 @@ char **split(char *str, char *s, int *n);
 
 char *charInSyms(char s, char *syms);
 
-char *replace(char *str, char *lastValue, char *newValue, int count);
+char *replace(char *str, char *lastValue, const char *newValue, int count);
 
 char *join(char **list, int count, char *joiner);
 
 char *addStrOnIndex(char *str, char *addStr, int index);
 
-long int strToLongInt(char *str);
+long int strToLongInt(const char *str);
 
 char *longIntToStr(long int i);
 
@@ -85,11 +77,8 @@ void *reallocList(void *str, int count, int sizeOfType);
 
 void *mallocList(int count, int sizeOfType);
 
-void *freeStr(char *str);
+void freeStr(char *str);
 //gcc -c main.c libraries/mystring.c
 //gcc -o main main.o mystring.o -lm
 //fseek(file, +-step, cur_
 //ftell()
-
-
-#endif //BIKE_MYSTRING_H
