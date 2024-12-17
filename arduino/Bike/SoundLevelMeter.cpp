@@ -29,22 +29,24 @@ int SoundLevelMeter::currentLevelOfSound(){
 
 float SoundLevelMeter::amplitudeLight(){
   int cur=currentLevelOfSound();
+  #ifdef DEBUG_SOUND
   Serial.print(" cur:");
   Serial.print(cur);
   Serial.print(" averageLevel:");
   Serial.print(averageLevel);
   Serial.print(" filter:");
   Serial.println(averageLevel-filterValue);
+  #endif
   if(averageLevel>100){
-    if(avegareTimeLight<100){
+    if(avegareTimeLight<140){
       if(filterValue<10){
       ++filterValue;
       }
     }else if(filterValue>-5){
       --filterValue;
     }
-    Serial.print(" bef:");
-    Serial.print(amplitude*100);
+    //Serial.print(" bef:");
+    //Serial.print(amplitude*100);
     if(cur-averageLevel>filterValue){
           if(!amplitude){
             currentTimer=millis();
@@ -65,8 +67,6 @@ float SoundLevelMeter::amplitudeLight(){
   }else{
     amplitude=0;
   }
-  Serial.print(" after:");
-  Serial.print(amplitude*100);
   return amplitude;
 }
 

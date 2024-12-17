@@ -33,7 +33,7 @@ void RGBLine::setColors(byte *newColors) {
         free(colors);         //опасный момент
         colors = newColors;
     }
-    myPal.loadDynamicGradientPalette(colors);
+    changeMode();
 }
 
 void RGBLine::setMode(unsigned short mode) {
@@ -63,7 +63,7 @@ void RGBLine::changeMode() {
             this->changeGradientAD();
             break;
         default:
-            this->setColors(colors);
+            myPal.loadDynamicGradientPalette(colors);
     }
     setBrightness(maxBright);
     /*switch (mode / 10 % 10) {
@@ -96,7 +96,7 @@ void RGBLine::changeGradientAB() {
             colors_[c++] = colors[i];
         }
     }
-    colors_[--c] = colors[23];
+    colors_[c-4] = colors[20];
     myPal.loadDynamicGradientPalette(colors_);
 }
 

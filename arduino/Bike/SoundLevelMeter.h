@@ -3,6 +3,8 @@
 //
 #include <Arduino.h>
 #include <math.h>
+
+//#define DEBUG_SOUND
 //============варианты предделителя(количество тактов для analogRead)========
 #define ADC_PRESCALER_2 0x01    //лучшая скорость, но малое качество
 #define ADC_PRESCALER_4 0x02
