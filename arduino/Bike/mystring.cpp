@@ -1,10 +1,5 @@
-//
-// Created by artem on 02.05.24.
-//
-
 #include "mystring.h"
 #include "mystring.h"
-//#include <cstdlib>
 
 #define min(a, b) (((a)<(b))?(a):(b))
 #define max(a, b) (((a)>(b))?(a):(b))
@@ -13,37 +8,27 @@
 #define IndexOutOfRange -2
 #define MemoryError -3
 
-/*
-#define NullSymbol '\0'
-#define BackScapeSymbol '\b'
-#define LineFeedSymbol '\n'
-#define CarriageReturnSymbol '\r'
-*/
-void *freeTwiceList(void **list, int n) {
-    for (; n; freeStr((char *) list[--n]));
+
+void freeTwiceList(void **list, int n) {
+    for (; n; freeStr(static_cast<char*>(list[--n])));
     free(list);
 }
 
-void *freeListStr(char **list, int n) {
+void freeListStr(char **list, int n) {
     freeTwiceList((void **) list, n);
 }
 
-void *freeStr(char *str) {
-    //qDebug("freeStr %s", str);
+void freeStr(char *str) {
     free(str);
-    //qDebug("freeStr");
 }
 
 void *reallocList(void *str, int count, int sizeOfType) {
-    //qDebug("realloc %s", (char*)str);
     void *s = realloc(str, sizeOfType * count);
-    //qDebug("realloc");
     return s;
 }
 
 
 void *mallocList(int count, int sizeOfType) {
-    //qDebug("malloc %i", count);
     return malloc(sizeOfType * count);
 }
 
@@ -152,9 +137,6 @@ char *addChar(char *str, int index, char addChar) {
 
 char *toStr(char s) {
     return createNewString(1, s);
-    /*char str[2] = {' ',0};
-    str[0] = s;
-    return str;*/
 }
 
 int lenStr(char *str) {
@@ -164,7 +146,6 @@ int lenStr(char *str) {
 }
 
 char *subStr(char *str, int start, int end) {
-    // Выделяем память для новой строки
     char *slice = (char *) mallocList(end - start + 1, sizeof(char));
     for (int i = start; i < end; ++i) {
         slice[i - start] = str[i];
@@ -173,10 +154,11 @@ char *subStr(char *str, int start, int end) {
     return slice;
 }
 
-int compareStr(char *a, char *b) {
-    int i = 0;
-    for (; a[i] && a[i] == b[i]; ++i);
-    return !(a[i] || b[i]);
+bool compareStr(const char *a, const char *b) {
+    for (; *a && *a == *b; ++a) {
+        ++b;
+    }
+    return !(*a || *b);
 }
 
 char **delStrInList(char **list, int index, int n) {
@@ -194,8 +176,8 @@ char **delThisStr(char **list, char *delStr, int *n) {
     return list;
 }
 
-int strToInt(char *str) {
-    return (int) strToLongInt(str);
+int strToInt(const char *str) {
+    return static_cast<int>(strToLongInt(str));
 }
 
 char *intToStr(int i) {
@@ -362,16 +344,16 @@ char **getListStrFromFile(FILE *file, int *k) {
     return list;
 }
 
-long int strToLongInt(char *str) {
-    long int j = 0, z = 1;
+long int strToLongInt(const char *str) {
+    long int absolut = 0, sign = 1;
     if (*str == '-') {
         ++str;
-        z = -1;
+        sign = -1;
     }
     while (*str) {
-        j = j * 10 + (long int) *str++ - (long int) '0';
+        absolut = absolut * 10 + (*str++ - '0');
     }
-    return j * z;
+    return absolut * sign;
 }
 
 char *longIntToStr(long int i) {

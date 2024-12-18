@@ -4,15 +4,14 @@
 
 #include "IgnitionKey.h"
 
-IgnitionKey::IgnitionKey(int pin, void (*pinMode)(int, int),
-                         void (*digitalWrite)(int, int)) : pin(pin), pinMode(pinMode),
-                                                           digitalWrite(digitalWrite) {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, val ? LOW : HIGH);
+IgnitionKey::IgnitionKey(int pin, void (*pinMode)(int, int), void (*digitalWrite)(int, int)) :
+        pin(pin), pinMode(pinMode), digitalWrite(digitalWrite) {
+    pinMode(pin, HIGH);
+    digitalWrite(pin, val ? HIGH : LOW);
 }
 
 
 void IgnitionKey::setVal(bool val) {
     this->val = val;
-    digitalWrite(pin, val ? LOW : HIGH);
+    digitalWrite(pin, val ? HIGH : LOW);
 }
