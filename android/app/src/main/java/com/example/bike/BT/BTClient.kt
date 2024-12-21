@@ -51,7 +51,7 @@ class BTClient(
             return Result.failure(e)
         }
         if (check) {
-            return connectRequest(5, 300, true)
+            return connectRequest(5, 500, true)
         } else {
             return Result.success(Unit)
         }
@@ -69,10 +69,8 @@ class BTClient(
                 sendMessage("Con\n")
                 SystemClock.sleep(time)
                 if (wait_answer) {
-                    val f = takeMessage()
-                    Log.d("BikeBluetooth", f.toString())
-                    message = f.getOrNull() ?: ""
-                    Log.d("BikeBluetooth", "message: $message")
+                    message = takeMessage().getOrNull() ?: ""
+                    Log.d("BikeBluetooth", message)
                     if (message.substring(0, 2) == "OK") {
                         Log.d("BikeBluetooth", "Connect")
                         return Result.success(Unit)
@@ -148,7 +146,6 @@ class BTClient(
                         }
                     } ?: throw IllegalStateException("Нет входного потока")
                 }
-
                 try {
                     // Ждем ответа с тайм-аутом
                     val result = future.get(timeWait, TimeUnit.MILLISECONDS)
@@ -173,7 +170,6 @@ class BTClient(
             executor.shutdown() // Закрываем executor
         }
     }
-
 
     fun colorsSend(colors: List<Int>): Result<Unit> {
         var message = "Co:"
