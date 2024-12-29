@@ -71,7 +71,7 @@ short BTSerial::messageProcessing(Parameters &parameters) {
             ans = BRIGHT;
         } else if (compareStr(firstPart, "Ty:")) {
             parameters.mode = static_cast<unsigned short>(strToLongInt(buf + 3));
-            ans = MODE;
+            ans = LINE_MODE;
         } else if (compareStr(firstPart, "CF:")) {
             parameters.frequency = static_cast<unsigned short>(strToLongInt(buf + 3));
             ans = FREQUENCY;

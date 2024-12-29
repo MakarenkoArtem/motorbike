@@ -28,7 +28,7 @@
 #define SOUND_OFF 7
 #define SOUND_ON 8
 #define BRIGHT 9
-#define MODE 10
+#define LINE_MODE 10
 #define FREQUENCY 11
 #define WAIT_INPUT 101
 
