@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
@@ -17,6 +16,8 @@ import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.NumberPicker
+import android.widget.NumberPicker.OnValueChangeListener
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -28,13 +29,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.alpha
-import androidx.core.graphics.blue
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.green
-import androidx.core.graphics.red
 import androidx.lifecycle.lifecycleScope
 import com.example.bi.ListDeviceDialog
 import com.example.bike.R
+import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -43,6 +42,7 @@ import kotlin.math.min
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var screenData: StateFlow<ScreenViewData>
+    private lateinit var curColor: CurrentColor
     lateinit var connectButton: Button
     lateinit var colorPicker: ImageView
     lateinit var brightness: SeekBar
@@ -56,8 +56,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var soundButton: ImageButton
     private lateinit var ignitionButton: ImageButton
-
-    private var activButton: Button? = null
     private lateinit var colorButtons: List<Button>
 
     val getResult: ActivityResultLauncher<Intent> =
@@ -119,9 +117,25 @@ class MainActivity : AppCompatActivity() {
             getResult.launch(intent)
         }
     }
-    private var curColor = Color.argb(0, 0, 0, 0)
+
+    private fun fixationColorChange(event: MotionEvent) {
+        curColor.activButton?.backgroundTintList = ColorStateList.valueOf(curColor.color)
+        if (event.action == MotionEvent.ACTION_UP) {
+            lifecycleScope.launch {
+                val resp =
+                    viewModel.colorPickerSend(
+                        curColor.color,
+                        colorButtons.indexOf(curColor.activButton)
+                    )
+                if (resp.isFailure) {
+                    viewModel.checkConnection()
+                }
+            }
+        }
+    }
+
     private val colorPickerTouch = OnTouchListener { view, event ->
-        if (activButton != null) {
+        if (curColor.activButton != null) {
             val imageView = view as ImageView
             val bitmap = imageView.drawable.toBitmap()
             val verticalBufferZone =
@@ -145,25 +159,12 @@ class MainActivity : AppCompatActivity() {
                         (y * bitmap.height).toInt()
                     )
                     if (pix.alpha != 0) {
-                        curColor = pix
+                        curColor.color = pix
                     }
-
                 } catch (e: IllegalArgumentException) {
                 }
-                Log.d(
-                    "BikeBluetooth",
-                    "rgba:${curColor.red},${curColor.green},${curColor.blue},${curColor.alpha}"
-                )
-                activButton!!.backgroundTintList = ColorStateList.valueOf(curColor)
-                if (event.action == MotionEvent.ACTION_UP) {
-                    lifecycleScope.launch {
-                        val resp =
-                            viewModel.colorPickerSend(curColor, colorButtons.indexOf(activButton))
-                        if (resp.isFailure) {
-                            viewModel.checkConnection()
-                        }
-                    }
-                }
+                curColor.updatePickers()
+                fixationColorChange(event)
             }
         }
         true
@@ -241,6 +242,12 @@ class MainActivity : AppCompatActivity() {
         butts.forEach { it -> changeActiveStatus(it, status) }
     }
 
+    private val changeNumPickerVal = OnTouchListener { view, event ->
+        curColor.updateByPickers()
+        fixationColorChange(event)
+        false//обязательно false, иначе не будет дальнейшей обратоки события и не будет изменения значений
+    }
+
     private val changeMode = OnClickListener { view ->
         val radioButton = view as RadioButton
         val num = modes.indexOf(radioButton)
@@ -248,7 +255,7 @@ class MainActivity : AppCompatActivity() {
             return@OnClickListener
         }
         changeActiveStatus(colorButtons, true)
-        activButton = colorButtons[0]
+        curColor.activButton = colorButtons[0]
         when (texts[num]) {
             getString(R.string.oneColor) -> {
                 changeActiveStatus(colorButtons.drop(1), false)
@@ -314,7 +321,7 @@ class MainActivity : AppCompatActivity() {
     ).map {
         val but = findViewById<Button>(it)
         but.setOnClickListener { view ->
-            activButton = view as Button
+            curColor.activButton = view as Button
         }
         return@map but
     }
@@ -375,15 +382,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val stepEvent = OnValueChangeListener { picker, oldVal, newVal ->
+        var value = oldVal
+        if (newVal > picker.maxValue - curColor.stepPicker && oldVal < picker.minValue + curColor.stepPicker) {
+            value = picker.maxValue
+        } else if (oldVal > picker.maxValue - curColor.stepPicker && newVal < picker.minValue + curColor.stepPicker) {
+            value = picker.minValue
+        } else {
+            if (newVal > oldVal) {
+                value += curColor.stepPicker
+            } else {
+                value -= curColor.stepPicker
+            }
+        }
+        picker.value = value/curColor.stepPicker*curColor.stepPicker
+        false
+    }
+
+    private fun initNumPickers() {
+        curColor.setPickers(
+            listOf(
+                findViewById<NumberPicker>(R.id.numPickerRed),
+                findViewById<NumberPicker>(R.id.numPickerGreen),
+                findViewById<NumberPicker>(R.id.numPickerBlue)
+            ), changeNumPickerVal, stepEvent
+        )
+        val r = findViewById<NumberPicker>(R.id.numPickerRed)
+        r.setOnValueChangedListener(stepEvent)
+    }
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)//MODE_NIGHT_FOLLOW_SYSTEM
         setContentView(R.layout.activity_main)
         val factory =
-            MainActivityViewModelFactory(context = applicationContext, activity = this)
+            MainActivityViewModelFactory(
+                context = applicationContext,
+                activity = this
+            )
         viewModel = factory.create(MainActivityViewModel::class.java)
         screenData = viewModel.screenDataState
+        curColor=screenData.value.curColor
 
         connectButton = findViewById(R.id.Connect)
         connectButton.setOnClickListener(connectListener)
@@ -391,6 +431,8 @@ class MainActivity : AppCompatActivity() {
         colorPicker = findViewById(R.id.colorPicker)
         colorPicker.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
         colorPicker.setOnTouchListener(colorPickerTouch)
+
+        initNumPickers()
 
         brightness = findViewById(R.id.brightness)
         brightness.setOnSeekBarChangeListener(brightSeekBarListener)

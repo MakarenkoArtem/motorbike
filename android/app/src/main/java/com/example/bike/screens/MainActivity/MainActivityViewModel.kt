@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.bike.BT.BTClient
 import com.example.bike.BT.BTService
+import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,8 +16,7 @@ class MainActivityViewModel(
     context: Context,
     activity: Activity
 ) : ViewModel() {
-    //var screenData = ScreenViewData()
-    private val _screenDataState = MutableStateFlow(ScreenViewData())
+    private val _screenDataState = MutableStateFlow(ScreenViewData(curColor = CurrentColor()))
     val screenDataState: StateFlow<ScreenViewData> = _screenDataState
     val btService: BTService = BTService(context = context, activity = activity)
 
@@ -59,7 +59,7 @@ class MainActivityViewModel(
         if (checkDevice().isFailure) {
             return Result.success(emptyList())
         }
-        var res = _screenDataState.value.device!!.getColors()
+        val res = _screenDataState.value.device!!.getColors()
         Log.d("BikeBluetooth", "$res")
         val colors = res.getOrElse { return res }
         Log.d("BikeBluetooth", "Colors: $colors")
