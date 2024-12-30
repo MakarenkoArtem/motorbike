@@ -1,70 +1,38 @@
-#include <Wire.h>
-#include <iarduino_RTC.h>
-
 #include "BTSerial.h"
 #include "IgnitionKey.h"
 #include "initialization.h"
-
-
-void printMemoryUsage() {
-    // Определение использования стека
-    volatile char stack_dummy;
-    char *stack_ptr = &stack_dummy;
-    extern char __stack;  // Объявление переменной, указывающей на конец стека
-
-    // Определение конца кучи
-    extern char __heap_start, *__brkval;
-    char *heap_ptr = (char *) __brkval == 0 ? (char *) &__heap_start : (char *) __brkval; //конец кучи
-
-    // Находим адреса памяти
-    int stack_usage = static_cast<int>((char *) &__stack - stack_ptr); // Использование стека
-    int heap_usage = static_cast<int>(heap_ptr - (char *) &__heap_start); // Использование памяти кучи
-
-    // Расчет общего размера стека и кучи
-    int total_stack_size = static_cast<int>((char *) &__stack - (char *) 0); // Размер стека
-    int total_heap_size = 2048; // Примерный общий размер кучи (проверьте для вашего устройства)
-
-    // Свободная память
-    int free_heap = total_heap_size - heap_usage;
-    int free_stack = total_stack_size - stack_usage;
-
-    Serial.print(F("Stack Usage: "));
-    Serial.print(stack_usage);
-    Serial.print(F(" Free Stack: "));
-    Serial.print(free_stack);
-    Serial.print(F(" Heap Usage: "));
-    Serial.print(heap_usage);
-    Serial.print(F(" Free Heap: "));
-    Serial.println(free_heap);
-}
+#include "SoundLevelMeter.h"
 
 
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
 
-RGBLine leftLine(LLine_pin, NUM_LEDS, colors, 0);//объект класса работы с лентой
-RGBLine rightLine(RLine_pin, NUM_LEDS, colors, 1);
+RGBLine *leftLine;//указатель на объект класса работы с лентой
+RGBLine *rightLine;
 
 iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для модуля DS1302 - RST, CLK, DAT
 
 IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
+
+Parameters *parameters;
+
+
+SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
 
 void setup() {
     initAssembly();
     initAudio();
     initSerial();
     initSwitchAudio();
-    initLedLine(leftLine);
-    initLedLine(rightLine);
+    leftLine = initLedLine(LLine_pin, NUM_LEDS, colors, 0);
+    rightLine = initLedLine(RLine_pin, NUM_LEDS, colors, 1);
     initClock(time);
+    parameters = new Parameters(*leftLine);
 };
 
-byte bright = leftLine.bright;
-unsigned short mode = leftLine.mode;
-byte frequency = leftLine.frequency;
-unsigned int iteration = 0;
+unsigned long timer = 0;
+float amplitude=1.0;
 
-void loop() {
-    int resp = serial.getSocket(bright, mode, colors, frequency);//проверяем блютуз
+int resultProcessing(int resp) {
     switch (resp) {
         case ON: {
             Serial.println(F("ON"));
@@ -87,38 +55,50 @@ void loop() {
             break;
         }
         case COLORS: {
-            rightLine.setColors(colors);
-            leftLine.setColors(colors);
+            rightLine->setColors(parameters->colors);
+            leftLine->setColors(parameters->colors);
             break;
         }
         case BRIGHT: {
-            Serial.println(bright);
-            rightLine.setBrightness(bright);
-            leftLine.setBrightness(bright);
+            rightLine->setMaxBrightness(parameters->maxBright);
+            leftLine->setMaxBrightness(parameters->maxBright);
             break;
         }
         case MODE: {
-            rightLine.setMode(mode);
-            leftLine.setMode(mode);
+            rightLine->setMode(parameters->mode);
+            leftLine->setMode(parameters->mode);
             break;
         }
         case FREQUENCY: {
-            rightLine.setFrequency(frequency);
-            leftLine.setFrequency(frequency);
+            rightLine->setFrequency(parameters->frequency);
+            leftLine->setFrequency(parameters->frequency);
             break;
         }
         case WAIT_INPUT: {
-            return;
+            return 1;
         }
     }
-    if (!iteration) {
-        //printMemoryUsage();
-        FastLED.clear();//очищаем адресную ленту
-        leftLine.show();
-        rightLine.show();
-        //rightLine.data();
-        FastLED.show();//обновляем адресную ленту
-        //printMemoryUsage();
+    return 0;
+}
+
+void updateRGBLine(){
+    if(leftLine->needAmplitude) {
+        amplitude = sound.amplitudeLight();
     }
-    iteration = ++iteration % 2500;
+    FastLED.clear();//очищаем адресную ленту
+    leftLine->show(amplitude);
+    rightLine->show(amplitude);
+    //rightLine->data();
+    FastLED.show();//обновляем адресную ленту
+}
+
+void loop() {
+    int resp = serial.getCommands(*parameters);
+    if(resultProcessing(resp)){
+        return;
+    }
+    if (timer < millis()-50 || timer > millis()) {
+        updateRGBLine();
+        timer = millis();
+    }
 }

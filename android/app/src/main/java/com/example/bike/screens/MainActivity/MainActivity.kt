@@ -16,6 +16,8 @@ import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.NumberPicker
+import android.widget.NumberPicker.OnValueChangeListener
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -28,13 +30,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.alpha
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.bi.ListDeviceDialog
 import com.example.bike.R
+import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -42,38 +42,21 @@ import kotlin.math.min
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var screenData: StateFlow<ScreenViewData>
+    private lateinit var curColor: CurrentColor
     lateinit var connectButton: Button
     lateinit var colorPicker: ImageView
     lateinit var brightness: SeekBar
     lateinit var bar: SeekBar
 
+    private lateinit var types: List<RadioButton>
+    private lateinit var modes: List<RadioButton>
+    private lateinit var synchronously: RadioButton
+    private var texts: List<String> =
+        listOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
 
-    lateinit var type1: RadioButton
-    lateinit var type2: RadioButton
-    lateinit var type3: RadioButton
-    lateinit var type4: RadioButton
-    lateinit var mode1: RadioButton
-    lateinit var mode2: RadioButton
-    lateinit var mode3: RadioButton
-    lateinit var mode4: RadioButton
-    lateinit var mode5: RadioButton
-    lateinit var synchronously: RadioButton
-    lateinit var modes: Array<RadioButton>
-    var texts: Array<String> =
-        arrayOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
-
-    lateinit var soundButton: ImageButton
-    lateinit var ignitionButton: ImageButton
-
-
-    var activButton: Button? = null
-    lateinit var colorButton0: Button
-    lateinit var colorButton50: Button
-    lateinit var colorButton100: Button
-    lateinit var colorButton150: Button
-    lateinit var colorButton200: Button
-    lateinit var colorButton250: Button
-    lateinit var colorButtons: Array<Button>
+    private lateinit var soundButton: ImageButton
+    private lateinit var ignitionButton: ImageButton
+    private lateinit var colorButtons: List<Button>
 
     val getResult: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -91,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-    val connectListener = object : OnClickListener {
+    private val connectListener = object : OnClickListener {
         override fun onClick(p0: View?) {
             if (ContextCompat.checkSelfPermission(
                     applicationContext,
@@ -135,45 +118,59 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val colorPickerTouch: OnTouchListener = OnTouchListener { view, event ->
-        if (activButton != null) {
+    private fun fixationColorChange(event: MotionEvent) {
+        curColor.activButton?.backgroundTintList = ColorStateList.valueOf(curColor.color)
+        if (event.action == MotionEvent.ACTION_UP) {
+            lifecycleScope.launch {
+                val resp =
+                    viewModel.colorPickerSend(
+                        curColor.color,
+                        colorButtons.indexOf(curColor.activButton)
+                    )
+                if (resp.isFailure) {
+                    viewModel.checkConnection()
+                }
+            }
+        }
+    }
+
+    private val colorPickerTouch = OnTouchListener { view, event ->
+        if (curColor.activButton != null) {
             val imageView = view as ImageView
             val bitmap = imageView.drawable.toBitmap()
             val verticalBufferZone =
                 (imageView.height - min(imageView.width, imageView.height)) / 2
             val horizontalBufferZone =
                 (imageView.width - min(imageView.width, imageView.height)) / 2
-            var x = (event.x - horizontalBufferZone) / min(imageView.width, imageView.height)
-            var y = (event.y - verticalBufferZone) / min(imageView.width, imageView.height)
-            /*Log.d(
+            val x = (event.x - horizontalBufferZone) / min(imageView.width, imageView.height)
+            val y = (event.y - verticalBufferZone) / min(imageView.width, imageView.height)
+            Log.d(
                 "BikeBluetooth",
                 "x:${x} event:${event.x} buffer:${horizontalBufferZone} width:${imageView.width}"
             )
             Log.d(
                 "BikeBluetooth",
                 "y:${y} event:${event.y} buffer:${verticalBufferZone} height:${imageView.height}"
-            )*/
+            )
             runCatching {
-                val pixel = bitmap.getPixel(
-                    (x * bitmap.width).toInt(),
-                    (y * bitmap.height).toInt()
-                )
-                if (pixel.alpha == 0) {
-                    return@OnTouchListener true
-                }
-                activButton!!.backgroundTintList = ColorStateList.valueOf(pixel)
-                if(event.action == MotionEvent.ACTION_UP) {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        viewModel.colorPickerSend(pixel, colorButtons.indexOf(activButton))
-                        //screenData.value.device?.sendMessage("END\n", 1, 0)
+                try {
+                    val pix = bitmap.getPixel(
+                        (x * bitmap.width).toInt(),
+                        (y * bitmap.height).toInt()
+                    )
+                    if (pix.alpha != 0) {
+                        curColor.color = pix
                     }
+                } catch (e: IllegalArgumentException) {
                 }
+                curColor.updatePickers()
+                fixationColorChange(event)
             }
         }
         true
     }
 
-    val brightSeekBarListener = object : OnSeekBarChangeListener {
+    private val brightSeekBarListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
         }
 
@@ -187,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val fastSeekBarListener = object : OnSeekBarChangeListener {
+    private val fastSeekBarListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
         override fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -197,8 +194,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val ignitionListener = OnClickListener {
-        lifecycleScope.launch {                    //CoroutineScope(Dispatchers.IO)
+    private val ignitionListener = OnClickListener {
+        lifecycleScope.launch {
             viewModel.setIgnition(!screenData.value.ignition).getOrElse {
                 viewModel.disconnect()
                 return@launch
@@ -206,7 +203,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val soundListener = OnClickListener {
+    private val soundListener = OnClickListener {
         lifecycleScope.launch {
             viewModel.setSound(!screenData.value.sound).getOrElse {
                 viewModel.disconnect()
@@ -215,7 +212,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val globalLayoutListener = object : ViewTreeObserver.OnGlobalLayoutListener {
+    private val globalLayoutListener = object : ViewTreeObserver.OnGlobalLayoutListener {
         //как только будут заданы все размеры вызовется эта функция
         override fun onGlobalLayout() {
             var layoutParams = brightness.layoutParams
@@ -230,41 +227,188 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun changeActiveStatus(butt: Button, status: Boolean) {
+        if (status) {
+            butt.isEnabled = true
+            butt.alpha = 1f
+
+        } else {
+            butt.isEnabled = false
+            butt.alpha = 0.5f
+        }
+    }
+
+    private fun changeActiveStatus(butts: List<Button>, status: Boolean) {
+        butts.forEach { it -> changeActiveStatus(it, status) }
+    }
+
+    private val changeNumPickerVal = OnTouchListener { view, event ->
+        curColor.updateByPickers()
+        fixationColorChange(event)
+        false//обязательно false, иначе не будет дальнейшей обратоки события и не будет изменения значений
+    }
+
     private val changeMode = OnClickListener { view ->
         val radioButton = view as RadioButton
         val num = modes.indexOf(radioButton)
         if (num == -1) {
             return@OnClickListener
         }
-        viewModel.setModeColors(num + 1)
-    }
-    private val changeType = OnClickListener { view ->
-        val radioButton = view as RadioButton
-        val num = when (radioButton) {
-            type1 -> {
-                texts = arrayOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
-                0
+        changeActiveStatus(colorButtons, true)
+        curColor.activButton = colorButtons[0]
+        when (texts[num]) {
+            getString(R.string.oneColor) -> {
+                changeActiveStatus(colorButtons.drop(1), false)
             }
 
-            type2 -> {
-                texts = arrayOf("1 цвет", "2 цвета", "3 цвета", "6 цвета", "", "Без градиента")
-                1
+            getString(R.string.twoColors) -> {
+                changeActiveStatus(colorButtons.slice(1..4), false)
             }
 
-            type3 -> {
-                texts = arrayOf("1 цвет", "2 цвета", "3 цвета", "6 цвета", "", "Без градиента")
-                2
-            }
-
-            type4 -> {
-                texts = arrayOf("Тип 1", "Тип 2", "Тип 3", "Тип 4", "", "Асинхронно")
-                3
-            }
-            else -> {
-                return@OnClickListener
+            getString(R.string.threeColors) -> {
+                changeActiveStatus(colorButtons[1], false)
+                changeActiveStatus(colorButtons.slice(3..4), false)
             }
         }
-        viewModel.setTypeColors(num+1)
+        viewModel.setModeColors(num + 1)
+    }
+
+    private val changeType = OnClickListener { view ->
+        val radioButton = view as RadioButton
+        val listOfTexts = listOf(
+            listOf(
+                "Движение",
+                getString(R.string.oneColor),
+                getString(R.string.twoColors),
+                getString(R.string.threeColors),
+                getString(R.string.sixColors),
+                "Асинхронно"
+            ),
+            listOf(
+                "Движение",
+                getString(R.string.threeColors),
+                "",
+                "",
+                "",
+                "Без градиента"
+            ),
+            listOf(
+                getString(R.string.oneColor),
+                getString(R.string.twoColors),
+                getString(R.string.threeColors),
+                getString(R.string.sixColors),
+                "",
+                "Без градиента"
+            ),
+            listOf("HSV", "Градиент", "", "", "", "Асинхронно")
+        )
+        val num = types.indexOf(radioButton)
+        if (num == -1) {
+            return@OnClickListener
+        }
+        texts = listOfTexts[num]
+        viewModel.setTypeColors(num + 1)
+    }
+
+
+    private fun initColorButs() = listOf(
+        R.id.buttonColor0,
+        R.id.buttonColor50,
+        R.id.buttonColor100,
+        R.id.buttonColor150,
+        R.id.buttonColor200,
+        R.id.buttonColor250
+    ).map {
+        val but = findViewById<Button>(it)
+        but.setOnClickListener { view ->
+            curColor.activButton = view as Button
+        }
+        return@map but
+    }
+
+    private fun initTypes(changeType: OnClickListener) = arrayOf(
+        R.id.radioButType1,
+        R.id.radioButType2,
+        R.id.radioButType3,
+        R.id.radioButType4
+    ).map {
+        val but = findViewById<RadioButton>(it)
+        but.setOnClickListener(changeType)
+        return@map but
+    }
+
+    private fun initModes(changeMode: OnClickListener): List<RadioButton> {
+        val modeList = listOf(
+            R.id.radioButMode1,
+            R.id.radioButMode2,
+            R.id.radioButMode3,
+            R.id.radioButMode4,
+            R.id.radioButMode5,
+            R.id.synchronously
+        ).map {
+            val but = findViewById<RadioButton>(it)
+            but.setOnClickListener(changeMode)
+            but
+        }
+        modeList[5].setOnClickListener({
+            viewModel.setSynchron(!screenData.value.synchrony)
+        })
+        return modeList
+    }
+
+    private fun checkScreenData() = lifecycleScope.launch {
+        viewModel.screenDataState.collect { data -> // Обновление в зависимости от значения screenData
+            connectButton.text = data.device?.name ?: "Connect"
+            synchronously.isChecked = screenData.value.synchrony
+            if (screenData.value.ignition) {
+                ignitionButton.setImageResource(R.drawable.start)
+            } else {
+                ignitionButton.setImageResource(R.drawable.stop)
+            }
+            if (screenData.value.sound) {
+                soundButton.setImageResource(R.drawable.sound)
+            } else {
+                soundButton.setImageResource(R.drawable.mute)
+            }
+            for (i in 0..<colorButtons.size) {
+                colorButtons[i].backgroundTintList =
+                    ColorStateList.valueOf(data.colors[i])
+            }
+            for (i in 0..5) {
+                modes[i].isClickable = texts[i] != ""
+                modes[i].visibility = if (texts[i] != "") View.VISIBLE else View.INVISIBLE
+                modes[i].text = texts[i]
+            }
+        }
+    }
+
+    private val stepEvent = OnValueChangeListener { picker, oldVal, newVal ->
+        var value = oldVal
+        if (newVal > picker.maxValue - curColor.stepPicker && oldVal < picker.minValue + curColor.stepPicker) {
+            value = picker.maxValue
+        } else if (oldVal > picker.maxValue - curColor.stepPicker && newVal < picker.minValue + curColor.stepPicker) {
+            value = picker.minValue
+        } else {
+            if (newVal > oldVal) {
+                value += curColor.stepPicker
+            } else {
+                value -= curColor.stepPicker
+            }
+        }
+        picker.value = value/curColor.stepPicker*curColor.stepPicker
+        false
+    }
+
+    private fun initNumPickers() {
+        curColor.setPickers(
+            listOf(
+                findViewById<NumberPicker>(R.id.numPickerRed),
+                findViewById<NumberPicker>(R.id.numPickerGreen),
+                findViewById<NumberPicker>(R.id.numPickerBlue)
+            ), changeNumPickerVal, stepEvent
+        )
+        val r = findViewById<NumberPicker>(R.id.numPickerRed)
+        r.setOnValueChangedListener(stepEvent)
     }
 
     @SuppressLint("MissingInflatedId")
@@ -272,21 +416,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)//MODE_NIGHT_FOLLOW_SYSTEM
         setContentView(R.layout.activity_main)
-        //viewModel = MainActivityViewModel(context = applicationContext, activity = this)
         val factory =
-            MainActivityViewModelFactory(context = applicationContext, activity = this)
-        viewModel = ViewModelProvider(this, factory).get(MainActivityViewModel::class.java)
+            MainActivityViewModelFactory(
+                context = applicationContext,
+                activity = this
+            )
+        viewModel = factory.create(MainActivityViewModel::class.java)
         screenData = viewModel.screenDataState
+        curColor=screenData.value.curColor
 
         connectButton = findViewById(R.id.Connect)
         connectButton.setOnClickListener(connectListener)
 
         colorPicker = findViewById(R.id.colorPicker)
         colorPicker.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
-        //colorPicker.setImageDrawable()
-        //colorPicker.setDrawingCacheEnabled(true)
-        //colorPicker.buildDrawingCache(true)
         colorPicker.setOnTouchListener(colorPickerTouch)
+
+        initNumPickers()
 
         brightness = findViewById(R.id.brightness)
         brightness.setOnSeekBarChangeListener(brightSeekBarListener)
@@ -300,77 +446,13 @@ class MainActivity : AppCompatActivity() {
         soundButton = findViewById(R.id.sound_button)
         soundButton.setOnClickListener(soundListener)
 
-        colorButton0 = findViewById(R.id.buttonColor0)
-        colorButton50 = findViewById(R.id.buttonColor50)
-        colorButton100 = findViewById(R.id.buttonColor100)
-        colorButton150 = findViewById(R.id.buttonColor150)
-        colorButton200 = findViewById(R.id.buttonColor200)
-        colorButton250 = findViewById(R.id.buttonColor250)
-        colorButtons = arrayOf<Button>(
-            colorButton0,
-            colorButton50,
-            colorButton100,
-            colorButton150,
-            colorButton200,
-            colorButton250
-        )
-        for (but in colorButtons) {
-            but.setOnClickListener { view ->
-                activButton = view as Button
-            }
-        }
+        colorButtons = initColorButs()
 
-        type1 = findViewById(R.id.radioButType1)
-        type1.setOnClickListener(changeType)
-        type2 = findViewById(R.id.radioButType2)
-        type2.setOnClickListener(changeType)
-        type3 = findViewById(R.id.radioButType3)
-        type3.setOnClickListener(changeType)
-        type4 = findViewById(R.id.radioButType4)
-        type4.setOnClickListener(changeType)
+        types = initTypes(changeType)
 
+        modes = initModes(changeMode)
+        synchronously = modes[5]
 
-        mode1 = findViewById(R.id.radioButMode1)
-        mode2 = findViewById(R.id.radioButMode2)
-        mode3 = findViewById(R.id.radioButMode3)
-        mode4 = findViewById(R.id.radioButMode4)
-        mode5 = findViewById(R.id.radioButMode5)
-        synchronously = findViewById(R.id.synchronously)
-        modes = arrayOf(mode1, mode2, mode3, mode4, mode5, synchronously)
-        for (i in 0..4) {
-            modes[i].setOnClickListener(changeMode)
-        }
-        synchronously.setOnClickListener(View.OnClickListener {
-            viewModel.setSynchron(!screenData.value.synchron)
-        })
-
-
-        lifecycleScope.launch {
-            viewModel.screenDataState.collect { data -> // Обновление в зависимости от значения screenData
-                connectButton.text = data.device?.name ?: "Connect"
-                synchronously.setChecked(screenData.value.synchron)
-                if (screenData.value.ignition) {
-                    ignitionButton.setImageResource(R.drawable.start)
-                } else {
-                    ignitionButton.setImageResource(R.drawable.stop)
-                }
-                if (screenData.value.sound) {
-                    soundButton.setImageResource(R.drawable.sound)
-                } else {
-                    soundButton.setImageResource(R.drawable.mute)
-                }
-                for (i in 0..colorButtons.size - 1) {
-                    colorButtons[i].backgroundTintList =
-                        ColorStateList.valueOf(data.colors[i])
-                }
-                for (i in 0..5) {
-                    modes[i].isClickable = texts[i] != ""
-                    modes[i].visibility = if (texts[i] != "") View.VISIBLE else View.INVISIBLE/*if texts[i].equals(""){
-                types_[i].setClickable(false);
-            }else{types_[i].setClickable(true);}*/
-                    modes[i].text = texts[i]
-                }
-            }
-        }
+        checkScreenData()
     }
 }

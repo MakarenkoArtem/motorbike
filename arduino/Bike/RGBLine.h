@@ -1,7 +1,12 @@
 #pragma once
 
-#include "config.h"
 #include <FastLED.h>
+
+#include "config.h"
+
+#ifndef CONFIG
+#define MIN_STROBE_PERIOD 150
+#endif
 
 extern float fStubLink;
 extern byte bStubLink;
@@ -10,13 +15,8 @@ class RGBLine {
     unsigned short oldMode = 11;
     const int pin;
     CRGBPalette32 myPal;
-    byte *colors = &bStubLink;
     float &sound = fStubLink;
-    long int strobePeriod = StrobePeriod;
-    //int STROBE_SMOOTH = 75;
-    //long int strobeTimer = 0;
-    //bool strobeUp_flag = true, strobeDwn_flag = false;
-    //long int light_time = STROBE_PERIOD / 2;
+    long int strobePeriod = MIN_STROBE_PERIOD;
     int STROBE_SAT = 255;
     byte strobeBright = 0;
     byte id;
@@ -25,8 +25,10 @@ class RGBLine {
     int hueSpeed = 3;
     int hueTimer = millis();
 public:
+    bool needAmplitude = false;
+    byte *colors = &bStubLink;
     CRGB *line;
-    byte bright = 0;
+    byte maxBright = 0;
     int count;
     unsigned short mode = 11;
     byte frequency = 0;
@@ -39,6 +41,8 @@ public:
     int getPin();
 
     void setMode(unsigned short mode);
+
+    void setMaxBrightness(byte bright);
 
     void setBrightness(byte bright);
 
@@ -57,6 +61,8 @@ public:
     void moveEffect();
 
     void regHSV();
+
+    void show(float amplitude);
 
     void show();
 
