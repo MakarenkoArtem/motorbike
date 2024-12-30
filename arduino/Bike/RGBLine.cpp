@@ -1,11 +1,7 @@
-//
-// Created by artem on 02.05.24.
-//
-
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, byte *colors, byte id) : pin(pin), count(count), colors(colors),
-                                                              id(id) {
+RGBLine::RGBLine(int pin, int count, byte *colors, byte id) :
+        pin(pin), count(count), colors(colors), id(id) {
     line = new CRGB[count];
     changeMode();
     /*switch (pin) {
@@ -21,23 +17,23 @@ RGBLine::RGBLine(int pin, int count, byte *colors, byte id) : pin(pin), count(co
 
 void RGBLine::setFastLED(CFastLED *fastLED) {
     this->fastLED = fastLED;
-    setBrightness(bright);
+    setBrightness(maxBright);
 }
 
-int RGBLine::getPin(){
+int RGBLine::getPin() {
     return pin;
 }
 
 void RGBLine::setFrequency(byte frequency) {
-    strobePeriod = StrobePeriod + frequency * 1.5;
+    strobePeriod = MIN_STROBE_PERIOD + frequency * 2;
 }
 
 void RGBLine::setColors(byte *newColors) {
     if (colors != newColors) {
-        free(colors);
+        free(colors);         //опасный момент
         colors = newColors;
     }
-    myPal.loadDynamicGradientPalette(colors);
+    changeMode();
 }
 
 void RGBLine::setMode(unsigned short mode) {
@@ -45,12 +41,17 @@ void RGBLine::setMode(unsigned short mode) {
     changeMode();
 }
 
+void RGBLine::setMaxBrightness(byte bright) {
+    this->maxBright = bright;
+    this->fastLED->setBrightness(bright);
+}
+
 void RGBLine::setBrightness(byte bright) {
-    this->bright = bright;
     this->fastLED->setBrightness(bright);
 }
 
 void RGBLine::changeMode() {
+    needAmplitude = mode % 100 / 10 == 2;
     switch (mode % 100) {
         case 12:
             this->changeGradientAB();
@@ -62,13 +63,14 @@ void RGBLine::changeMode() {
             this->changeGradientAD();
             break;
         default:
-            this->setColors(colors);
+            myPal.loadDynamicGradientPalette(colors);
     }
-    switch (mode / 10 % 10) {
+    setBrightness(maxBright);
+    /*switch (mode / 10 % 10) {
         case 4:
             this->fastLED->setBrightness(255);
             break;
-    }
+    }*/
     oldMode = mode;
 }
 
@@ -94,7 +96,7 @@ void RGBLine::changeGradientAB() {
             colors_[c++] = colors[i];
         }
     }
-    colors_[--c] = colors[23];
+    colors_[c-4] = colors[20];
     myPal.loadDynamicGradientPalette(colors_);
 }
 
@@ -137,8 +139,7 @@ void RGBLine::regGradient() {
 void RGBLine::regHSV() {
     byte t = 255 * (mode / 100) * (id % 2);
     for (int i = 0; i < count; i++) {
-        line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - bright);
-        //RLine[i] = CHSV((byte)millis() - t, STROBE_SAT, t - bright);
+        line[i] = CHSV(static_cast<byte>(millis()) - t, STROBE_SAT, t - maxBright);
     }
 }
 
@@ -169,32 +170,24 @@ void RGBLine::blick() {
 
 void RGBLine::moveEffect() {
     byte j, t = 255 * (mode / 100) * (id % 2);
-    /*j = 255 - hue ;
-    Serial.print("Start: ");
-    Serial.println( j - t);*/
     for (int i = 0; i < count; i++) {
         j = 255 - hue - i * 255 / count;
         line[i] = ColorFromPalette(myPal, j - t);
     }
 }
 
-void RGBLine::show() {
-    /*Serial.print(oldMode);
-    Serial.print(" ");
-    Serial.print(mode);
-    if (oldMode != mode) {
-        this->changeMode();
-    }*/
+void RGBLine::show(float amplitude) {
     switch (mode / 10 % 10) {
-        /*case 2:
-            level_size();
-            break;*/
+        case 2:
+            setBrightness(maxBright * amplitude);
+            break;
         case 4:
             blick();
             break;
     }
     switch (mode % 100) {
         case 11:
+        case 21:
             this->moveEffect();
             break;
         case 41:
@@ -204,10 +197,8 @@ void RGBLine::show() {
             this->strobe();
             break;
         default:
-            for (int i = 0; i < count; i++) {//!!!!!
-                line[i] = ColorFromPalette(myPal,
-                                           (i * 255 /
-                                            count));   // заливка по палитре " от зелёного к красному"
+            for (int i = 0; i < count; i++) {
+                line[i] = ColorFromPalette(myPal, (i * 255 / count));
             }
             break;
     }
@@ -215,14 +206,18 @@ void RGBLine::show() {
         hue += hueStep;
         hueTimer = millis();
     }
-    //hue += hueStep;
+}
+
+void RGBLine::show() {
+    show(1.0);
 }
 
 void RGBLine::data() {
+    Serial.print("Mode: ");
     Serial.print(mode);
-    Serial.print(" ");
-    Serial.print(bright);
-    Serial.print(" ");
+    Serial.print(" maxBright:");
+    Serial.print(maxBright);
+    Serial.print(" count:");
     Serial.println(count);
 }
 

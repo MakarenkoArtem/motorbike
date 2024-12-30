@@ -3,6 +3,8 @@
 //
 #include <Arduino.h>
 #include <math.h>
+
+//#define DEBUG_SOUND
 //============варианты предделителя(количество тактов для analogRead)========
 #define ADC_PRESCALER_2 0x01    //лучшая скорость, но малое качество
 #define ADC_PRESCALER_4 0x02
@@ -26,13 +28,21 @@ class SoundLevelMeter {
 
     int (*analogRead)(int);
     float LsoundLevel_f, RsoundLevel_f;
+    int filterValue=15;
+    float amplitude=0.5;
+    int currentTimer=0;
+    int avegareTimeLight=200;
 public:
     float LsoundLevel, RsoundLevel;
-    float averageLevel;
+    float averageLevel=0;
     float maxLevel;
     short Rlenght, Llenght;
 
     SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int));
+
+    int currentLevelOfSound();
+    
+    float amplitudeLight();
 
     void fhtSound();
 };

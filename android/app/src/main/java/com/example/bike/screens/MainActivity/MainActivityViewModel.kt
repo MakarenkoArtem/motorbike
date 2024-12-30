@@ -7,27 +7,46 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.bike.BT.BTClient
 import com.example.bike.BT.BTService
+import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class MainActivityViewModel(
-    val context: Context,
-    val activity: Activity
+    context: Context,
+    activity: Activity
 ) : ViewModel() {
-    //var screenData = ScreenViewData()
-    private val _screenDataState = MutableStateFlow(ScreenViewData())
+    private val _screenDataState = MutableStateFlow(ScreenViewData(curColor = CurrentColor()))
     val screenDataState: StateFlow<ScreenViewData> = _screenDataState
     val btService: BTService = BTService(context = context, activity = activity)
 
     fun connect(device: BluetoothDevice): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(device = BTClient(device))
+        val res = checkConnection()
+        Log.d("BikeBluetoothCheck", res.toString())
+        if (res.isFailure) {
+            return res
+        }
+        return getColors() as Result<Unit>
+    }
+
+    fun checkDevice(): Result<Unit> {
+        if (_screenDataState.value.device == null) {
+            return Result.failure(IllegalStateException(""))
+        }
+        Log.d("BikeBluetooth", "00!!!connect")
+        return Result.success(Unit)
+
+    }
+
+    fun checkConnection(): Result<Unit> {
+        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
         val res = screenDataState.value.device!!.connect(check = false)
         if (res.isFailure) {
             _screenDataState.value = _screenDataState.value.copy(device = null)
             return res
         }
-        return getColors() as Result<Unit>
+        return Result.success(Unit)
     }
 
     fun getPairedDevices(): List<BluetoothDevice> {
@@ -37,10 +56,10 @@ class MainActivityViewModel(
     }
 
     fun getColors(): Result<List<Int>> {
-        if (_screenDataState.value.device == null) {
+        if (checkDevice().isFailure) {
             return Result.success(emptyList())
         }
-        var res = _screenDataState.value.device!!.getColors()
+        val res = _screenDataState.value.device!!.getColors()
         Log.d("BikeBluetooth", "$res")
         val colors = res.getOrElse { return res }
         Log.d("BikeBluetooth", "Colors: $colors")
@@ -56,11 +75,12 @@ class MainActivityViewModel(
             var res = Result.success(Unit)
             repeat(2) {
                 res = screenDataState.value.device?.colorsSend(screenDataState.value.colors)
-                    ?: Result.success(Unit)
+                    ?: res
                 if (res.isSuccess) {
-                    return res;
+                    return res
                 }
             }
+            return checkConnection()
         }
     }
 
@@ -69,7 +89,6 @@ class MainActivityViewModel(
         screenDataState.value.device?.sendMessage("Br:$brightness\n", 3, 100)
             ?: return
                 .getOrElse { return }
-        //screenDataState.value.device!!.takeMessage(5, 100)
     }
 
     fun setFrequency(frequency: Int) {
@@ -77,14 +96,11 @@ class MainActivityViewModel(
         screenDataState.value.device?.sendMessage("CF:$frequency\n", 3, 100)
             ?: return
                 .getOrElse { return }
-        //screenDataState.value.device!!.takeMessage(5, 100)
     }
 
     fun setIgnition(ignition: Boolean): Result<Unit> {
-        Log.d("BikeBluetooth", screenDataState.value.device?.name ?: "null")
-        if (screenDataState.value.device == null) {
-            return Result.failure(IllegalStateException(""))
-        }
+        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
+        Log.d("BikeBluetooth Device:", screenDataState.value.device!!.name)
         if (ignition) {
             screenDataState.value.device!!.sendMessage("ON\n")
         } else {
@@ -110,47 +126,29 @@ class MainActivityViewModel(
         return sendType()
     }
 
-    fun setSynchron(synchron: Boolean): Result<Unit> {
-        _screenDataState.value = _screenDataState.value.copy(synchron = synchron)
-        /*if (screenDataState.value.synchron) {
-            screenDataState.value.device!!.sendMessage("ON")
-        } else {
-            screenDataState.value.device!!.sendMessage("OFF")
-        }
-        val mes =
-            screenDataState.value.device!!.takeMessage(2).getOrElse { return Result.failure(it) }
-        Log.d("BikeBluetooth", "$mes ${mes.length} ${mes == "OK"}")
-        if (mes == "OK") {
-            _screenDataState.value = _screenDataState.value.copy(ignition = ignition)
-            return Result.success(Unit)
-        }
-        return Result.failure(IllegalStateException(""))*/
+    fun setSynchron(synchrony: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(synchrony = synchrony)
         return sendType()
     }
 
     fun sendType(): Result<Unit> {
-        if (screenDataState.value.device == null) {
-            return Result.failure(IllegalStateException(""))
-        }
-        return screenDataState.value.device?.sendMessage(
-            "Ty:${if (screenDataState.value.synchron) 1 else 0}${screenDataState.value.type}${screenDataState.value.mode}\n",
+        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
+        return screenDataState.value.device!!.sendMessage(
+            "Ty:${if (screenDataState.value.synchrony) 1 else 0}${screenDataState.value.type}${screenDataState.value.mode}\n",
             3,
             100
-        ) ?: Result.success(Unit)
+        )
     }
 
     fun setSound(sound: Boolean): Result<Unit> {
-        if (screenDataState.value.device == null) {
-            return Result.failure(IllegalStateException(""))
-        }
+        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
         if (sound) {
             screenDataState.value.device!!.sendMessage("HIGH\n")
         } else {
             screenDataState.value.device!!.sendMessage("LOW\n")
         }
         val resp = screenDataState.value.device!!.takeMessage(2, 250)
-        Log.d("BikeBluetooth", resp.toString())
-        resp.getOrElse { return Result.failure(it) }
+            .getOrElse { return Result.failure(it) }
         _screenDataState.value = _screenDataState.value.copy(sound = sound)
         return Result.success(Unit)
     }

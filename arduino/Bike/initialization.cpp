@@ -1,6 +1,6 @@
 #include "initialization.h"
 
-void initAssembly() {
+void initAssembly() {//увеличение частоты оцифровки
     sbi(ADCSRA, ADPS2);
     cbi(ADCSRA, ADPS1);
     sbi(ADCSRA, ADPS0);
@@ -40,9 +40,11 @@ void addLedsInFastLED(RGBLine &line) {
     }
 }
 
-void initLedLine(RGBLine &line) {
-    addLedsInFastLED(line);
-    line.setFastLED(&FastLED);  
+RGBLine *initLedLine(int pin, int count, byte *colors, byte id) {
+    RGBLine *line = new RGBLine(pin, count, colors, id);
+    addLedsInFastLED(*line);
+    line->setFastLED(&FastLED);
+    return line;
 }
 
 void initClock(iarduino_RTC &time) {

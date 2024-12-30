@@ -13,5 +13,6 @@ data class ScreenViewData(
     var sound: Boolean = false,
     var device: BTClient? = null,
     var mode:Int=1,
-    var synchron: Boolean = true
+    var synchrony: Boolean = true,
+    var curColor: CurrentColor
 )
