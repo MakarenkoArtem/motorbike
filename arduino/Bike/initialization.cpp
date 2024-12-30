@@ -1,6 +1,6 @@
 #include "initialization.h"
 
-void initAssembly() {
+void initAssembly() {//увеличение частоты оцифровки
     sbi(ADCSRA, ADPS2);
     cbi(ADCSRA, ADPS1);
     sbi(ADCSRA, ADPS0);

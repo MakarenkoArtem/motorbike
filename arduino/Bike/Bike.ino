@@ -2,6 +2,8 @@
 #include "IgnitionKey.h"
 #include "initialization.h"
 #include "SoundLevelMeter.h"
+//#include "SoundDecomposition.h"
+
 
 
 BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
@@ -15,8 +17,8 @@ IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
 
 Parameters *parameters;
 
-
 SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
+//SoundDecomposition FHT(SOUND_R, SOUND_L, pinMode, analogRead);
 
 void setup() {
     initAssembly();
@@ -30,7 +32,7 @@ void setup() {
 };
 
 unsigned long timer = 0;
-float amplitude=1.0;
+float amplitude = 1.0;
 
 int resultProcessing(int resp) {
     switch (resp) {
@@ -64,7 +66,7 @@ int resultProcessing(int resp) {
             leftLine->setMaxBrightness(parameters->maxBright);
             break;
         }
-        case MODE: {
+        case LINE_MODE: {
             rightLine->setMode(parameters->mode);
             leftLine->setMode(parameters->mode);
             break;
@@ -81,10 +83,17 @@ int resultProcessing(int resp) {
     return 0;
 }
 
-void updateRGBLine(){
-    if(leftLine->needAmplitude) {
+void updateRGBLine() {
+    if (leftLine->needAmplitude) {
         amplitude = sound.amplitudeLight();
-    }
+    } 
+    /*    uint8_t* fht = FHT.analyzeAudio();
+        for (int i = 0; i < 64; ++i) {
+            Serial.print(fht[i]);
+            Serial.print(",");
+        }
+        Serial.println("");
+    */
     FastLED.clear();//очищаем адресную ленту
     leftLine->show(amplitude);
     rightLine->show(amplitude);
@@ -94,10 +103,10 @@ void updateRGBLine(){
 
 void loop() {
     int resp = serial.getCommands(*parameters);
-    if(resultProcessing(resp)){
+    if (resultProcessing(resp)) {
         return;
     }
-    if (timer < millis()-50 || timer > millis()) {
+    if (timer < millis() - 50 || timer > millis()) {
         updateRGBLine();
         timer = millis();
     }
