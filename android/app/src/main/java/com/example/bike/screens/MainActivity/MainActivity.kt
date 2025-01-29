@@ -229,11 +229,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun changeActiveStatus(butt: Button, status: Boolean) {
         if (status) {
-            butt.isEnabled = true
             butt.alpha = 1f
-
         } else {
-            butt.isEnabled = false
             butt.alpha = 0.5f
         }
     }
@@ -320,8 +317,16 @@ class MainActivity : AppCompatActivity() {
         R.id.buttonColor250
     ).map {
         val but = findViewById<Button>(it)
+        but.setOnLongClickListener { view ->
+            changeActiveStatus(but, but.alpha != 1f)
+            true
+        }
         but.setOnClickListener { view ->
-            curColor.activButton = view as Button
+            if (but.alpha == 1f) {
+                curColor.activButton = but
+            } else if (curColor.activButton == but) {
+                curColor.activButton = null
+            }
         }
         return@map but
     }
@@ -395,7 +400,7 @@ class MainActivity : AppCompatActivity() {
                 value -= curColor.stepPicker
             }
         }
-        picker.value = value/curColor.stepPicker*curColor.stepPicker
+        picker.value = value / curColor.stepPicker * curColor.stepPicker
         false
     }
 
@@ -423,7 +428,7 @@ class MainActivity : AppCompatActivity() {
             )
         viewModel = factory.create(MainActivityViewModel::class.java)
         screenData = viewModel.screenDataState
-        curColor=screenData.value.curColor
+        curColor = screenData.value.curColor
 
         connectButton = findViewById(R.id.Connect)
         connectButton.setOnClickListener(connectListener)
