@@ -44,41 +44,59 @@ short BTSerial::getCommands(Parameters &parameters) {
 short BTSerial::messageProcessing(Parameters &parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
+        ans = GET_COLOR;
         for (int x = 0; x < 6 * 4; ++x) {
             this->print(parameters.colors[x]);
             this->print(F(","));
         }
     } else if (compareStr(buf, "Con")) {
-        this->print(F("OK"));
     } else if (compareStr(buf, "OFF")) {
-        this->print(F("OK"));
         ans = OFF;
     } else if (compareStr(buf, "ON")) {
-        this->print(F("OK"));
         ans = ON;
-    } else if (compareStr(buf, "LOW")) {
-        this->print(F("OK"));
-        ans = SOUND_OFF;
-    } else if (compareStr(buf, "HIGH")) {
-        this->print(F("OK"));
-        ans = SOUND_ON;
+    } else if (compareStr(buf, "LowAmp") || compareStr(buf, "LOW")) {
+        ans = SOUND_AMPLIFIER_OFF;
+    } else if (compareStr(buf, "HighAmp") || compareStr(buf, "HIGH")) {
+        ans = SOUND_AMPLIFIER_ON;
+    } else if (compareStr(buf, "OffBT")) {
+        ans = SOUND_BT_OFF;
+    } else if (compareStr(buf, "OnBT")) {
+        ans = SOUND_BT_ON;
+    } else if (compareStr(buf, "OnHSV")) {
+        parameters.hsv = true;
+    } else if (compareStr(buf, "OffHSV")) {
+        parameters.hsv = false;
+    } else if (compareStr(buf, "OnMov")) {
+        parameters.movement = true;
+    } else if (compareStr(buf, "OffMov")) {
+        parameters.movement = false;
+    } else if (compareStr(buf, "OnSync")) {
+        parameters.sync = true;
+    } else if (compareStr(buf, "OffSync")) {
+        parameters.sync = false;
+    } else if (compareStr(buf, "OnGrad")) {
+        parameters.gradient = true;
+    } else if (compareStr(buf, "OffGrad")) {
+        parameters.gradient = false;
     } else if (compareStr(buf, "END")) {
         ans = END;
     } else {
         char *firstPart = subStr(buf, 0, 3);
         if (compareStr(firstPart, "Br:")) {
-            parameters.maxBright = static_cast<byte>(strToLongInt(buf + 3));
-            ans = BRIGHT;
+            parameters.setMaxBright(static_cast<byte>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "Ty:")) {
-            parameters.mode = static_cast<unsigned short>(strToLongInt(buf + 3));
-            ans = LINE_MODE;
+            parameters.setMode(static_cast<unsigned short>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "CF:")) {
-            parameters.frequency = static_cast<unsigned short>(strToLongInt(buf + 3));
-            ans = FREQUENCY;
+            parameters.setFrequency(static_cast<unsigned short>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "Co:")) {
             ans = changeColors(buf + 3, parameters.colors);
+        } else {
+            ans = ERROR;
         }
         free(firstPart);
+    }
+    if (ans == OK) {
+        this->print(F("OK"));
     }
     sz = -1;
     return ans;
@@ -99,4 +117,4 @@ short BTSerial::changeColors(char *buf, byte *colors) {
     this->print(F("OK"));
     return COLORS;
 }
-
+//verified 1.02.25
