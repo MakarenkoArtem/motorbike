@@ -16,8 +16,9 @@ void initAudio();
 
 void initSerial();
 
-void initSwitchAudio();
+void initSwitchAudio(int amplifier, int btSource);
 
-RGBLine *initLedLine(int pin, int count, byte *colors, byte id);
+RGBLine *initLedLine(int pin, int count, Parameters &params, byte id);
 
 void initClock(iarduino_RTC &time);
+//verified 1.02.25

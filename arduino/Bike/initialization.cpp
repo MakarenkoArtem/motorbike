@@ -7,11 +7,12 @@ void initAssembly() {//увеличение частоты оцифровки
 }
 
 void initAudio() {
+    analogReference(EXTERNAL);/*
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     analogReference(INTERNAL1V1);
 #else
     analogReference(INTERNAL);
-#endif
+#endif*/
 }
 
 void initSerial() {
@@ -19,9 +20,11 @@ void initSerial() {
     Serial.println("Setup");
 }
 
-void initSwitchAudio() {
-    pinMode(AUDIO_OFF, OUTPUT);
-    digitalWrite(AUDIO_OFF, LOW);
+void initSwitchAudio(int amplifier, int btSource) {
+    pinMode(amplifier, OUTPUT);
+    digitalWrite(amplifier, LOW);
+    pinMode(btSource, OUTPUT);
+    digitalWrite(btSource, LOW);
 }
 
 void addLedsInFastLED(RGBLine &line) {
@@ -40,8 +43,8 @@ void addLedsInFastLED(RGBLine &line) {
     }
 }
 
-RGBLine *initLedLine(int pin, int count, byte *colors, byte id) {
-    RGBLine *line = new RGBLine(pin, count, colors, id);
+RGBLine *initLedLine(int pin, int count, Parameters &params, byte id) {
+    RGBLine *line = new RGBLine(pin, count, params, id);
     addLedsInFastLED(*line);
     line->setFastLED(&FastLED);
     return line;
@@ -52,4 +55,4 @@ void initClock(iarduino_RTC &time) {
                  DAY_OF_WEEK);//(сек, мин, час, день, мес, год, день_недели)
     time.period(1);
 }
-
+//verified 1.02.25
