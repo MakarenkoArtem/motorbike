@@ -31,6 +31,12 @@
 #define GET_COLOR 9
 #define WAIT_INPUT 100
 
+//DEBUGER
+#define DEBUGER false
+#if DEBUGER
+#define DEBUGBT true
+#endif
+
 //      SETTINGS
 #define TIMEOUT 200
 #define SPEED 9600
@@ -66,4 +72,4 @@
 
 
 extern byte colors[24];
-//verified 1.02.25
+//verified 11.02.25

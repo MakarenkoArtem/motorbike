@@ -23,5 +23,10 @@ private:
     short messageProcessing(Parameters &parameters);
 
     short changeColors(char *buf, byte *colors);
+
+    //DEBUG
+    void whatDel();
+
+    void whyError();
 };
-//verified 1.02.25
+//verified 11.02.25

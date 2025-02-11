@@ -6,12 +6,16 @@ BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
     timer = millis();
 }
 
-short BTSerial::getCommands(Parameters &parameters) {
+short BTSerial::getCommands(Parameters& parameters) {
     if (!available()) {
         return OK;
     }
     //не ставить тайм ауты, тк по умолчанию размер буфера составляет 64 байта и при переполнении старые данные будут зетерты
-    if (millis() - timer > DELAY) { //если пора очищать ввод
+    if (millis() - timer > DELAY) {
+        //если пора очищать ввод
+#if DEBUGBT
+        whatDel();
+#endif
         sz = -1;
     }
     if (sz == -1) {
@@ -21,6 +25,9 @@ short BTSerial::getCommands(Parameters &parameters) {
         buf[++sz] = this->read();
     } while (available() and buf[sz] != '\n' and sz < MAXSZ);
     if (MAXSZ == sz) {
+#if DEBUGBT
+        whatDel();
+#endif
         sz = -1;
         return ERROR;
     }
@@ -41,7 +48,7 @@ short BTSerial::getCommands(Parameters &parameters) {
     return messageProcessing(parameters);
 }
 
-short BTSerial::messageProcessing(Parameters &parameters) {
+short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
         ans = GET_COLOR;
@@ -81,7 +88,7 @@ short BTSerial::messageProcessing(Parameters &parameters) {
     } else if (compareStr(buf, "END")) {
         ans = END;
     } else {
-        char *firstPart = subStr(buf, 0, 3);
+        char* firstPart = subStr(buf, 0, 3);
         if (compareStr(firstPart, "Br:")) {
             parameters.setMaxBright(static_cast<byte>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "Ty:")) {
@@ -91,30 +98,47 @@ short BTSerial::messageProcessing(Parameters &parameters) {
         } else if (compareStr(firstPart, "Co:")) {
             ans = changeColors(buf + 3, parameters.colors);
         } else {
+            Serial.println(F("Damaged message"));
+            this->print(F("Damaged message"));
             ans = ERROR;
         }
         free(firstPart);
     }
-    if (ans == OK) {
+    if (ans != ERROR) {
         this->print(F("OK"));
+    } else {
+#if DEBUGBT
+        whyError();
+#endif
     }
     sz = -1;
     return ans;
 }
 
-short BTSerial::changeColors(char *buf, byte *colors) {
+short BTSerial::changeColors(char* buf, byte* colors) {
     if (sz != 99) {
         Serial.println(F("Damaged message"));
         this->print(F("Damaged message"));
         return ERROR;
     }
-    char *val;
+    char* val;
     for (int i = 0; i < 24; ++i) {
         val = subStr(buf + i * 4, 0, 3);
         colors[i] = static_cast<byte>(strToLongInt(val));
         free(val);
     }
-    this->print(F("OK"));
     return COLORS;
 }
-//verified 1.02.25
+
+void BTSerial::whatDel() {
+    if (sz > 2) {
+        Serial.print(F("Deleting damaged message:"));
+        Serial.print(buf);
+    }
+}
+
+void BTSerial::whyError() {
+    Serial.print(F("Error due to this message:"));
+    Serial.print(buf);
+}
+//verified 11.02.25
