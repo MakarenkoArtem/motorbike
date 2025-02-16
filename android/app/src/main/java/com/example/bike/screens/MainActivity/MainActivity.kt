@@ -54,8 +54,9 @@ class MainActivity : AppCompatActivity() {
     private var texts: List<String> =
         listOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
 
-    private lateinit var soundButton: ImageButton
+    private lateinit var amplifierButton: ImageButton
     private lateinit var ignitionButton: ImageButton
+    private lateinit var audioBTButton: ImageButton
     private lateinit var colorButtons: List<Button>
 
     val getResult: ActivityResultLauncher<Intent> =
@@ -203,15 +204,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val soundListener = OnClickListener {
+    private val amplifierListener = OnClickListener {
         lifecycleScope.launch {
-            viewModel.setSound(!screenData.value.sound).getOrElse {
+            viewModel.setAmplifierStatus(!screenData.value.amplifier).getOrElse {
                 viewModel.disconnect()
                 return@launch
             }
         }
     }
-
+    private val audioBTListener = OnClickListener {
+        lifecycleScope.launch {
+            viewModel.setAudioBTStatus(!screenData.value.audioBT).getOrElse {
+                viewModel.disconnect()
+                return@launch
+            }
+        }
+    }
     private val globalLayoutListener = object : ViewTreeObserver.OnGlobalLayoutListener {
         //как только будут заданы все размеры вызовется эта функция
         override fun onGlobalLayout() {
@@ -370,10 +378,15 @@ class MainActivity : AppCompatActivity() {
             } else {
                 ignitionButton.setImageResource(R.drawable.stop)
             }
-            if (screenData.value.sound) {
-                soundButton.setImageResource(R.drawable.sound)
+            if (screenData.value.amplifier) {
+                amplifierButton.setImageResource(R.drawable.sound)
             } else {
-                soundButton.setImageResource(R.drawable.mute)
+                amplifierButton.setImageResource(R.drawable.mute)
+            }
+            if (screenData.value.audioBT) {
+                audioBTButton.setImageResource(R.drawable.bt)
+            } else {
+                audioBTButton.setImageResource(R.drawable.aux_pic)
             }
             for (i in 0..<colorButtons.size) {
                 colorButtons[i].backgroundTintList =
@@ -448,8 +461,11 @@ class MainActivity : AppCompatActivity() {
         ignitionButton = findViewById(R.id.bike_off_button)
         ignitionButton.setOnClickListener(ignitionListener)
 
-        soundButton = findViewById(R.id.sound_button)
-        soundButton.setOnClickListener(soundListener)
+        amplifierButton = findViewById(R.id.amplifierButton)
+        amplifierButton.setOnClickListener(amplifierListener)
+
+        audioBTButton = findViewById(R.id.soundBTButton)
+        audioBTButton.setOnClickListener(audioBTListener)
 
         colorButtons = initColorButs()
 
