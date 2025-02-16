@@ -32,9 +32,10 @@
 #define WAIT_INPUT 100
 
 //DEBUGER
-#define DEBUGER false
+#define DEBUGER true
 #if DEBUGER
 #define DEBUGBT true
+#define DEBUG_LEVEL_SOUND true
 #endif
 
 //      SETTINGS

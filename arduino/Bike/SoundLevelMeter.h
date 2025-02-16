@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <math.h>
 
+#include "config.h"
+
 //#define DEBUG_SOUND
 //============варианты предделителя(количество тактов для analogRead)========
 #define ADC_PRESCALER_2 0x01    //лучшая скорость, но малое качество
@@ -46,7 +48,9 @@ public:
     byte getLevelAmplitude();
 
     byte getSmoothedAmplitude();
-//verified 1.02.25
+
+    void whichCurrentLevel(int curVal);
+//verified 11.02.25
     float LsoundLevel, RsoundLevel;
     float LsoundLevel_f, RsoundLevel_f;
     float maxLevel;

@@ -7,8 +7,8 @@ void initAssembly() {//увеличение частоты оцифровки
 }
 
 void initAudio() {
-    analogReference(EXTERNAL);/*
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    analogReference(EXTERNAL);
+/*#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     analogReference(INTERNAL1V1);
 #else
     analogReference(INTERNAL);
@@ -24,7 +24,7 @@ void initSwitchAudio(int amplifier, int btSource) {
     pinMode(amplifier, OUTPUT);
     digitalWrite(amplifier, LOW);
     pinMode(btSource, OUTPUT);
-    digitalWrite(btSource, LOW);
+    digitalWrite(btSource, HIGH);
 }
 
 void addLedsInFastLED(RGBLine &line) {

@@ -25,14 +25,11 @@ byte SoundLevelMeter::currentLevelOfSound() {
 
 void SoundLevelMeter::amplitudeUpdate() {
     currentAmplitude = currentLevelOfSound();
-#ifdef DEBUG_SOUND
-    Serial.print(" cur:");
-    Serial.print(cur);
-    Serial.print(" averageLevel:");
-    Serial.print(averageLevel);
-    Serial.print(" filter:");
-    Serial.println(averageLevel-filterValue);
-#endifу
+#if DEBUG_LEVEL_SOUND
+    whichCurrentLevel(currentAmplitude);
+#else
+    Serial.println("DEBUG error");
+#endif
     if (averageLevel > 25) {
         if (avegareTimeLight < 140) {
             if (filterValue < 10) {
@@ -113,3 +110,11 @@ void SoundLevelMeter::fhtSound() {
     }
 }
 
+void SoundLevelMeter::whichCurrentLevel(int curVal) {
+    Serial.print("Current sound level: ");
+    Serial.print(curVal);
+    Serial.print(" averageLevel: ");
+    Serial.print(averageLevel);
+    Serial.print(" filter: ");
+    Serial.println(averageLevel-filterValue);
+}
