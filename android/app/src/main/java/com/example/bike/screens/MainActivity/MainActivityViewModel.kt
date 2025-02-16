@@ -98,22 +98,27 @@ class MainActivityViewModel(
                 .getOrElse { return }
     }
 
-    fun setIgnition(ignition: Boolean): Result<Unit> {
+    private fun changeStatus(status: Boolean, active: String, passive: String): Result<Unit> {
         val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
-        Log.d("BikeBluetooth Device:", screenDataState.value.device!!.name)
-        if (ignition) {
-            screenDataState.value.device!!.sendMessage("ON\n")
+        if (status) {
+            screenDataState.value.device!!.sendMessage(active)
         } else {
-            screenDataState.value.device!!.sendMessage("OFF\n")
+            screenDataState.value.device!!.sendMessage(passive)
         }
         val resp = screenDataState.value.device!!.takeMessage(2, 250)
         val mes = resp.getOrElse { return Result.failure(it) }
-        Log.d("BikeBluetooth", "$mes ${mes.length} ${mes == "OK"}")
         if (mes == "OK") {
-            _screenDataState.value = _screenDataState.value.copy(ignition = ignition)
             return Result.success(Unit)
         }
         return Result.failure(IllegalStateException(""))
+    }
+
+    fun setIgnition(status: Boolean): Result<Unit> {
+        val resp = changeStatus(status, "ON\n", "OFF\n")
+        if (resp.isSuccess) {
+            _screenDataState.value = _screenDataState.value.copy(ignition = status)
+        }
+        return resp
     }
 
     fun setTypeColors(index: Int): Result<Unit> {
@@ -140,17 +145,21 @@ class MainActivityViewModel(
         )
     }
 
-    fun setSound(sound: Boolean): Result<Unit> {
-        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
-        if (sound) {
-            screenDataState.value.device!!.sendMessage("HIGH\n")
-        } else {
-            screenDataState.value.device!!.sendMessage("LOW\n")
+    fun setAmplifierStatus(status: Boolean): Result<Unit> {
+        val resp = changeStatus(status, "HighAmp\n", "LowAmp\n")
+        if (resp.isSuccess) {
+            _screenDataState.value = _screenDataState.value.copy(amplifier = status)
         }
-        val resp = screenDataState.value.device!!.takeMessage(2, 250)
-            .getOrElse { return Result.failure(it) }
-        _screenDataState.value = _screenDataState.value.copy(sound = sound)
-        return Result.success(Unit)
+        return resp
+    }
+
+
+    fun setAudioBTStatus(status: Boolean): Result<Unit> {
+        val resp = changeStatus(status, "OnBT\n", "OffBT\n")
+        if (resp.isSuccess) {
+            _screenDataState.value = _screenDataState.value.copy(audioBT = status)
+        }
+        return resp
     }
 
 
