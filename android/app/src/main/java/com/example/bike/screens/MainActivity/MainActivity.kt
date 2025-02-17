@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
@@ -55,13 +56,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gradient: RadioButton
     private lateinit var movement: RadioButton
     private lateinit var synchronously: RadioButton
-    private var texts: List<String> =
-        listOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
+    private var texts: List<String> = mutableListOf("База", "Мерцание", "", "", "", "")
 
     private lateinit var amplifierButton: ImageButton
     private lateinit var ignitionButton: ImageButton
     private lateinit var audioBTButton: ImageButton
     private lateinit var colorButtons: List<Button>
+
+    private var actuallyColorsButtons: MutableList<Int> =
+        mutableListOf(Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY)
 
     val getResult: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -118,9 +121,11 @@ class MainActivity : AppCompatActivity() {
     private fun fixationColorChange(event: MotionEvent) {
         curColor.activButton?.backgroundTintList = ColorStateList.valueOf(curColor.color)
         if (event.action == MotionEvent.ACTION_UP) {
+            val index = colorButtons.indexOf(curColor.activButton)
+            actuallyColorsButtons[index] = curColor.color
             lifecycleScope.launch {
                 val resp = viewModel.colorPickerSend(
-                    curColor.color, colorButtons.indexOf(curColor.activButton)
+                    curColor.color, index
                 )
                 if (resp.isFailure) {
                     viewModel.checkConnection()
@@ -230,8 +235,11 @@ class MainActivity : AppCompatActivity() {
     private fun changeActiveStatus(butt: Button, status: Boolean) {
         if (status) {
             butt.alpha = 1f
+            val index = colorButtons.indexOf(butt)
+            viewModel.updateColor(actuallyColorsButtons[index], index)
         } else {
             butt.alpha = 0.5f
+            viewModel.updateColor(Color.BLACK, colorButtons.indexOf(butt))
         }
     }
 
@@ -251,7 +259,7 @@ class MainActivity : AppCompatActivity() {
         if (num == -1) {
             return@OnClickListener
         }
-        changeActiveStatus(colorButtons, true)
+        /*changeActiveStatus(colorButtons, true)
         curColor.activButton = colorButtons[0]
         when (texts[num]) {
             getString(R.string.oneColor) -> {
@@ -266,7 +274,7 @@ class MainActivity : AppCompatActivity() {
                 changeActiveStatus(colorButtons[1], false)
                 changeActiveStatus(colorButtons.slice(3..4), false)
             }
-        }
+        }*/
         viewModel.setModeColors(num + 1)
     }
 
@@ -274,22 +282,22 @@ class MainActivity : AppCompatActivity() {
         val radioButton = view as RadioButton
         val listOfTexts = listOf(
             listOf(
-                "Движение",
-                getString(R.string.oneColor),
-                getString(R.string.twoColors),
-                getString(R.string.threeColors),
-                getString(R.string.sixColors),
-                "Асинхронно"
-            ), listOf(
-                "Движение", getString(R.string.threeColors), "", "", "", "Без градиента"
-            ), listOf(
-                getString(R.string.oneColor),
-                getString(R.string.twoColors),
-                getString(R.string.threeColors),
-                getString(R.string.sixColors),
+                "База",
+                "Мерцание",
                 "",
-                "Без градиента"
-            ), listOf("HSV", "Градиент", "", "", "", "Асинхронно")
+                "",
+                "",
+                ""
+            ), listOf(
+                "Вспышки", "Бег", "Столбец", "", "", ""
+            ), listOf(
+                "Вспышки",
+                "Бег",
+                "Распеделение",
+                "",
+                "",
+                ""
+            ), listOf("База", "", "", "", "", "")
         )
         val num = types.indexOf(radioButton)
         if (num == -1) {
@@ -399,7 +407,10 @@ class MainActivity : AppCompatActivity() {
                 audioBTButton.setImageResource(R.drawable.aux_pic)
             }
             for (i in 0..<colorButtons.size) {
-                colorButtons[i].backgroundTintList = ColorStateList.valueOf(data.colors[i])
+                if (data.colors[i] != Color.BLACK) {
+                    colorButtons[i].backgroundTintList = ColorStateList.valueOf(data.colors[i])
+                    actuallyColorsButtons[i] = data.colors[i]
+                }
             }
             for (i in 0..3) {
                 modes[i].isClickable = texts[i] != ""

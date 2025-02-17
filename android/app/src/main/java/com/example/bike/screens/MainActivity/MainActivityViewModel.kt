@@ -4,7 +4,6 @@ import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
-import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import androidx.lifecycle.ViewModel
 import com.example.bike.BT.BTClient
 import com.example.bike.BT.BTService
@@ -68,21 +67,28 @@ class MainActivityViewModel(
         return res
     }
 
-    fun colorPickerSend(pixel: Int, index: Int): Result<Unit> {
+    fun updateColor(pixel: Int, index: Int): Result<Unit> {
         return runCatching {
             val colors = screenDataState.value.colors.toMutableList()
             colors[index] = pixel
             _screenDataState.value = _screenDataState.value.copy(colors = colors)
             var res = Result.success(Unit)
             repeat(2) {
-                res = screenDataState.value.device?.colorsSend(screenDataState.value.colors)
-                    ?: res
+                res = screenDataState.value.device?.colorSend(pixel, index) ?: res
+                if (res.isSuccess) {
+                    return res
+                }
+                res = screenDataState.value.device?.colorsSend(screenDataState.value.colors) ?: res
                 if (res.isSuccess) {
                     return res
                 }
             }
             return checkConnection()
         }
+    }
+
+    fun colorPickerSend(pixel: Int, index: Int): Result<Unit> {
+        return updateColor(pixel, index)
     }
 
     fun setBrightness(brightness: Int) {
@@ -103,7 +109,6 @@ class MainActivityViewModel(
             screenDataState.value.device!!.sendMessage(passive)
         }
         val resp = screenDataState.value.device!!.takeMessage(2, 250)
-        Log.d("BikeBluetoothCheck", "changeStatus " + resp.toString())
         val mes = resp.getOrElse { return Result.failure(it) }
         if (mes == "OK") {
             return Result.success(Unit)
@@ -121,12 +126,12 @@ class MainActivityViewModel(
 
     fun setTypeColors(index: Int): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(type = index)
-        return sendType()
+        return send("Ty:${screenDataState.value.type}${screenDataState.value.mode}\n")
     }
 
     fun setModeColors(index: Int): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(mode = index)
-        return sendType()
+        return send("Ty:${screenDataState.value.type}${screenDataState.value.mode}\n")
     }
 
     fun setHSVStatus(status: Boolean): Result<Unit> {
@@ -146,17 +151,7 @@ class MainActivityViewModel(
 
     fun setSynchronStatus(status: Boolean): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(synchrony = status)
-        sendType()
         return send(if (status) "OnSync\n" else "OffSync\n")
-    }
-
-    fun sendType(): Result<Unit> {
-        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
-        return screenDataState.value.device!!.sendMessage(
-            "Ty:${if (screenDataState.value.synchrony) 1 else 0}${screenDataState.value.type}${screenDataState.value.mode}\n",
-            3,
-            100
-        )
     }
 
     private fun send(message: String, repeat: Int = 3, timeWait: Long = 100): Result<Unit> {
