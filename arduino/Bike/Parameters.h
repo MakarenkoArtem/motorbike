@@ -8,7 +8,7 @@ public:
     bool gradient = true;
     bool movement = true;
     bool hsv = false;
-    bool sync = true;
+    bool synchrony = true;
     long int strobePeriod = MIN_STROBE_PERIOD;
     byte step = 1;
     byte *colors;

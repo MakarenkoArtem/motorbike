@@ -78,9 +78,9 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     } else if (compareStr(buf, "OffMov")) {
         parameters.movement = false;
     } else if (compareStr(buf, "OnSync")) {
-        parameters.sync = true;
+        parameters.synchrony = true;
     } else if (compareStr(buf, "OffSync")) {
-        parameters.sync = false;
+        parameters.synchrony = false;
     } else if (compareStr(buf, "OnGrad")) {
         parameters.gradient = true;
     } else if (compareStr(buf, "OffGrad")) {
@@ -95,6 +95,8 @@ short BTSerial::messageProcessing(Parameters& parameters) {
             parameters.setMode(static_cast<unsigned short>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "CF:")) {
             parameters.setFrequency(static_cast<unsigned short>(strToLongInt(buf + 3)));
+        } else if (compareStr(firstPart, "Cr:")) {
+            ans = changeColor(buf + 3, parameters.colors);
         } else if (compareStr(firstPart, "Co:")) {
             ans = changeColors(buf + 3, parameters.colors);
         } else {
@@ -113,6 +115,23 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     }
     sz = -1;
     return ans;
+}
+
+short BTSerial::changeColor(char* buf, byte* colors) {
+    if (sz != 19) {
+        Serial.println(F("Damaged message"));
+        this->print(F("Damaged message"));
+        return ERROR;
+    }
+    char* val = subStr(buf, 0, 3);
+    int index = static_cast<int>(strToLongInt(val));
+    free(val);
+    for (int i = 1; i < 4; ++i) {
+        val = subStr(buf + i * 4, 0, 3);
+        colors[index * 4 + i] = static_cast<byte>(strToLongInt(val));
+        free(val);
+    }
+    return COLORS;
 }
 
 short BTSerial::changeColors(char* buf, byte* colors) {
@@ -141,4 +160,5 @@ void BTSerial::whyError() {
     Serial.print(F("Error due to this message:"));
     Serial.print(buf);
 }
+
 //verified 11.02.25

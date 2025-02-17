@@ -59,12 +59,12 @@ int resultProcessing(int resp) {
         }
         case SOUND_BT_OFF: {
             Serial.println(F("BT: inactiv"));
-            digitalWrite(AUDIO_OFF, HIGH);
+            digitalWrite(AUDIO_BT_OFF, HIGH);
             break;
         }
         case SOUND_BT_ON: {
             Serial.println(F("BT: activ"));
-            digitalWrite(AUDIO_OFF, LOW);
+            digitalWrite(AUDIO_BT_OFF, LOW);
             break;
         }
         case COLORS: {

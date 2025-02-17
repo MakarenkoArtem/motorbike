@@ -63,7 +63,7 @@ byte RGBLine::calculatePhase(byte phase, int index) {
     if (!params.gradient) {
         phase = phase / 43 * 51;
     }
-    if (!params.sync && id % 2) {
+    if (!params.synchrony && id % 2) {
         phase = 255 - phase;
     }
     return phase;
@@ -91,7 +91,7 @@ byte RGBLine::calculatePhaseByAmplitude(byte amplitude, int index) {
         if (params.gradient) {
             phase = phase / 43 * 51;
         }
-        if (!params.sync && id % 2) {
+        if (!params.synchrony && id % 2) {
             phase = 255 - phase;
         }
     }

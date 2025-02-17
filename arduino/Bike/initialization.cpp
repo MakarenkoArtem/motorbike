@@ -24,7 +24,7 @@ void initSwitchAudio(int amplifier, int btSource) {
     pinMode(amplifier, OUTPUT);
     digitalWrite(amplifier, LOW);
     pinMode(btSource, OUTPUT);
-    digitalWrite(btSource, HIGH);
+    digitalWrite(btSource, LOW);
 }
 
 void addLedsInFastLED(RGBLine &line) {
