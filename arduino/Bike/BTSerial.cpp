@@ -62,13 +62,13 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     } else if (compareStr(buf, "ON")) {
         ans = ON;
     } else if (compareStr(buf, "LowAmp") || compareStr(buf, "LOW")) {
-        ans = SOUND_AMPLIFIER_OFF;
+        ans = AMPLIFIER_OFF;
     } else if (compareStr(buf, "HighAmp") || compareStr(buf, "HIGH")) {
-        ans = SOUND_AMPLIFIER_ON;
+        ans = AMPLIFIER_ON;
     } else if (compareStr(buf, "OffBT")) {
-        ans = SOUND_BT_OFF;
+        ans = AUDIO_BT_OFF;
     } else if (compareStr(buf, "OnBT")) {
-        ans = SOUND_BT_ON;
+        ans = AUDIO_BT_ON;
     } else if (compareStr(buf, "OnHSV")) {
         parameters.hsv = true;
     } else if (compareStr(buf, "OffHSV")) {

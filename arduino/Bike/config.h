@@ -6,7 +6,7 @@
 #define RLine_pin 3
 #define TX_BLUETOOTH 4  //0
 #define RX_BLUETOOTH 5  //1
-#define AUDIO_OFF 6
+#define AMPLIFIER_PIN_OFF 6
 #define AUDIO_BT_OFF 7
 #define CLK_CLOCK 11
 #define DATA_CLOCK 12
@@ -22,10 +22,10 @@
 #define OK 0
 #define OFF 1
 #define ON 2
-#define SOUND_AMPLIFIER_OFF 3
-#define SOUND_AMPLIFIER_ON 4
-#define SOUND_BT_OFF 5
-#define SOUND_BT_ON 6
+#define AMPLIFIER_OFF 3
+#define AMPLIFIER_ON 4
+#define AUDIO_BT_OFF 5
+#define AUDIO_BT_ON 6
 #define END 7
 #define COLORS 8
 #define GET_COLOR 9

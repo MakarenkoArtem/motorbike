@@ -28,7 +28,7 @@ void setup() {
     initAssembly();
     initAudio();
     initSerial();
-    initSwitchAudio(AUDIO_OFF, AUDIO_BT_OFF);
+    initSwitchAudio(AMPLIFIER_PIN_OFF, AUDIO_BT_OFF);
     leftLine = initLedLine(LLine_pin, NUM_LEDS, params, 0);
     rightLine = initLedLine(RLine_pin, NUM_LEDS, params, 1);
     initClock(time);
@@ -47,22 +47,22 @@ int resultProcessing(int resp) {
             ignKey.setVal(true);
             break;
         }
-        case SOUND_AMPLIFIER_OFF: {
+        case AMPLIFIER_OFF: {
             Serial.println(F("Amplifier: LOW"));
-            digitalWrite(AUDIO_OFF, LOW);
+            digitalWrite(AMPLIFIER_PIN_OFF, LOW);
             break;
         }
-        case SOUND_AMPLIFIER_ON: {
+        case AMPLIFIER_ON: {
             Serial.println(F("Amplifier: HIGH"));
-            digitalWrite(AUDIO_OFF, HIGH);
+            digitalWrite(AMPLIFIER_PIN_OFF, HIGH);
             break;
         }
-        case SOUND_BT_OFF: {
+        case AUDIO_BT_OFF: {
             Serial.println(F("BT: inactiv"));
             digitalWrite(AUDIO_BT_OFF, HIGH);
             break;
         }
-        case SOUND_BT_ON: {
+        case AUDIO_BT_ON: {
             Serial.println(F("BT: activ"));
             digitalWrite(AUDIO_BT_OFF, LOW);
             break;
