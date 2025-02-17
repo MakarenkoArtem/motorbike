@@ -50,6 +50,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var types: List<RadioButton>
     private lateinit var modes: List<RadioButton>
+    private lateinit var extraParams: List<RadioButton>
+    private lateinit var hsv: RadioButton
+    private lateinit var gradient: RadioButton
+    private lateinit var movement: RadioButton
     private lateinit var synchronously: RadioButton
     private var texts: List<String> =
         listOf("Движение", "1 цвет", "2 цвета", "3 цвета", "6 цвета", "Асинхронно")
@@ -68,9 +72,9 @@ class MainActivity : AppCompatActivity() {
                 connectButton.text = viewModel.screenDataState.value.device?.name ?: ""
                 Toast.makeText(
                     applicationContext,
-                    getString(R.string.connectionEstablished), Toast.LENGTH_SHORT
-                )
-                    .show()
+                    getString(R.string.connectionEstablished),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -78,18 +82,12 @@ class MainActivity : AppCompatActivity() {
     private val connectListener = object : OnClickListener {
         override fun onClick(p0: View?) {
             if (ContextCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.BLUETOOTH_SCAN
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+                    applicationContext, Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(
                     Manifest.permission.BLUETOOTH_CONNECT,
                     Manifest.permission.BLUETOOTH_SCAN,
@@ -104,10 +102,8 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             if (ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+                    applicationContext, Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(Manifest.permission.BLUETOOTH_CONNECT)
                 ActivityCompat.requestPermissions(this@MainActivity, permissions, 0)
             }
@@ -123,11 +119,9 @@ class MainActivity : AppCompatActivity() {
         curColor.activButton?.backgroundTintList = ColorStateList.valueOf(curColor.color)
         if (event.action == MotionEvent.ACTION_UP) {
             lifecycleScope.launch {
-                val resp =
-                    viewModel.colorPickerSend(
-                        curColor.color,
-                        colorButtons.indexOf(curColor.activButton)
-                    )
+                val resp = viewModel.colorPickerSend(
+                    curColor.color, colorButtons.indexOf(curColor.activButton)
+                )
                 if (resp.isFailure) {
                     viewModel.checkConnection()
                 }
@@ -139,8 +133,7 @@ class MainActivity : AppCompatActivity() {
         if (curColor.activButton != null) {
             val imageView = view as ImageView
             val bitmap = imageView.drawable.toBitmap()
-            val verticalBufferZone =
-                (imageView.height - min(imageView.width, imageView.height)) / 2
+            val verticalBufferZone = (imageView.height - min(imageView.width, imageView.height)) / 2
             val horizontalBufferZone =
                 (imageView.width - min(imageView.width, imageView.height)) / 2
             val x = (event.x - horizontalBufferZone) / min(imageView.width, imageView.height)
@@ -156,8 +149,7 @@ class MainActivity : AppCompatActivity() {
             runCatching {
                 try {
                     val pix = bitmap.getPixel(
-                        (x * bitmap.width).toInt(),
-                        (y * bitmap.height).toInt()
+                        (x * bitmap.width).toInt(), (y * bitmap.height).toInt()
                     )
                     if (pix.alpha != 0) {
                         curColor.color = pix
@@ -288,24 +280,16 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.threeColors),
                 getString(R.string.sixColors),
                 "Асинхронно"
-            ),
-            listOf(
-                "Движение",
-                getString(R.string.threeColors),
-                "",
-                "",
-                "",
-                "Без градиента"
-            ),
-            listOf(
+            ), listOf(
+                "Движение", getString(R.string.threeColors), "", "", "", "Без градиента"
+            ), listOf(
                 getString(R.string.oneColor),
                 getString(R.string.twoColors),
                 getString(R.string.threeColors),
                 getString(R.string.sixColors),
                 "",
                 "Без градиента"
-            ),
-            listOf("HSV", "Градиент", "", "", "", "Асинхронно")
+            ), listOf("HSV", "Градиент", "", "", "", "Асинхронно")
         )
         val num = types.indexOf(radioButton)
         if (num == -1) {
@@ -315,6 +299,23 @@ class MainActivity : AppCompatActivity() {
         viewModel.setTypeColors(num + 1)
     }
 
+    private val changeExtraParam = OnClickListener { view ->
+        val radioButton = view as RadioButton
+        when (radioButton) {
+            hsv -> {
+                viewModel.setHSVStatus(!screenData.value.hsv)
+            }
+            gradient -> {
+                viewModel.setGradientStatus(!screenData.value.gradient)
+            }
+            movement -> {
+                viewModel.setMovementStatus(!screenData.value.movement)
+            }
+            synchronously -> {
+                viewModel.setSynchronStatus(!screenData.value.synchrony)
+            }
+        }
+    }
 
     private fun initColorButs() = listOf(
         R.id.buttonColor0,
@@ -340,10 +341,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initTypes(changeType: OnClickListener) = arrayOf(
-        R.id.radioButType1,
-        R.id.radioButType2,
-        R.id.radioButType3,
-        R.id.radioButType4
+        R.id.radioButType1, R.id.radioButType2, R.id.radioButType3, R.id.radioButType4
     ).map {
         val but = findViewById<RadioButton>(it)
         but.setOnClickListener(changeType)
@@ -356,22 +354,34 @@ class MainActivity : AppCompatActivity() {
             R.id.radioButMode2,
             R.id.radioButMode3,
             R.id.radioButMode4,
-            R.id.radioButMode5,
-            R.id.synchronously
         ).map {
             val but = findViewById<RadioButton>(it)
             but.setOnClickListener(changeMode)
             but
         }
-        modeList[5].setOnClickListener({
-            viewModel.setSynchron(!screenData.value.synchrony)
-        })
         return modeList
+    }
+
+    private fun initParams(changeExtraParam: OnClickListener): List<RadioButton> {
+        val paramsList = listOf(
+            R.id.hsv,
+            R.id.gradient,
+            R.id.movement,
+            R.id.synchronously,
+        ).map {
+            val but = findViewById<RadioButton>(it)
+            but.setOnClickListener(changeExtraParam)
+            but
+        }
+        return paramsList
     }
 
     private fun checkScreenData() = lifecycleScope.launch {
         viewModel.screenDataState.collect { data -> // Обновление в зависимости от значения screenData
             connectButton.text = data.device?.name ?: "Connect"
+            hsv.isChecked = screenData.value.hsv
+            gradient.isChecked = screenData.value.gradient
+            movement.isChecked = screenData.value.movement
             synchronously.isChecked = screenData.value.synchrony
             if (screenData.value.ignition) {
                 ignitionButton.setImageResource(R.drawable.start)
@@ -389,10 +399,9 @@ class MainActivity : AppCompatActivity() {
                 audioBTButton.setImageResource(R.drawable.aux_pic)
             }
             for (i in 0..<colorButtons.size) {
-                colorButtons[i].backgroundTintList =
-                    ColorStateList.valueOf(data.colors[i])
+                colorButtons[i].backgroundTintList = ColorStateList.valueOf(data.colors[i])
             }
-            for (i in 0..5) {
+            for (i in 0..3) {
                 modes[i].isClickable = texts[i] != ""
                 modes[i].visibility = if (texts[i] != "") View.VISIBLE else View.INVISIBLE
                 modes[i].text = texts[i]
@@ -434,11 +443,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)//MODE_NIGHT_FOLLOW_SYSTEM
         setContentView(R.layout.activity_main)
-        val factory =
-            MainActivityViewModelFactory(
-                context = applicationContext,
-                activity = this
-            )
+        val factory = MainActivityViewModelFactory(
+            context = applicationContext, activity = this
+        )
         viewModel = factory.create(MainActivityViewModel::class.java)
         screenData = viewModel.screenDataState
         curColor = screenData.value.curColor
@@ -464,7 +471,7 @@ class MainActivity : AppCompatActivity() {
         amplifierButton = findViewById(R.id.amplifierButton)
         amplifierButton.setOnClickListener(amplifierListener)
 
-        audioBTButton = findViewById(R.id.soundBTButton)
+        audioBTButton = findViewById(R.id.audioBTButton)
         audioBTButton.setOnClickListener(audioBTListener)
 
         colorButtons = initColorButs()
@@ -472,7 +479,12 @@ class MainActivity : AppCompatActivity() {
         types = initTypes(changeType)
 
         modes = initModes(changeMode)
-        synchronously = modes[5]
+
+        extraParams = initParams(changeExtraParam)
+        hsv = extraParams[0]
+        gradient = extraParams[1]
+        movement = extraParams[2]
+        synchronously = extraParams[3]
 
         checkScreenData()
     }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
+import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import androidx.lifecycle.ViewModel
 import com.example.bike.BT.BTClient
 import com.example.bike.BT.BTService
@@ -34,7 +35,7 @@ class MainActivityViewModel(
         if (_screenDataState.value.device == null) {
             return Result.failure(IllegalStateException(""))
         }
-        Log.d("BikeBluetooth", "00!!!connect")
+        Log.d("BikeBluetooth", "Device exist")
         return Result.success(Unit)
 
     }
@@ -86,16 +87,12 @@ class MainActivityViewModel(
 
     fun setBrightness(brightness: Int) {
         _screenDataState.value = _screenDataState.value.copy(brightness = brightness)
-        screenDataState.value.device?.sendMessage("Br:$brightness\n", 3, 100)
-            ?: return
-                .getOrElse { return }
+        send("Br:$brightness\n")
     }
 
     fun setFrequency(frequency: Int) {
         _screenDataState.value = _screenDataState.value.copy(frequency = frequency)
-        screenDataState.value.device?.sendMessage("CF:$frequency\n", 3, 100)
-            ?: return
-                .getOrElse { return }
+        send("CF:$frequency\n")
     }
 
     private fun changeStatus(status: Boolean, active: String, passive: String): Result<Unit> {
@@ -106,6 +103,7 @@ class MainActivityViewModel(
             screenDataState.value.device!!.sendMessage(passive)
         }
         val resp = screenDataState.value.device!!.takeMessage(2, 250)
+        Log.d("BikeBluetoothCheck", "changeStatus " + resp.toString())
         val mes = resp.getOrElse { return Result.failure(it) }
         if (mes == "OK") {
             return Result.success(Unit)
@@ -131,9 +129,25 @@ class MainActivityViewModel(
         return sendType()
     }
 
-    fun setSynchron(synchrony: Boolean): Result<Unit> {
-        _screenDataState.value = _screenDataState.value.copy(synchrony = synchrony)
-        return sendType()
+    fun setHSVStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(hsv = status)
+        return send(if (status) "OnHSV\n" else "OffHSV\n")
+    }
+
+    fun setGradientStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(gradient = status)
+        return send(if (status) "OnGrad\n" else "OffGrad\n")
+    }
+
+    fun setMovementStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(movement = status)
+        return send(if (status) "OnMov\n" else "OffMov\n")
+    }
+
+    fun setSynchronStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(synchrony = status)
+        sendType()
+        return send(if (status) "OnSync\n" else "OffSync\n")
     }
 
     fun sendType(): Result<Unit> {
@@ -144,6 +158,16 @@ class MainActivityViewModel(
             100
         )
     }
+
+    private fun send(message: String, repeat: Int = 3, timeWait: Long = 100): Result<Unit> {
+        val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
+        return screenDataState.value.device!!.sendMessage(
+            message,
+            repeat,
+            timeWait
+        )
+    }
+
 
     fun setAmplifierStatus(status: Boolean): Result<Unit> {
         val resp = changeStatus(status, "HighAmp\n", "LowAmp\n")

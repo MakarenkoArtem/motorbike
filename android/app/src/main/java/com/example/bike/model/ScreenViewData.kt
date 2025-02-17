@@ -14,6 +14,9 @@ data class ScreenViewData(
     var audioBT: Boolean = true,
     var device: BTClient? = null,
     var mode:Int=1,
+    var hsv:Boolean=false,
+    var gradient:Boolean=true,
+    var movement:Boolean=true,
     var synchrony: Boolean = true,
     var curColor: CurrentColor
 )
