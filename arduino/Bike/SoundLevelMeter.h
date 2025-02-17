@@ -1,8 +1,9 @@
-//
-// Created by artem on 05.05.24.
-//
+#pragma once
+
 #include <Arduino.h>
 #include <math.h>
+
+#include "config.h"
 
 //#define DEBUG_SOUND
 //============варианты предделителя(количество тактов для analogRead)========
@@ -17,7 +18,7 @@
 #define AVERK 0.006
 #define SMOOTH 0.5          // коэффициент плавности анимации VU (по умолчанию 0.5)
 #define LOW_PASS 100
-#define MAX_COEF 1.8 
+#define MAX_COEF 1.8
 #define EXP 2.7             // степень усиления сигнала (для более "резкой" работы) (по умолчанию 1.4)
 
 class SoundLevelMeter {
@@ -27,22 +28,32 @@ class SoundLevelMeter {
     void (*pinMode)(int, int);
 
     int (*analogRead)(int);
-    float LsoundLevel_f, RsoundLevel_f;
-    int filterValue=15;
-    float amplitude=0.5;
-    int currentTimer=0;
-    int avegareTimeLight=200;
-public:
-    float LsoundLevel, RsoundLevel;
-    float averageLevel=0;
-    float maxLevel;
-    short Rlenght, Llenght;
 
+    int filterValue = 15;
+    int currentTimer = 0;
+    int avegareTimeLight = 200;
+    byte averageLevel = 0;
+    byte currentAmplitude = 0;
+    byte levelAmplitude = 0;
+    byte smoothedAmplitude = 0;
+
+    byte currentLevelOfSound();
+
+    void amplitudeUpdate();
+public:
     SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int));
 
-    int currentLevelOfSound();
-    
-    float amplitudeLight();
+    byte getCurAmplitude();
 
+    byte getLevelAmplitude();
+
+    byte getSmoothedAmplitude();
+
+    void whichCurrentLevel(int curVal);
+//verified 11.02.25
+    float LsoundLevel, RsoundLevel;
+    float LsoundLevel_f, RsoundLevel_f;
+    float maxLevel;
+    short Rlenght, Llenght;
     void fhtSound();
 };
