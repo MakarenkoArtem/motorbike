@@ -1,16 +1,31 @@
 #pragma once
-#include <Arduino.h>
 
-#include "RGBLine.h"
+#include "config.h"
+#include <Arduino.h>
 
 class Parameters {
 public:
-    byte maxBright;
-    unsigned short mode;
-    byte frequency;
+    bool gradient = true;
+    bool movement = true;
+    bool hsv = false;
+    bool sync = true;
+    long int strobePeriod = MIN_STROBE_PERIOD;
+    byte step = 1;
     byte *colors;
+    byte maxBright = 0;
+    byte bright = 0;
+    unsigned short mode = 11;
+    byte frequency = 0;
+    int inpCount = 15;
+    byte *input;//могут запоминать прошлый максимумы или частотные
+    int outCount = 15;
+    byte *output;
 
-    Parameters(RGBLine &line);
+    Parameters(byte *colors);
 
-    Parameters(byte maxBright, unsigned short mode, byte *colors, byte frequency);
-};
+    void setFrequency(byte frequency);
+
+    void setMaxBright(byte bright);
+
+    void setMode(byte mode);
+};//verified 1.02.25

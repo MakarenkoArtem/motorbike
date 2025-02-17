@@ -2,7 +2,8 @@
 #include "IgnitionKey.h"
 #include "initialization.h"
 #include "SoundLevelMeter.h"
-//#include "SoundDecomposition.h"
+#include "SoundDecomposition.h"
+#include "Animation.h"
 
 
 
@@ -15,65 +16,60 @@ iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для мо
 
 IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
 
-Parameters *parameters;
+Parameters params(colors);//объект, где хранятся все параметры для взаиводействия разных частей кода
+
 
 SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
-//SoundDecomposition FHT(SOUND_R, SOUND_L, pinMode, analogRead);
+SoundDecomposition fht(SOUND_R, SOUND_L, pinMode, analogRead);
+
+Animation animation(params, sound, fht);
 
 void setup() {
     initAssembly();
     initAudio();
     initSerial();
-    initSwitchAudio();
-    leftLine = initLedLine(LLine_pin, NUM_LEDS, colors, 0);
-    rightLine = initLedLine(RLine_pin, NUM_LEDS, colors, 1);
+    initSwitchAudio(AUDIO_OFF, AUDIO_BT_OFF);
+    leftLine = initLedLine(LLine_pin, NUM_LEDS, params, 0);
+    rightLine = initLedLine(RLine_pin, NUM_LEDS, params, 1);
     initClock(time);
-    parameters = new Parameters(*leftLine);
 };
 
-unsigned long timer = 0;
-float amplitude = 1.0;
 
 int resultProcessing(int resp) {
     switch (resp) {
-        case ON: {
-            Serial.println(F("ON"));
-            ignKey.setVal(true);
-            break;
-        }
         case OFF: {
             Serial.println(F("OFF"));
             ignKey.setVal(false);
             break;
         }
-        case SOUND_OFF: {
-            Serial.println(F("LOW"));
+        case ON: {
+            Serial.println(F("ON"));
+            ignKey.setVal(true);
+            break;
+        }
+        case SOUND_AMPLIFIER_OFF: {
+            Serial.println(F("Amplifier: LOW"));
             digitalWrite(AUDIO_OFF, LOW);
             break;
         }
-        case SOUND_ON: {
-            Serial.println(F("HIGH"));
+        case SOUND_AMPLIFIER_ON: {
+            Serial.println(F("Amplifier: HIGH"));
             digitalWrite(AUDIO_OFF, HIGH);
             break;
         }
+        case SOUND_BT_OFF: {
+            Serial.println(F("BT: inactiv"));
+            digitalWrite(AUDIO_OFF, HIGH);
+            break;
+        }
+        case SOUND_BT_ON: {
+            Serial.println(F("BT: activ"));
+            digitalWrite(AUDIO_OFF, LOW);
+            break;
+        }
         case COLORS: {
-            rightLine->setColors(parameters->colors);
-            leftLine->setColors(parameters->colors);
-            break;
-        }
-        case BRIGHT: {
-            rightLine->setMaxBrightness(parameters->maxBright);
-            leftLine->setMaxBrightness(parameters->maxBright);
-            break;
-        }
-        case LINE_MODE: {
-            rightLine->setMode(parameters->mode);
-            leftLine->setMode(parameters->mode);
-            break;
-        }
-        case FREQUENCY: {
-            rightLine->setFrequency(parameters->frequency);
-            leftLine->setFrequency(parameters->frequency);
+            rightLine->setColors(params.colors);
+            leftLine->setColors(params.colors);
             break;
         }
         case WAIT_INPUT: {
@@ -84,30 +80,19 @@ int resultProcessing(int resp) {
 }
 
 void updateRGBLine() {
-    if (leftLine->needAmplitude) {
-        amplitude = sound.amplitudeLight();
-    } 
-    /*    uint8_t* fht = FHT.analyzeAudio();
-        for (int i = 0; i < 64; ++i) {
-            Serial.print(fht[i]);
-            Serial.print(",");
-        }
-        Serial.println("");
-    */
     FastLED.clear();//очищаем адресную ленту
-    leftLine->show(amplitude);
-    rightLine->show(amplitude);
-    //rightLine->data();
+    leftLine->show();
+    rightLine->show();
     FastLED.show();//обновляем адресную ленту
 }
 
 void loop() {
-    int resp = serial.getCommands(*parameters);
+    int resp = serial.getCommands(params);
     if (resultProcessing(resp)) {
         return;
     }
-    if (timer < millis() - 50 || timer > millis()) {
+    if (animation.processing()){
         updateRGBLine();
-        timer = millis();
     }
 }
+//verified 1.02.25

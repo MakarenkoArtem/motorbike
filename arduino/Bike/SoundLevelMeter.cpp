@@ -1,78 +1,76 @@
-//
-// Created by artem on 05.05.24.
-//
 #include "SoundLevelMeter.h"
 
-void setADCPrescaler(uint8_t prescaler){
-  ADCSRA=(ADCSRA&0b11111000)|prescaler;
+void setADCPrescaler(uint8_t prescaler) {
+    ADCSRA = (ADCSRA & 0b11111000) | prescaler;
 }
 
 SoundLevelMeter::SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int))
         : pinR(pinR), pinL(pinL), pinMode(pinMode), analogRead(analogRead) {
-          pinMode(pinR, INPUT);
-          pinMode(pinL, INPUT);
+    pinMode(pinR, INPUT);
+    pinMode(pinL, INPUT);
 }
 
 
-int SoundLevelMeter::currentLevelOfSound(){
-  int m=0,cur;
-  for(int i=0;i<100;++i){
-    cur=analogRead(pinR);
-    if(cur>m){
-      m=cur;
+byte SoundLevelMeter::currentLevelOfSound() {
+    int m = 0, cur;
+    for (int i = 0; i < 100; ++i) {
+        cur = analogRead(pinR);
+        m = cur > m ? cur : m;
     }
-  }
-  averageLevel=(averageLevel*100+m*5)/105;
-  return m;
+    m = map(m, 0, 1023, 0, 255);
+    averageLevel = (averageLevel * 100 + m * 5) / 105;
+    return m;
 }
 
 
-float SoundLevelMeter::amplitudeLight(){
-  int cur=currentLevelOfSound();
-  #ifdef DEBUG_SOUND
-  Serial.print(" cur:");
-  Serial.print(cur);
-  Serial.print(" averageLevel:");
-  Serial.print(averageLevel);
-  Serial.print(" filter:");
-  Serial.println(averageLevel-filterValue);
-  #endif
-  if(averageLevel>100){
-    if(avegareTimeLight<140){
-      if(filterValue<10){
-      ++filterValue;
-      }
-    }else if(filterValue>-5){
-      --filterValue;
-    }
-    //Serial.print(" bef:");
-    //Serial.print(amplitude*100);
-    if(cur-averageLevel>filterValue){
-          if(!amplitude){
-            currentTimer=millis();
-          }
-          amplitude+=1;
-          if(amplitude>1){
-            amplitude=1;
-          }
-    } else{         
-          if(amplitude==1){
-            avegareTimeLight=(avegareTimeLight*100+(millis()-currentTimer)*2.5)/102.5;
-          }
-          amplitude-=1;
-          if(amplitude<0){
-              amplitude=0;
+void SoundLevelMeter::amplitudeUpdate() {
+    currentAmplitude = currentLevelOfSound();
+#if DEBUG_LEVEL_SOUND
+    whichCurrentLevel(currentAmplitude);
+#else
+    Serial.println("DEBUG error");
+#endif
+    if (averageLevel > 25) {
+        if (avegareTimeLight < 140) {
+            if (filterValue < 10) {
+                ++filterValue;
             }
+        } else if (filterValue > -5) {
+            --filterValue;
+        }
+        if (currentAmplitude - averageLevel > filterValue) {
+            if (!levelAmplitude) {
+                currentTimer = millis();
+            }
+            levelAmplitude = map(currentAmplitude, averageLevel, 255, 0, 255);
+        } else if (levelAmplitude) {
+            avegareTimeLight = (avegareTimeLight * 100 + (millis() - currentTimer) * 2.5) / 102.5;
+            levelAmplitude = 0;
+        }
+    } else {
+        levelAmplitude = 0;
+        currentAmplitude = 0;
     }
-  }else{
-    amplitude=0;
-  }
-  return amplitude;
+    if (currentAmplitude < smoothedAmplitude) {
+        smoothedAmplitude -= 5;
+    } else { smoothedAmplitude = currentAmplitude; }
 }
-
+byte SoundLevelMeter::getCurAmplitude(){
+    amplitudeUpdate();
+    return currentAmplitude;
+}
+byte SoundLevelMeter::getLevelAmplitude(){
+    amplitudeUpdate();
+    return levelAmplitude;
+}
+byte SoundLevelMeter::getSmoothedAmplitude(){
+    amplitudeUpdate();
+    return smoothedAmplitude;
+}//verified 1.02.25
 void SoundLevelMeter::fhtSound() {
     int RcurrentLevel, LcurrentLevel;
-    setADCPrescaler(ADC_PRESCALER_2); //изменение времени анализа напряжения, сама операция 3 машинных операции(analogRead ~200мо)
+    setADCPrescaler(
+            ADC_PRESCALER_2); //изменение времени анализа напряжения, сама операция 3 машинных операции(analogRead ~200мо)
     for (int i = 0; i < 100; i++) { // делаем 100 измерений
         RcurrentLevel = analogRead(pinR);                            // с правого
         LcurrentLevel = analogRead(pinL);                 // и левого каналов
@@ -112,3 +110,11 @@ void SoundLevelMeter::fhtSound() {
     }
 }
 
+void SoundLevelMeter::whichCurrentLevel(int curVal) {
+    Serial.print("Current sound level: ");
+    Serial.print(curVal);
+    Serial.print(" averageLevel: ");
+    Serial.print(averageLevel);
+    Serial.print(" filter: ");
+    Serial.println(averageLevel-filterValue);
+}
