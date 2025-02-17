@@ -171,6 +171,19 @@ class BTClient(
         }
     }
 
+    fun colorSend(color: Int, index: Int): Result<Unit> {
+        return runCatching {
+            val message = "Cr:" + String.format(
+                "%03d,%03d,%03d,%03d,",
+                51 * index, Color.red(color), Color.green(color), Color.blue(color)
+            ) + "\n"
+            sendMessage(message)
+            if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
+                throw IllegalStateException("Damaged message")
+            }
+        }
+    }
+
     fun colorsSend(colors: List<Int>): Result<Unit> {
         var message = "Co:"
         return runCatching {

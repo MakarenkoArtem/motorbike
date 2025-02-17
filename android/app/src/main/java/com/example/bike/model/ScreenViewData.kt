@@ -10,9 +10,13 @@ data class ScreenViewData(
     var frequency: Int = 0,
     var brightness: Int = 0,
     var ignition: Boolean = true,
-    var sound: Boolean = false,
+    var amplifier: Boolean = false,
+    var audioBT: Boolean = true,
     var device: BTClient? = null,
     var mode:Int=1,
+    var hsv:Boolean=false,
+    var gradient:Boolean=true,
+    var movement:Boolean=true,
     var synchrony: Boolean = true,
     var curColor: CurrentColor
 )
