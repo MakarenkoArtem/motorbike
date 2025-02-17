@@ -7,6 +7,7 @@
 #define TX_BLUETOOTH 4  //0
 #define RX_BLUETOOTH 5  //1
 #define AUDIO_OFF 6
+#define AUDIO_BT_OFF 7
 #define CLK_CLOCK 11
 #define DATA_CLOCK 12
 #define RST_CLOCK 13
@@ -21,16 +22,21 @@
 #define OK 0
 #define OFF 1
 #define ON 2
-#define END 3
-#define BRIGHT 4
-#define TYPE 5
-#define COLORS 6
-#define SOUND_OFF 7
-#define SOUND_ON 8
-#define BRIGHT 9
-#define LINE_MODE 10
-#define FREQUENCY 11
-#define WAIT_INPUT 101
+#define SOUND_AMPLIFIER_OFF 3
+#define SOUND_AMPLIFIER_ON 4
+#define SOUND_BT_OFF 5
+#define SOUND_BT_ON 6
+#define END 7
+#define COLORS 8
+#define GET_COLOR 9
+#define WAIT_INPUT 100
+
+//DEBUGER
+#define DEBUGER true
+#if DEBUGER
+#define DEBUGBT true
+#define DEBUG_LEVEL_SOUND true
+#endif
 
 //      SETTINGS
 #define TIMEOUT 200
@@ -41,7 +47,6 @@
 
 //RGBLine part
 #define MIN_STROBE_PERIOD 150
-
 
 
 
@@ -68,3 +73,4 @@
 
 
 extern byte colors[24];
+//verified 11.02.25

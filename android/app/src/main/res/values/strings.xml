@@ -5,6 +5,7 @@
     <string name="connectionEstablished">Соединение установлено</string>
     <string name="soundbutton">soundButton</string>
     <string name="bikeoffbutton">bikeOffButton</string>
+    <string name="movement">Движение</string>
     <string name="synchronously">Синхронно</string>
     <string name="basic">Основной</string>
     <string name="oneColor">1 цвет</string>

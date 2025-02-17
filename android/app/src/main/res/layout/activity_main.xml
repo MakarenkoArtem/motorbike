@@ -174,87 +174,145 @@
 
         </LinearLayout>
 
-        <RadioGroup
-            android:layout_width="156dp"
-            android:layout_height="match_parent">
-
-            <RadioButton
-                android:id="@+id/radioButType1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/basic" />
-
-            <RadioButton
-                android:id="@+id/radioButType2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Цветомузыка" />
-
-            <RadioButton
-                android:id="@+id/radioButType3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Цв.муз(частоты)" />
-
-            <RadioButton
-                android:id="@+id/radioButType4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Стробоскоп" />
-        </RadioGroup>
-
         <LinearLayout
-            android:layout_width="160dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <RadioGroup
-                android:layout_width="158dp"
-                android:layout_height="wrap_content">
-
-                <RadioButton
-                    android:id="@+id/radioButMode1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="Движение" />
-
-                <RadioButton
-                    android:id="@+id/radioButMode2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="1 цвет" />
-
-                <RadioButton
-                    android:id="@+id/radioButMode3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="2 цвета" />
-
-                <RadioButton
-                    android:id="@+id/radioButMode4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="3 цвета" />
-
-                <RadioButton
-                    android:id="@+id/radioButMode5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="6 цвета"
-                    android:visibility="visible" />
-
-            </RadioGroup>
-
-            <RadioButton
-                android:id="@+id/synchronously"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="false"
-                android:text="@string/synchronously" />
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/radioButType1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/basic" />
+
+                        <RadioButton
+                            android:id="@+id/radioButType2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Цветомузыка" />
+
+                        <RadioButton
+                            android:id="@+id/radioButType3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Цв.муз(частоты)" />
+
+                        <RadioButton
+                            android:id="@+id/radioButType4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Стробоскоп" />
+
+                    </RadioGroup>
+
+                </LinearLayout>
+
+                <RadioGroup
+                    android:layout_width="164dp"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/radioButMode1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Движение" />
+
+                    <RadioButton
+                        android:id="@+id/radioButMode2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="1 цвет" />
+
+                    <RadioButton
+                        android:id="@+id/radioButMode3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="2 цвета" />
+
+                    <RadioButton
+                        android:id="@+id/radioButMode4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="3 цвета"
+                        android:visibility="invisible"
+                        tools:visibility="invisible" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#FFFFFF"
+                android:backgroundTint="#FFFFFF"
+                android:foregroundTint="#FFFFFF">
+
+            </View>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="164dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/gradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Градиент" />
+
+                    <RadioButton
+                        android:id="@+id/hsv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="HSV" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="164dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/movement"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:text="@string/movement" />
+
+                    <RadioButton
+                        android:id="@+id/synchronously"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:text="@string/synchronously" />
+
+                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
+
     </LinearLayout>
 
     <ImageButton
@@ -270,7 +328,7 @@
         tools:ignore="SpeakableTextPresentCheck" />
 
     <ImageButton
-        android:id="@+id/soundBTButton"
+        android:id="@+id/audioBTButton"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginStart="16dp"

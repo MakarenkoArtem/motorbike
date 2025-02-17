@@ -34,7 +34,7 @@ class MainActivityViewModel(
         if (_screenDataState.value.device == null) {
             return Result.failure(IllegalStateException(""))
         }
-        Log.d("BikeBluetooth", "00!!!connect")
+        Log.d("BikeBluetooth", "Device exist")
         return Result.success(Unit)
 
     }
@@ -67,15 +67,18 @@ class MainActivityViewModel(
         return res
     }
 
-    fun colorPickerSend(pixel: Int, index: Int): Result<Unit> {
+    fun updateColor(pixel: Int, index: Int): Result<Unit> {
         return runCatching {
             val colors = screenDataState.value.colors.toMutableList()
             colors[index] = pixel
             _screenDataState.value = _screenDataState.value.copy(colors = colors)
             var res = Result.success(Unit)
             repeat(2) {
-                res = screenDataState.value.device?.colorsSend(screenDataState.value.colors)
-                    ?: res
+                res = screenDataState.value.device?.colorSend(pixel, index) ?: res
+                if (res.isSuccess) {
+                    return res
+                }
+                res = screenDataState.value.device?.colorsSend(screenDataState.value.colors) ?: res
                 if (res.isSuccess) {
                     return res
                 }
@@ -84,18 +87,18 @@ class MainActivityViewModel(
         }
     }
 
+    fun colorPickerSend(pixel: Int, index: Int): Result<Unit> {
+        return updateColor(pixel, index)
+    }
+
     fun setBrightness(brightness: Int) {
         _screenDataState.value = _screenDataState.value.copy(brightness = brightness)
-        screenDataState.value.device?.sendMessage("Br:$brightness\n", 3, 100)
-            ?: return
-                .getOrElse { return }
+        send("Br:$brightness\n")
     }
 
     fun setFrequency(frequency: Int) {
         _screenDataState.value = _screenDataState.value.copy(frequency = frequency)
-        screenDataState.value.device?.sendMessage("CF:$frequency\n", 3, 100)
-            ?: return
-                .getOrElse { return }
+        send("CF:$frequency\n")
     }
 
     private fun changeStatus(status: Boolean, active: String, passive: String): Result<Unit> {
@@ -123,27 +126,43 @@ class MainActivityViewModel(
 
     fun setTypeColors(index: Int): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(type = index)
-        return sendType()
+        return send("Ty:${screenDataState.value.type}${screenDataState.value.mode}\n")
     }
 
     fun setModeColors(index: Int): Result<Unit> {
         _screenDataState.value = _screenDataState.value.copy(mode = index)
-        return sendType()
+        return send("Ty:${screenDataState.value.type}${screenDataState.value.mode}\n")
     }
 
-    fun setSynchron(synchrony: Boolean): Result<Unit> {
-        _screenDataState.value = _screenDataState.value.copy(synchrony = synchrony)
-        return sendType()
+    fun setHSVStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(hsv = status)
+        return send(if (status) "OnHSV\n" else "OffHSV\n")
     }
 
-    fun sendType(): Result<Unit> {
+    fun setGradientStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(gradient = status)
+        return send(if (status) "OnGrad\n" else "OffGrad\n")
+    }
+
+    fun setMovementStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(movement = status)
+        return send(if (status) "OnMov\n" else "OffMov\n")
+    }
+
+    fun setSynchronStatus(status: Boolean): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(synchrony = status)
+        return send(if (status) "OnSync\n" else "OffSync\n")
+    }
+
+    private fun send(message: String, repeat: Int = 3, timeWait: Long = 100): Result<Unit> {
         val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
         return screenDataState.value.device!!.sendMessage(
-            "Ty:${if (screenDataState.value.synchrony) 1 else 0}${screenDataState.value.type}${screenDataState.value.mode}\n",
-            3,
-            100
+            message,
+            repeat,
+            timeWait
         )
     }
+
 
     fun setAmplifierStatus(status: Boolean): Result<Unit> {
         val resp = changeStatus(status, "HighAmp\n", "LowAmp\n")
