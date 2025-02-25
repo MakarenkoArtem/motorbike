@@ -3,6 +3,8 @@
 RGBLine::RGBLine(int pin, int count, Parameters& params, byte id) :
         pin(pin), count(count), params(params), id(id) {
     line = new CRGB[count];
+    setColors(params.colors);
+    show();
 }
 
 void RGBLine::setFastLED(CFastLED* fastLED) {
@@ -85,6 +87,12 @@ void RGBLine::renderStaticPattern() { //11, 12
         }
     }
 }
+/*
+21,64,107,149,192,235
+1/12,3/12,5/12,7/12,9/12,11/12
+26,77,128,179,230
+1/10,3/10,5/10,7/10,9/10
+*/
 
 
 byte RGBLine::calculatePhaseByAmplitude(byte amplitude, int index) {

@@ -141,7 +141,7 @@ short BTSerial::changeColor(char* buf, byte* colors) {
         return ERROR;
     }
     char* val = subStr(buf, 0, 3);
-    int index = static_cast<int>(strToLongInt(val));
+    char index = static_cast<int>(strToLongInt(val))/51;
     free(val);
     for (int i = 1; i < 4; ++i) {
         val = subStr(buf + i * 4, 0, 3);
