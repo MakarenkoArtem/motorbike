@@ -69,7 +69,7 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
         ans = GET_COLOR;
-        for (int x = 0; x < 6 * 4; ++x) {
+        for (int x = 0; x < 20; ++x) {
             this->print(parameters.colors[x]);
             this->print(F(","));
         }
