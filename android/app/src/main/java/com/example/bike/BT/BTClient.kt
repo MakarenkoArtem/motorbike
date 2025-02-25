@@ -99,8 +99,8 @@ class BTClient(
         }
         val data = message.split(Regex(",")).dropLastWhile { it.isEmpty() }
         return runCatching {
-            val colors = Array(6, { Color.BLACK })
-            for (i in 0..5) {
+            val colors = Array(5, { Color.BLACK })
+            for (i in 0..4) {
                 val r = data[i * 4 + 1].toInt()
                 val g = data[i * 4 + 2].toInt()
                 val b = data[i * 4 + 3].toInt()
@@ -153,7 +153,7 @@ class BTClient(
                         return@runCatching result
                     }
                 } catch (e: TimeoutException) {
-                    Log.d("BikeBluetooth", "3")
+                    Log.d("BikeBluetooth", "Ошибка: ${e.message}")
                     //throw IllegalStateException("Время ожидания истекло")
                 } catch (e: Exception) {
                     // Обработка других исключений, если они возникают
@@ -175,7 +175,7 @@ class BTClient(
         return runCatching {
             val message = "Cr:" + String.format(
                 "%03d,%03d,%03d,%03d,",
-                51 * index, Color.red(color), Color.green(color), Color.blue(color)
+                51 * index + 26, Color.red(color), Color.green(color), Color.blue(color)
             ) + "\n"
             sendMessage(message)
             if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
@@ -187,10 +187,10 @@ class BTClient(
     fun colorsSend(colors: List<Int>): Result<Unit> {
         var message = "Co:"
         return runCatching {
-            for (i in 0..5) {
+            for (i in 0..4) {
                 message += String.format(
                     "%03d,%03d,%03d,%03d,",
-                    51 * i, Color.red(colors[i]), Color.green(colors[i]), Color.blue(colors[i])
+                    51 * i + 26, Color.red(colors[i]), Color.green(colors[i]), Color.blue(colors[i])
                 )
             }
             message += "\n"

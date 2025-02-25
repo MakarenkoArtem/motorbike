@@ -118,7 +118,7 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <Button
-                android:id="@+id/buttonColor50"
+                android:id="@+id/buttonColor1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorButton50"
@@ -129,7 +129,7 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <Button
-                android:id="@+id/buttonColor100"
+                android:id="@+id/buttonColor2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorButton100"
@@ -140,7 +140,7 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <Button
-                android:id="@+id/buttonColor150"
+                android:id="@+id/buttonColor3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorButton150"
@@ -151,21 +151,10 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <Button
-                android:id="@+id/buttonColor200"
+                android:id="@+id/buttonColor4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorButton200"
-                android:text=""
-                app:cornerRadius="20sp"
-                app:strokeColor="@color/white"
-                app:strokeWidth="3sp"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-            <Button
-                android:id="@+id/buttonColor250"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton250"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
@@ -272,7 +261,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="164dp"
+                    android:layout_width="148dp"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
