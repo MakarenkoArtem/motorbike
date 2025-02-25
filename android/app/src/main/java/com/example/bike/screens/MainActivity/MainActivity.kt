@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var colorButtons: List<Button>
 
     private var actuallyColorsButtons: MutableList<Int> =
-        mutableListOf(Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY)
+        mutableListOf(Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY)
 
     val getResult: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -327,11 +327,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initColorButs() = listOf(
         R.id.buttonColor0,
-        R.id.buttonColor50,
-        R.id.buttonColor100,
-        R.id.buttonColor150,
-        R.id.buttonColor200,
-        R.id.buttonColor250
+        R.id.buttonColor1,
+        R.id.buttonColor2,
+        R.id.buttonColor3,
+        R.id.buttonColor4
     ).map {
         val but = findViewById<Button>(it)
         but.setOnLongClickListener { view ->
