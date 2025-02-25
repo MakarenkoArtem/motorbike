@@ -7,31 +7,32 @@
 
 
 
-BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
+BTSerial serial(RX_BLUETOOTH_PIN, TX_BLUETOOTH_PIN); // подключаем объект класса работы с блютуз
 
 RGBLine *leftLine;//указатель на объект класса работы с лентой
 RGBLine *rightLine;
 
-iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для модуля DS1302 - RST, CLK, DAT
+iarduino_RTC time(RTC_DS1302, RST_CLOCK_PIN, CLK_CLOCK_PIN, DATA_CLOCK_PIN);  // для модуля DS1302 - RST, CLK, DAT
 
-IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
+IgnitionKey ignKey(BIKE_PIN, pinMode, digitalWrite);
 
-Parameters params(colors);//объект, где хранятся все параметры для взаиводействия разных частей кода
+Parameters params(colors);  //объект, где хранятся все параметры для взаиводействия разных частей кода
 
 
-SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
-SoundDecomposition fht(SOUND_R, SOUND_L, pinMode, analogRead);
+SoundLevelMeter sound(SOUND_R_PIN, SOUND_L_PIN, pinMode, analogRead);
+SoundDecomposition fht(SOUND_R_PIN, SOUND_L_PIN, pinMode, analogRead);
 
 Animation animation(params, sound, fht);
 
 void setup() {
     initAssembly();
-    initAudio();
     initSerial();
-    initSwitchAudio(AUDIO_OFF, AUDIO_BT_OFF);
-    leftLine = initLedLine(LLine_pin, NUM_LEDS, params, 0);
-    rightLine = initLedLine(RLine_pin, NUM_LEDS, params, 1);
+    initAudio();
+    initSwitchAudio(AMPLIFIER_PIN, AUDIO_BT_PIN);
+    leftLine = initLedLine(LLINE_PIN, NUM_LEDS, params, 0);
+    rightLine = initLedLine(RLINE_PIN, NUM_LEDS, params, 1);
     initClock(time);
+    Serial.println("End setup");
 };
 
 
@@ -47,24 +48,24 @@ int resultProcessing(int resp) {
             ignKey.setVal(true);
             break;
         }
-        case SOUND_AMPLIFIER_OFF: {
+        case AMPLIFIER_OFF: {
             Serial.println(F("Amplifier: LOW"));
-            digitalWrite(AUDIO_OFF, LOW);
+            digitalWrite(AMPLIFIER_PIN, LOW);
             break;
         }
-        case SOUND_AMPLIFIER_ON: {
+        case AMPLIFIER_ON: {
             Serial.println(F("Amplifier: HIGH"));
-            digitalWrite(AUDIO_OFF, HIGH);
+            digitalWrite(AMPLIFIER_PIN, HIGH);
             break;
         }
-        case SOUND_BT_OFF: {
+        case AUDIO_BT_OFF: {
             Serial.println(F("BT: inactiv"));
-            digitalWrite(AUDIO_OFF, HIGH);
+            digitalWrite(AUDIO_BT_PIN, HIGH);
             break;
         }
-        case SOUND_BT_ON: {
+        case AUDIO_BT_ON: {
             Serial.println(F("BT: activ"));
-            digitalWrite(AUDIO_OFF, LOW);
+            digitalWrite(AUDIO_BT_PIN, LOW);
             break;
         }
         case COLORS: {

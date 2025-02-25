@@ -2,18 +2,18 @@
 #include <Arduino.h>
 #define CONFIG true
 
-#define LLine_pin 2
-#define RLine_pin 3
-#define TX_BLUETOOTH 4  //0
-#define RX_BLUETOOTH 5  //1
-#define AUDIO_OFF 6
-#define AUDIO_BT_OFF 7
-#define CLK_CLOCK 11
-#define DATA_CLOCK 12
-#define RST_CLOCK 13
-#define BIKE_OFF A2
-#define SOUND_R A6
-#define SOUND_L A7
+#define LLINE_PIN 2
+#define RLINE_PIN 3
+#define TX_BLUETOOTH_PIN 4  //0
+#define RX_BLUETOOTH_PIN 5  //1
+#define AMPLIFIER_PIN 6
+#define AUDIO_BT_PIN 7
+#define CLK_CLOCK_PIN 11
+#define DATA_CLOCK_PIN 12
+#define RST_CLOCK_PIN 13
+#define BIKE_PIN A2
+#define SOUND_R_PIN A6
+#define SOUND_L_PIN A7
 #define NUM_LEDS 50
 
 //BTSerial part
@@ -22,17 +22,17 @@
 #define OK 0
 #define OFF 1
 #define ON 2
-#define SOUND_AMPLIFIER_OFF 3
-#define SOUND_AMPLIFIER_ON 4
-#define SOUND_BT_OFF 5
-#define SOUND_BT_ON 6
+#define AMPLIFIER_OFF 3
+#define AMPLIFIER_ON 4
+#define AUDIO_BT_OFF 5
+#define AUDIO_BT_ON 6
 #define END 7
 #define COLORS 8
 #define GET_COLOR 9
 #define WAIT_INPUT 100
 
-//DEBUGER
-#define DEBUGER true
+//      DEBUGER
+#define DEBUGER false
 #if DEBUGER
 #define DEBUGBT true
 #define DEBUG_LEVEL_SOUND true
@@ -45,7 +45,7 @@
 #define MAXSZ 100
 
 
-//RGBLine part
+//      RGBLine part
 #define MIN_STROBE_PERIOD 150
 
 

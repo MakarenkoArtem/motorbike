@@ -1,11 +1,13 @@
 #include "RGBLine.h"
 
-RGBLine::RGBLine(int pin, int count, Parameters &params, byte id) :
+RGBLine::RGBLine(int pin, int count, Parameters& params, byte id) :
         pin(pin), count(count), params(params), id(id) {
     line = new CRGB[count];
+    setColors(params.colors);
+    show();
 }
 
-void RGBLine::setFastLED(CFastLED *fastLED) {
+void RGBLine::setFastLED(CFastLED* fastLED) {
     this->fastLED = fastLED;
     setBrightness(params.maxBright);
 }
@@ -14,7 +16,7 @@ int RGBLine::getPin() {
     return pin;
 }
 
-void RGBLine::setColors(byte *colors) {
+void RGBLine::setColors(byte* colors) {
     myPal.loadDynamicGradientPalette(colors);
 }
 
@@ -41,6 +43,9 @@ void RGBLine::show() {
             renderColumn(params.output[0]);
             break;
         }
+        case 31: {
+            //renderFlashByFrequency(params.outCount, params.output);
+        }
         default: {
             renderStaticPattern();
             break;
@@ -63,76 +68,90 @@ byte RGBLine::calculatePhase(byte phase, int index) {
     if (!params.gradient) {
         phase = phase / 43 * 51;
     }
-    if (!params.sync && id % 2) {
+    if (!params.synchrony && id % 2) {
         phase = 255 - phase;
     }
     return phase;
 }
 
-void RGBLine::renderStaticPattern() {//11, 12
+void RGBLine::renderStaticPattern() { //11, 12
     byte phase = 0;
     if (params.movement) {
         phase = millis();
     }
     for (int index = 0; index < count; index++) {
         if (params.hsv) {
-            line[index] = CHSV(calculatePhase(phase, index), STROBE_SAT, params.bright);
+            line[index] = CHSV(calculatePhase(phase, index), 255, params.bright);
         } else {
             line[index] = ColorFromPalette(myPal, calculatePhase(phase, index));
         }
     }
 }
-//verified 1.02.25
+/*
+21,64,107,149,192,235
+1/12,3/12,5/12,7/12,9/12,11/12
+26,77,128,179,230
+1/10,3/10,5/10,7/10,9/10
+*/
+
 
 byte RGBLine::calculatePhaseByAmplitude(byte amplitude, int index) {
-    byte phase = amplitude;
-    if (!params.movement) {
-        byte phase = index * 255 / (count - 1);
-        if (params.gradient) {
-            phase = phase / 43 * 51;
-        }
-        if (!params.sync && id % 2) {
+    byte phase = params.movement ? millis() : amplitude;
+    if (params.gradient) {
+        phase += index * 255 / (count - 1);
+        if (!params.synchrony && id % 2) {
             phase = 255 - phase;
         }
     }
-    return (params.gradient) ? phase : phase / 43 * 51;
+    return phase;
 }
 
-void RGBLine::renderFlashByAmplitude(byte amplitude) {//21
+void RGBLine::renderFlashByAmplitude(byte amplitude) { //21
     if (!amplitude) return;
-    setBrightness(params.bright);
     for (int index = 0; index < count; ++index) {
         if (params.hsv) {
-            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), STROBE_SAT, params.bright);
+            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), 255, params.bright);
         } else {
             line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, index));
         }
     }
 }
 
-void RGBLine::renderRunningFlashByAmplitude(int countAmp, byte *amplitudes) {//22
-    setBrightness(params.bright);
+void RGBLine::renderRunningFlashByAmplitude(int countAmp, byte* amplitudes) { //22
     for (int index = 0; index < count; index++) {
-        byte amplitude = amplitudes[index * (countAmp) / (count - 1)];
+        byte amplitude = amplitudes[index * countAmp / (count - 1)];
         if (!amplitude) continue;
-        amplitude = (params.gradient) ? amplitude : amplitude / 43 * 51;
         if (params.hsv) {
-            line[index] = CHSV(amplitude, STROBE_SAT, params.bright);
+            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, 0), 255, params.bright);
         } else {
-            line[index] = ColorFromPalette(myPal, amplitude);
+            line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, 0));
         }
     }
-
 }
 
-void RGBLine::renderColumn(byte amplitude) {//23
+void RGBLine::renderColumn(byte amplitude) { //23
     if (!amplitude) return;
-    setBrightness(params.bright);
     for (int index = 0; index < amplitude * count / 255; index++) {
         if (params.hsv) {
-            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), STROBE_SAT, params.bright);
+            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), 255, params.bright);
         } else {
             line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, index));
         }
     }
 }
+
+//verified 18.02.25
+
+/*
+void RGBLine::renderFlashByFrequency(int countFreq, byte* frequencies) { //22
+    for (int index = 0; index < count; index++) {
+        byte curIndex = index * countFreq / (count - 1);
+        byte amplitude = frequencies[curIndex];
+        if (!amplitude) continue;
+        if (params.hsv) {
+            line[index] = CHSV(curIndex, 255, amplitude);
+        } else {
+            line[index] = ColorFromPalette(myPal, curIndex * amplitude);
+        }
+    }
+}*/
