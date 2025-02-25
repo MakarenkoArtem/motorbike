@@ -69,9 +69,13 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
         ans = GET_COLOR;
-        for (int x = 4; x < 24; ++x) {
-            this->print(parameters.colors[x]);
+        for (int row = 1; row < 6; ++row) {
+            this->print(map(parameters.colors[row * 4], 0, 200, 0, 256));
             this->print(F(","));
+            for (int col = 1; col < 4; ++col) {
+                this->print(parameters.colors[row * 4 + col]);
+                this->print(F(","));
+            }
         }
     } else if (compareStr(buf, "Con")) {
     } else if (compareStr(buf, "OFF")) {
@@ -133,7 +137,7 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     sz = -1;
     return ans;
 }
-byte* colors;
+
 short BTSerial::calculateFirstAndLastColors(byte* colors) {
     for (int i = 1; i < 4; ++i) {
         colors[i] = colors[i + 4];
