@@ -6,9 +6,9 @@ int freeMemory() {
     extern int __brkval;
     int v = (int)&v;
     if (__brkval == 0) {
-        return ((int)&v - (int)&__heap_start);  // Если нет кучи, возвращаем память от начала стека
+        return ((int)&v - (int)&__heap_start); // Если нет кучи, возвращаем память от начала стека
     } else {
-        return ((int)&v - (int)&__brkval);     // Для других случаев возвращаем память от конца кучи
+        return ((int)&v - (int)&__brkval); // Для других случаев возвращаем память от конца кучи
     }
 }
 
@@ -20,10 +20,10 @@ BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
 }
 
 short BTSerial::getCommands(Parameters& parameters) {
-    #if DEBUGBT
+#if DEBUGBT
         Serial.print(F("Free memory: "));
         Serial.println(freeMemory());  // Покажет доступную память
-    #endif
+#endif
     if (!available()) {
         return OK;
     }
@@ -141,8 +141,9 @@ short BTSerial::changeColor(char* buf, byte* colors) {
         return ERROR;
     }
     char* val = subStr(buf, 0, 3);
-    char index = static_cast<int>(strToLongInt(val))/51;
+    char index = (static_cast<int>(strToLongInt(val)) - 26) / 51;
     free(val);
+    if (index > 4 || index < 0) { return ERROR; }
     for (int i = 1; i < 4; ++i) {
         val = subStr(buf + i * 4, 0, 3);
         colors[index * 4 + i] = static_cast<byte>(strToLongInt(val));
@@ -152,13 +153,13 @@ short BTSerial::changeColor(char* buf, byte* colors) {
 }
 
 short BTSerial::changeColors(char* buf, byte* colors) {
-    if (sz != 99) {
+    if (sz != 83) {
         Serial.println(F("Damaged message"));
         this->print(F("Damaged message"));
         return ERROR;
     }
     char* val;
-    for (int i = 0; i < 24; ++i) {
+    for (int i = 0; i < 20; ++i) {
         val = subStr(buf + i * 4, 0, 3);
         colors[i] = static_cast<byte>(strToLongInt(val));
         free(val);

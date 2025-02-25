@@ -72,5 +72,5 @@
 #define DAY_OF_WEEK ((DAY + (((13 * (MONTH + 1)) / 5) + YEAR + (YEAR / 4) - (YEAR / 100) + (YEAR / 400)) % 7 + 6) % 7)
 
 
-extern byte colors[24];
+extern byte colors[20];
 //verified 11.02.25
