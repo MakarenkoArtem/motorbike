@@ -7,28 +7,28 @@
 class RGBLine {
     const int pin;
     CRGBPalette32 myPal;
-    int STROBE_SAT = 255;
     byte id;
-    Parameters &params;
-    CFastLED *fastLED = nullptr;
+    Parameters& params;
+    CFastLED* fastLED = nullptr;
+
 public:
     int count;
-    CRGB *line;
+    CRGB* line;
 
-    RGBLine(int pin, int count, Parameters &params, byte id);
+    RGBLine(int pin, int count, Parameters& params, byte id);
 
-    void setFastLED(CFastLED *fastLED);
+    void setFastLED(CFastLED* fastLED);
 
     int getPin();
 
     void setBrightness(byte bright);
 
-    void setColors(byte *colors);
+    void setColors(byte* colors);
 
     void show();
 
     void data();
-//verified 1.02.25
+    //verified 1.02.25
 private:
     byte calculatePhase(byte phase, int index);
 
@@ -38,7 +38,9 @@ private:
 
     void renderFlashByAmplitude(byte amplitude);
 
-    void renderRunningFlashByAmplitude(int countAmp, byte *amplitudes);
+    void renderRunningFlashByAmplitude(int countAmp, byte* amplitudes);
 
     void renderColumn(byte amplitude);
+
+    void renderFlashByFrequency(int countFreq, byte* frequencies);
 };

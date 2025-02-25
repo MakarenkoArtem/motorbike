@@ -24,7 +24,7 @@ void initSwitchAudio(int amplifier, int btSource) {
     pinMode(amplifier, OUTPUT);
     digitalWrite(amplifier, LOW);
     pinMode(btSource, OUTPUT);
-    digitalWrite(btSource, HIGH);
+    digitalWrite(btSource, LOW);
 }
 
 void addLedsInFastLED(RGBLine &line) {
@@ -32,12 +32,12 @@ void addLedsInFastLED(RGBLine &line) {
         //FastLED.addLeds<WS2811, pin, BRG>(&line, count).setCorrection(TypicalLEDStrip);
         //найти реализацию addLeds с переменной pin, а не заданным при компиляции значением
         //https://community.alexgyver.ru/threads/fastled-nastraivaem-piny-i-porjadok-cvetov-na-letu-ili-kak-rabotat-s-nasledovaniem-klassov-v-c.9732/
-        case LLine_pin: {
-            FastLED.addLeds<WS2811, LLine_pin, BRG>(line.line, line.count);
+        case LLINE_PIN: {
+            FastLED.addLeds<WS2811, LLINE_PIN, BRG>(line.line, line.count);
             break;
         }
-        case RLine_pin: {
-            FastLED.addLeds<WS2811, RLine_pin, BRG>(line.line, line.count);
+        case RLINE_PIN: {
+            FastLED.addLeds<WS2811, RLINE_PIN, BRG>(line.line, line.count);
             break;
         }
     }

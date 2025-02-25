@@ -17,16 +17,21 @@ class BTSerial : public SoftwareSerial {
 public:
     BTSerial(int RX, int TX);
 
-    short getCommands(Parameters &parameters);
+    short getCommands(Parameters& parameters);
 
 private:
-    short messageProcessing(Parameters &parameters);
+    short messageProcessing(Parameters& parameters);
+    
+    short calculateFirstAndLastColors(byte* colors);
 
-    short changeColors(char *buf, byte *colors);
+    short changeColor(char* buf, byte* colors);
+
+    short changeColors(char* buf, byte* colors);
 
     //DEBUG
     void whatDel();
 
     void whyError();
 };
+
 //verified 11.02.25

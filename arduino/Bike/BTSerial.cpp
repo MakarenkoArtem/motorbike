@@ -1,5 +1,18 @@
 #include "BTSerial.h"
 
+int freeMemory() {
+    // Для платформы AVR (например, Arduino Uno или Nano)
+    extern int __heap_start;
+    extern int __brkval;
+    int v = (int)&v;
+    if (__brkval == 0) {
+        return ((int)&v - (int)&__heap_start); // Если нет кучи, возвращаем память от начала стека
+    } else {
+        return ((int)&v - (int)&__brkval); // Для других случаев возвращаем память от конца кучи
+    }
+}
+
+
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
     this->begin(SPEED);
     this->setTimeout(TIMEOUT);
@@ -7,6 +20,10 @@ BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
 }
 
 short BTSerial::getCommands(Parameters& parameters) {
+#if DEBUGBT
+        Serial.print(F("Free memory: "));
+        Serial.println(freeMemory());  // Покажет доступную память
+#endif
     if (!available()) {
         return OK;
     }
@@ -52,9 +69,13 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
         ans = GET_COLOR;
-        for (int x = 0; x < 6 * 4; ++x) {
-            this->print(parameters.colors[x]);
+        for (int row = 1; row < 6; ++row) {
+            this->print(map(parameters.colors[row * 4], 0, 200, 0, 256));
             this->print(F(","));
+            for (int col = 1; col < 4; ++col) {
+                this->print(parameters.colors[row * 4 + col]);
+                this->print(F(","));
+            }
         }
     } else if (compareStr(buf, "Con")) {
     } else if (compareStr(buf, "OFF")) {
@@ -62,13 +83,13 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     } else if (compareStr(buf, "ON")) {
         ans = ON;
     } else if (compareStr(buf, "LowAmp") || compareStr(buf, "LOW")) {
-        ans = SOUND_AMPLIFIER_OFF;
+        ans = AMPLIFIER_OFF;
     } else if (compareStr(buf, "HighAmp") || compareStr(buf, "HIGH")) {
-        ans = SOUND_AMPLIFIER_ON;
+        ans = AMPLIFIER_ON;
     } else if (compareStr(buf, "OffBT")) {
-        ans = SOUND_BT_OFF;
+        ans = AUDIO_BT_OFF;
     } else if (compareStr(buf, "OnBT")) {
-        ans = SOUND_BT_ON;
+        ans = AUDIO_BT_ON;
     } else if (compareStr(buf, "OnHSV")) {
         parameters.hsv = true;
     } else if (compareStr(buf, "OffHSV")) {
@@ -78,9 +99,9 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     } else if (compareStr(buf, "OffMov")) {
         parameters.movement = false;
     } else if (compareStr(buf, "OnSync")) {
-        parameters.sync = true;
+        parameters.synchrony = true;
     } else if (compareStr(buf, "OffSync")) {
-        parameters.sync = false;
+        parameters.synchrony = false;
     } else if (compareStr(buf, "OnGrad")) {
         parameters.gradient = true;
     } else if (compareStr(buf, "OffGrad")) {
@@ -95,6 +116,8 @@ short BTSerial::messageProcessing(Parameters& parameters) {
             parameters.setMode(static_cast<unsigned short>(strToLongInt(buf + 3)));
         } else if (compareStr(firstPart, "CF:")) {
             parameters.setFrequency(static_cast<unsigned short>(strToLongInt(buf + 3)));
+        } else if (compareStr(firstPart, "Cr:")) {
+            ans = changeColor(buf + 3, parameters.colors);
         } else if (compareStr(firstPart, "Co:")) {
             ans = changeColors(buf + 3, parameters.colors);
         } else {
@@ -115,18 +138,46 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     return ans;
 }
 
+short BTSerial::calculateFirstAndLastColors(byte* colors) {
+    for (int i = 1; i < 4; ++i) {
+        colors[i] = colors[i + 4];
+        colors[24 + i] = colors[i + 20];
+    }
+    return OK;
+}
+
+short BTSerial::changeColor(char* buf, byte* colors) {
+    if (sz != 19) {
+        Serial.println(F("Damaged message"));
+        this->print(F("Damaged message"));
+        return ERROR;
+    }
+    char* val = subStr(buf, 0, 3);
+    byte index = (static_cast<int>(strToLongInt(val)) - 26) / 51 + 1;
+    free(val);
+    if (index > 5 || index < 1) { return ERROR; }
+    for (int i = 1; i < 4; ++i) {
+        val = subStr(buf + i * 4, 0, 3);
+        colors[index * 4 + i] = static_cast<byte>(strToLongInt(val));
+        free(val);
+    }
+    calculateFirstAndLastColors(colors);
+    return COLORS;
+}
+
 short BTSerial::changeColors(char* buf, byte* colors) {
-    if (sz != 99) {
+    if (sz != 83) {
         Serial.println(F("Damaged message"));
         this->print(F("Damaged message"));
         return ERROR;
     }
     char* val;
-    for (int i = 0; i < 24; ++i) {
+    for (int i = 0; i < 20; ++i) {
         val = subStr(buf + i * 4, 0, 3);
-        colors[i] = static_cast<byte>(strToLongInt(val));
+        colors[i + 4] = static_cast<byte>(strToLongInt(val));
         free(val);
     }
+    calculateFirstAndLastColors(colors);
     return COLORS;
 }
 
@@ -141,4 +192,5 @@ void BTSerial::whyError() {
     Serial.print(F("Error due to this message:"));
     Serial.print(buf);
 }
+
 //verified 11.02.25
