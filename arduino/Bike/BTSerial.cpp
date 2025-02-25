@@ -1,5 +1,18 @@
 #include "BTSerial.h"
 
+int freeMemory() {
+    // Для платформы AVR (например, Arduino Uno или Nano)
+    extern int __heap_start;
+    extern int __brkval;
+    int v = (int)&v;
+    if (__brkval == 0) {
+        return ((int)&v - (int)&__heap_start);  // Если нет кучи, возвращаем память от начала стека
+    } else {
+        return ((int)&v - (int)&__brkval);     // Для других случаев возвращаем память от конца кучи
+    }
+}
+
+
 BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
     this->begin(SPEED);
     this->setTimeout(TIMEOUT);
@@ -7,6 +20,10 @@ BTSerial::BTSerial(int RX, int TX) : SoftwareSerial(RX, TX) {
 }
 
 short BTSerial::getCommands(Parameters& parameters) {
+    #if DEBUGBT
+        Serial.print(F("Free memory: "));
+        Serial.println(freeMemory());  // Покажет доступную память
+    #endif
     if (!available()) {
         return OK;
     }
