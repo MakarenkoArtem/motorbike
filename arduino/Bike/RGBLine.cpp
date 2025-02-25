@@ -1,7 +1,7 @@
 #include "RGBLine.h"
 
 RGBLine::RGBLine(int pin, int count, Parameters& params, byte id) :
-        pin(pin), count(count), params(params), id(id) {
+    pin(pin), count(count), params(params), id(id) {
     line = new CRGB[count];
     setColors(params.colors);
     show();
@@ -27,29 +27,29 @@ void RGBLine::setBrightness(byte bright) {
 void RGBLine::show() {
     setBrightness(params.bright);
     switch (params.mode) {
-        case 11:
-        case 12:
-            renderStaticPattern();
-            break;
-        case 21: {
-            renderFlashByAmplitude(params.output[0]);
-            break;
-        }
-        case 22: {
-            renderRunningFlashByAmplitude(params.outCount, params.output);
-            break;
-        }
-        case 23: {
-            renderColumn(params.output[0]);
-            break;
-        }
-        case 31: {
-            //renderFlashByFrequency(params.outCount, params.output);
-        }
-        default: {
-            renderStaticPattern();
-            break;
-        }
+    case 11:
+    case 12:
+        renderStaticPattern();
+        break;
+    case 21: {
+        renderFlashByAmplitude(params.output[0]);
+        break;
+    }
+    case 22: {
+        renderRunningFlashByAmplitude(params.outCount, params.output);
+        break;
+    }
+    case 23: {
+        renderColumn(params.output[0]);
+        break;
+    }
+    case 31: {
+        //renderFlashByFrequency(params.outCount, params.output);
+    }
+    default: {
+        renderStaticPattern();
+        break;
+    }
     }
 }
 
@@ -66,7 +66,7 @@ byte RGBLine::calculatePhase(byte phase, int index) {
     phase *= params.frequency;
     phase += index * 255 / (count - 1);
     if (!params.gradient) {
-        phase = phase / 43 * 51;
+        phase = (phase - 26) / 51 * 51 + 26;
     }
     if (!params.synchrony && id % 2) {
         phase = 255 - phase;
@@ -83,16 +83,11 @@ void RGBLine::renderStaticPattern() { //11, 12
         if (params.hsv) {
             line[index] = CHSV(calculatePhase(phase, index), 255, params.bright);
         } else {
-            line[index] = ColorFromPalette(myPal, calculatePhase(phase, index));
+            //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
+            line[index] = ColorFromPalette(myPal, map(calculatePhase(phase, index), 0, 255, 0, 200));
         }
     }
 }
-/*
-21,64,107,149,192,235
-1/12,3/12,5/12,7/12,9/12,11/12
-26,77,128,179,230
-1/10,3/10,5/10,7/10,9/10
-*/
 
 
 byte RGBLine::calculatePhaseByAmplitude(byte amplitude, int index) {
@@ -112,7 +107,8 @@ void RGBLine::renderFlashByAmplitude(byte amplitude) { //21
         if (params.hsv) {
             line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), 255, params.bright);
         } else {
-            line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, index));
+            //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
+            line[index] = ColorFromPalette(myPal, map(calculatePhaseByAmplitude(amplitude, index), 0, 255, 0, 200));
         }
     }
 }
@@ -124,7 +120,7 @@ void RGBLine::renderRunningFlashByAmplitude(int countAmp, byte* amplitudes) { //
         if (params.hsv) {
             line[index] = CHSV(calculatePhaseByAmplitude(amplitude, 0), 255, params.bright);
         } else {
-            line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, 0));
+            line[index] = ColorFromPalette(myPal, map(calculatePhaseByAmplitude(amplitude, 0), 0, 255, 0, 200));
         }
     }
 }
@@ -135,7 +131,8 @@ void RGBLine::renderColumn(byte amplitude) { //23
         if (params.hsv) {
             line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), 255, params.bright);
         } else {
-            line[index] = ColorFromPalette(myPal, calculatePhaseByAmplitude(amplitude, index));
+            //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
+            line[index] = ColorFromPalette(myPal, map(calculatePhaseByAmplitude(amplitude, index), 0, 255, 0, 200));
         }
     }
 }
@@ -151,7 +148,8 @@ void RGBLine::renderFlashByFrequency(int countFreq, byte* frequencies) { //22
         if (params.hsv) {
             line[index] = CHSV(curIndex, 255, amplitude);
         } else {
-            line[index] = ColorFromPalette(myPal, curIndex * amplitude);
+            //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
+            line[index] = ColorFromPalette(myPal, map(curIndex * amplitude, 0, 255, 0, 200);
         }
     }
 }*/

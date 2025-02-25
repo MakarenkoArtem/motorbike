@@ -7,7 +7,6 @@
 class RGBLine {
     const int pin;
     CRGBPalette32 myPal;
-    int STROBE_SAT = 255;
     byte id;
     Parameters& params;
     CFastLED* fastLED = nullptr;

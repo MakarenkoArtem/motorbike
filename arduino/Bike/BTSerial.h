@@ -21,6 +21,8 @@ public:
 
 private:
     short messageProcessing(Parameters& parameters);
+    
+    short calculateFirstAndLastColors(byte* colors);
 
     short changeColor(char* buf, byte* colors);
 
