@@ -69,7 +69,7 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
         ans = GET_COLOR;
-        for (int x = 0; x < 20; ++x) {
+        for (int x = 4; x < 24; ++x) {
             this->print(parameters.colors[x]);
             this->print(F(","));
         }
@@ -133,6 +133,14 @@ short BTSerial::messageProcessing(Parameters& parameters) {
     sz = -1;
     return ans;
 }
+byte* colors;
+short BTSerial::calculateFirstAndLastColors(byte* colors) {
+    for (int i = 1; i < 4; ++i) {
+        colors[i] = colors[i + 4];
+        colors[24 + i] = colors[i + 20];
+    }
+    return OK;
+}
 
 short BTSerial::changeColor(char* buf, byte* colors) {
     if (sz != 19) {
@@ -141,14 +149,15 @@ short BTSerial::changeColor(char* buf, byte* colors) {
         return ERROR;
     }
     char* val = subStr(buf, 0, 3);
-    char index = (static_cast<int>(strToLongInt(val)) - 26) / 51;
+    byte index = (static_cast<int>(strToLongInt(val)) - 26) / 51 + 1;
     free(val);
-    if (index > 4 || index < 0) { return ERROR; }
+    if (index > 5 || index < 1) { return ERROR; }
     for (int i = 1; i < 4; ++i) {
         val = subStr(buf + i * 4, 0, 3);
         colors[index * 4 + i] = static_cast<byte>(strToLongInt(val));
         free(val);
     }
+    calculateFirstAndLastColors(colors);
     return COLORS;
 }
 
@@ -161,9 +170,10 @@ short BTSerial::changeColors(char* buf, byte* colors) {
     char* val;
     for (int i = 0; i < 20; ++i) {
         val = subStr(buf + i * 4, 0, 3);
-        colors[i] = static_cast<byte>(strToLongInt(val));
+        colors[i + 4] = static_cast<byte>(strToLongInt(val));
         free(val);
     }
+    calculateFirstAndLastColors(colors);
     return COLORS;
 }
 

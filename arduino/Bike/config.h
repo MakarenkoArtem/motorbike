@@ -14,7 +14,7 @@
 #define BIKE_PIN A2
 #define SOUND_R_PIN A6
 #define SOUND_L_PIN A7
-#define NUM_LEDS 50
+#define NUM_LEDS 18//50
 
 //BTSerial part
 //      Messages
@@ -52,18 +52,18 @@
 
 #define YEAR  ((__DATE__[12] - '0') * 1000 + (__DATE__[13] - '0') * 100 + (__DATE__[14] - '0') * 10 + (__DATE__[15] - '0'))
 #define MONTH ( \
-    (__DATE__[0] == 'J' && __DATE__[1] == 'a') ? 1 : \
-    (__DATE__[0] == 'F' ? 2 : \
-    (__DATE__[0] == 'M' && __DATE__[2] == 'r') ? 3 : \
-    (__DATE__[0] == 'A' && __DATE__[1] == 'p') ? 4 : \
-    (__DATE__[0] == 'M' && __DATE__[2] == 'y') ? 5 : \
-    (__DATE__[0] == 'J' && __DATE__[1] == 'u' && __DATE__[2] == 'n') ? 6 : \
-    (__DATE__[0] == 'J' && __DATE__[1] == 'u' && __DATE__[2] == 'l') ? 7 : \
-    (__DATE__[0] == 'A' && __DATE__[1] == 'u') ? 8 : \
-    (__DATE__[0] == 'S' ? 9 : \
-    (__DATE__[0] == 'O' ? 10 : \
-    (__DATE__[0] == 'N' ? 11 : \
-    (__DATE__[0] == 'D' ? 12 : 0))))))
+                (__DATE__[0] == 'J' && __DATE__[1] == 'a') ? 1 : \
+                (__DATE__[0] == 'F' ? 2 : \
+                 (__DATE__[0] == 'M' && __DATE__[2] == 'r') ? 3 : \
+                 (__DATE__[0] == 'A' && __DATE__[1] == 'p') ? 4 : \
+                 (__DATE__[0] == 'M' && __DATE__[2] == 'y') ? 5 : \
+                 (__DATE__[0] == 'J' && __DATE__[1] == 'u' && __DATE__[2] == 'n') ? 6 : \
+                 (__DATE__[0] == 'J' && __DATE__[1] == 'u' && __DATE__[2] == 'l') ? 7 : \
+                 (__DATE__[0] == 'A' && __DATE__[1] == 'u') ? 8 : \
+                 (__DATE__[0] == 'S' ? 9 : \
+                  (__DATE__[0] == 'O' ? 10 : \
+                   (__DATE__[0] == 'N' ? 11 : \
+                    (__DATE__[0] == 'D' ? 12 : 0))))))
 #define DAY  (__DATE__[7] - '0') * 10 + (__DATE__[8] - '0')
 #define HOURS (__TIME__[0] - '0') * 10 + (__TIME__[1] - '0')
 #define MINUTES (__TIME__[3] - '0') * 10 + (__TIME__[4] - '0')
@@ -72,5 +72,5 @@
 #define DAY_OF_WEEK ((DAY + (((13 * (MONTH + 1)) / 5) + YEAR + (YEAR / 4) - (YEAR / 100) + (YEAR / 400)) % 7 + 6) % 7)
 
 
-extern byte colors[20];
+extern byte colors[32];
 //verified 11.02.25
