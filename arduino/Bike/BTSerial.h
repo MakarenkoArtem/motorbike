@@ -35,7 +35,7 @@ private:
 
     void whyError();
 
-    void whatListOfColors();
+    void whatListOfColors(Parameters& parameters);
 };
 
 //verified 11.02.25

@@ -201,7 +201,7 @@ void BTSerial::whyError() {
     Serial.print(buf);
 }
 
-void BTSerial::whatListOfColors() {
+void BTSerial::whatListOfColors(Parameters &parameters) {
     Serial.print(F("Colors in palette: "));
     sendingColors(Serial, parameters.colors);
     Serial.println();
