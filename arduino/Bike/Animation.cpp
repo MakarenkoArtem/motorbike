@@ -1,15 +1,16 @@
 #include "Animation.h"
 
-Animation::Animation(Parameters &params, SoundLevelMeter &sound, SoundDecomposition &fht) :
-        params(params), sound(sound), fht(fht) {}
+Animation::Animation(Parameters& params, SoundLevelMeter& sound, SoundDecomposition& fht) :
+    params(params), sound(sound), fht(fht) {
+}
 
 
 byte Animation::strode(int period, byte maxBright) {
     int halfPeriod = period / 2;
-    int curBright = ((millis() % period / halfPeriod) ?     //0-возрастает, 1-убывает
-                     halfPeriod - millis() % halfPeriod :
-                     millis() % halfPeriod) *
-                    255 * 2 / period;
+    int curBright = ((millis() % period > halfPeriod) ?
+                         //0-возрастает, 1-убывает
+                         halfPeriod - millis() % halfPeriod :
+                         millis() % halfPeriod);
     return map(curBright, 0, halfPeriod, 0, maxBright);
 }
 
@@ -34,7 +35,7 @@ bool Animation::processing() {
             break;
         }
         case 12: {
-            params.bright = strode(params.strobePeriod * 10, params.maxBright);
+            params.bright = strode(params.strobePeriod, params.maxBright);
             break;
         }
         case 21: {
@@ -52,7 +53,7 @@ bool Animation::processing() {
             byte amplitude = sound.getSmoothedAmplitude();
             convertAmplitudeToListOutput(amplitude);
             break;
-        }//verified 1.02.25
+        } //verified 1.02.25
         case 31: {
             break;
         }

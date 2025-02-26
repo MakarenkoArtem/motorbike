@@ -27,29 +27,31 @@ void RGBLine::setBrightness(byte bright) {
 void RGBLine::show() {
     setBrightness(params.bright);
     switch (params.mode) {
-    case 11:
-    case 12:
-        renderStaticPattern();
-        break;
-    case 21: {
-        renderFlashByAmplitude(params.output[0]);
-        break;
-    }
-    case 22: {
-        renderRunningFlashByAmplitude(params.outCount, params.output);
-        break;
-    }
-    case 23: {
-        renderColumn(params.output[0]);
-        break;
-    }
-    case 31: {
-        //renderFlashByFrequency(params.outCount, params.output);
-    }
-    default: {
-        renderStaticPattern();
-        break;
-    }
+        case 11: {
+            speedCoef = 2 + (100 - params.frequency) / 5;
+        }
+        case 12:
+            renderStaticPattern();
+            break;
+        case 21: {
+            renderFlashByAmplitude(params.output[0]);
+            break;
+        }
+        case 22: {
+            renderRunningFlashByAmplitude(params.outCount, params.output);
+            break;
+        }
+        case 23: {
+            renderColumn(params.output[0]);
+            break;
+        }
+        case 31: {
+            //renderFlashByFrequency(params.outCount, params.output);
+        }
+        default: {
+            renderStaticPattern();
+            break;
+        }
     }
 }
 
@@ -63,10 +65,12 @@ void RGBLine::data() {
 }
 
 byte RGBLine::calculatePhase(byte phase, int index) {
-    phase *= params.frequency;
+    if (params.movement) {
+        phase += millis() / speedCoef;
+    }
     phase += index * 255 / (count - 1);
     if (!params.gradient) {
-        phase = (phase - 26) / 51 * 51 + 26;
+        phase = phase / 52 * 51 + 26; //за счет округления вниз phase / 52* 51 получаем 0,51,102,153,204 +26
     }
     if (!params.synchrony && id % 2) {
         phase = 255 - phase;
@@ -75,16 +79,12 @@ byte RGBLine::calculatePhase(byte phase, int index) {
 }
 
 void RGBLine::renderStaticPattern() { //11, 12
-    byte phase = 0;
-    if (params.movement) {
-        phase = millis();
-    }
     for (int index = 0; index < count; index++) {
         if (params.hsv) {
-            line[index] = CHSV(calculatePhase(phase, index), 255, params.bright);
+            line[index] = CHSV(calculatePhase(0, index), 255, params.bright);
         } else {
             //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
-            line[index] = ColorFromPalette(myPal, map(calculatePhase(phase, index), 0, 255, 0, 200));
+            line[index] = ColorFromPalette(myPal, map(calculatePhase(0, index), 0, 255, 0, 200));
         }
     }
 }

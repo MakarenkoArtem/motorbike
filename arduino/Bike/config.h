@@ -46,7 +46,7 @@
 
 
 //      RGBLine part
-#define MIN_STROBE_PERIOD 150
+#define MIN_STROBE_PERIOD 250
 
 
 
