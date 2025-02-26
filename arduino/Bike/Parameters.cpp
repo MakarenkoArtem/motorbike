@@ -13,7 +13,7 @@ void Parameters::setFrequency(byte frequency) {
             break;
         }
         default: {
-            strobePeriod = MIN_STROBE_PERIOD * pow(100.0, (100 - params.frequency) / 100.0);
+            strobePeriod = MIN_STROBE_PERIOD * pow(100.0, (100 - frequency) / 100.0);
         }
     }
     step = 1 + frequency;
