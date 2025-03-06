@@ -1,7 +1,7 @@
 #include "Parameters.h"
 
 Parameters::Parameters(byte* colors) :
-    maxBright(0), mode(11), colors(colors), frequency(0),
+    colors(colors),
     input(malloc(inpCount * sizeof(byte))), output(malloc(outCount * sizeof(byte))) {
 }
 

@@ -6,17 +6,20 @@
 #include "SoundDecomposition.h"
 
 class Animation {
-    Parameters &params;
-    SoundLevelMeter &sound;
-    SoundDecomposition &fht;
+    Parameters& params;
+    SoundLevelMeter& sound;
+    SoundDecomposition& fht;
     unsigned long timer = 0;
+    unsigned long timerRunLine = 0;
+    float average = 0;
 
     byte strode(int period, byte maxBright);
+    void runningLineMode();
 
     void convertAmplitudeToListOutput(byte amplitude);
 
 public:
-    Animation(Parameters &params, SoundLevelMeter &sound, SoundDecomposition &fht);
-//verified 1.02.25
+    Animation(Parameters& params, SoundLevelMeter& sound, SoundDecomposition& fht);
+    //verified 1.02.25
     bool processing();
 };

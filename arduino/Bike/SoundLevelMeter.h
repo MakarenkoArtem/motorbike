@@ -29,13 +29,15 @@ class SoundLevelMeter {
 
     int (*analogRead)(int);
 
-    int filterValue = 15;
-    int currentTimer = 0;
-    int avegareTimeLight = 200;
-    byte averageLevel = 0;
+    float filterValue = 1.1;
+    long long currentTimer = 0;
+    float avegareTimeLight = 200.0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
+    float averageLevel = 0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
     byte currentAmplitude = 0;
     byte levelAmplitude = 0;
     byte smoothedAmplitude = 0;
+    float fastAverageTop=0.0;
+    float fastAverageBottom=0.0;
 
     byte currentLevelOfSound();
 
@@ -50,6 +52,9 @@ public:
     byte getSmoothedAmplitude();
 
     void whichCurrentLevel(int curVal);
+
+    void whichAvegareTimeLight(int avegareTimeLight);
+
 //verified 11.02.25
     float LsoundLevel, RsoundLevel;
     float LsoundLevel_f, RsoundLevel_f;

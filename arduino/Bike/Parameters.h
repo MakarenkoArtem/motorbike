@@ -11,21 +11,21 @@ public:
     bool synchrony = true;
     long int strobePeriod = MIN_STROBE_PERIOD;
     byte step = 1;
-    byte *colors;
+    byte* colors;
     byte maxBright = 0;
-    byte bright = 0;
+    byte bright = maxBright;
     unsigned short mode = 11;
     byte frequency = 0;
-    int inpCount = 15;
-    byte *input;//могут запоминать прошлый максимумы или частотные
-    int outCount = 15;
-    byte *output;
+    int inpCount = 9;
+    byte* input; //могут запоминать прошлый максимумы или частотные
+    int outCount = 9;
+    byte* output;
 
-    Parameters(byte *colors);
+    Parameters(byte* colors);
 
     void setFrequency(byte frequency);
 
     void setMaxBright(byte bright);
 
     void setMode(byte mode);
-};//verified 1.02.25
+}; //verified 1.02.25
