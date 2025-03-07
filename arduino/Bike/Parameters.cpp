@@ -27,13 +27,14 @@ void Parameters::setMode(byte mode) {
     this->mode = mode;
     setFrequency(frequency);
     switch (mode) {
-        case 22: {
+        case 21: {
             outCount = 1;
             break;
         }
+        case 22:
         case 23:
         case 24: {
-            outCount = 15;
+            outCount = 9;
             break;
         }
         default: {
