@@ -1,4 +1,4 @@
-package com.example.bike.screens.DialogView
+package com.example.bike.ui.viewmodel.DialogView
 
 import android.app.Activity
 import android.bluetooth.BluetoothDevice

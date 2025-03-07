@@ -1,4 +1,4 @@
-package com.example.bike.screens.MainActivity
+package com.example.bike.ui.viewmodel.MainActivity
 
 import android.app.Activity
 import android.content.Context

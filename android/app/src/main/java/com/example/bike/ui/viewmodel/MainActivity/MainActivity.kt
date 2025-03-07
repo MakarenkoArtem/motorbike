@@ -1,4 +1,4 @@
-package com.example.bike.screens.MainActivity
+package com.example.bike.ui.viewmodel.MainActivity
 
 import android.Manifest
 import android.annotation.SuppressLint

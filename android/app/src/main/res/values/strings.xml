@@ -12,4 +12,8 @@
     <string name="twoColors">2 цвета</string>
     <string name="threeColors" >3 цвета</string>
     <string name="sixColors">6 цвета</string>
+
+
+    <string name="emptyDeviceList">Нет устройств для подключения</string>
+
 </resources>

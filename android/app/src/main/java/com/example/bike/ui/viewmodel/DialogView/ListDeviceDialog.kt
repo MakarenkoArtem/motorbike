@@ -10,16 +10,17 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Switch
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.bike.BT.BTClient
 import com.example.bike.R
-import com.example.bike.screens.DialogView.ListDeviceDialogViewModel
+import com.example.bike.ui.screens.EmptyDeviceListScreen
+import com.example.bike.ui.viewmodel.DialogView.ListDeviceDialogViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 class ListDeviceDialog : AppCompatActivity() {
     lateinit var viewModel: ListDeviceDialogViewModel
@@ -55,7 +56,9 @@ class ListDeviceDialog : AppCompatActivity() {
 
     fun f(devices:List<BluetoothDevice>){
         if (devices.isEmpty()) {
-            setContentView(R.layout.empty_list_devices_dialog)
+            setContent{
+                EmptyDeviceListScreen()
+            }
         } else {
             setContentView(R.layout.list_devices_dialog)
             list = findViewById<ListView>(R.id.listDevices)
