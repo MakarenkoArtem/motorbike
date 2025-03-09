@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     alias(libs.plugins.compose.compiler)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -21,7 +22,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion ="1.5.15"
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
     buildTypes {
         release {

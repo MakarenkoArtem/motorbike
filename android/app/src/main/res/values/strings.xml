@@ -15,5 +15,6 @@
 
 
     <string name="emptyDeviceList">Нет устройств для подключения</string>
+    <string name="bluetoothLocked">Блютуз выключен</string>
 
 </resources>

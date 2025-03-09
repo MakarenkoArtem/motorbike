@@ -1,7 +1,7 @@
 package com.example.bike.model
 
 import android.graphics.Color
-import com.example.bike.BT.BTClient
+import com.example.bike.services.bluetooth.BluetoothClient
 
 data class ScreenViewData(
     val colors: List<Int> = List(6) { Color.rgb(50, 50, 50) },//{ if (it % 2 == 0) Color.BLACK else Color.WHITE }
@@ -12,7 +12,7 @@ data class ScreenViewData(
     var ignition: Boolean = true,
     var amplifier: Boolean = false,
     var audioBT: Boolean = true,
-    var device: BTClient? = null,
+    var client: BluetoothClient? = null,
     var mode:Int=1,
     var hsv:Boolean=false,
     var gradient:Boolean=true,
