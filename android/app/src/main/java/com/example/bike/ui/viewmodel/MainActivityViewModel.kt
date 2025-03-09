@@ -1,27 +1,21 @@
-package com.example.bike.ui.viewmodel.MainActivity
+package com.example.bike.ui.viewmodel
 
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.bike.BT.BTClient
-import com.example.bike.BT.BTService
 import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
+import com.example.bike.services.bluetooth.BluetoothClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class MainActivityViewModel(
-    context: Context,
-    activity: Activity
-) : ViewModel() {
+class MainActivityViewModel: ViewModel() {
     private val _screenDataState = MutableStateFlow(ScreenViewData(curColor = CurrentColor()))
     val screenDataState: StateFlow<ScreenViewData> = _screenDataState
-    val btService: BTService = BTService(context = context, activity = activity)
 
-    fun connect(device: BluetoothDevice): Result<Unit> {
-        _screenDataState.value = _screenDataState.value.copy(device = BTClient(device))
+    fun connect(client:BluetoothClient): Result<Unit> {
+        _screenDataState.value = _screenDataState.value.copy(client = client)
         val res = checkConnection()
         Log.d("BikeBluetoothCheck", res.toString())
         if (res.isFailure) {
@@ -31,7 +25,7 @@ class MainActivityViewModel(
     }
 
     fun checkDevice(): Result<Unit> {
-        if (_screenDataState.value.device == null) {
+        if (_screenDataState.value.client == null) {
             return Result.failure(IllegalStateException(""))
         }
         Log.d("BikeBluetooth", "Device exist")
@@ -41,25 +35,20 @@ class MainActivityViewModel(
 
     fun checkConnection(): Result<Unit> {
         val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
-        val res = screenDataState.value.device!!.connect(check = false)
+        val res = screenDataState.value.client!!.connect(check = false)
         if (res.isFailure) {
-            _screenDataState.value = _screenDataState.value.copy(device = null)
+            _screenDataState.value = _screenDataState.value.copy(client = null)
             return res
         }
         return Result.success(Unit)
     }
 
-    fun getPairedDevices(): List<BluetoothDevice> {
-        val pairedDevices = btService.getPairedDevices()
-        Log.d("myLog", pairedDevices.toString())
-        return pairedDevices
-    }
 
     fun getColors(): Result<List<Int>> {
         if (checkDevice().isFailure) {
             return Result.success(emptyList())
         }
-        val res = _screenDataState.value.device!!.getColors()
+        val res = _screenDataState.value.client!!.getColors()
         Log.d("BikeBluetooth", "$res")
         val colors = res.getOrElse { return res }
         Log.d("BikeBluetooth", "Colors: $colors")
@@ -74,11 +63,11 @@ class MainActivityViewModel(
             _screenDataState.value = _screenDataState.value.copy(colors = colors)
             var res = Result.success(Unit)
             repeat(2) {
-                res = screenDataState.value.device?.colorSend(pixel, index) ?: res
+                res = screenDataState.value.client?.colorSend(pixel, index) ?: res
                 if (res.isSuccess) {
                     return res
                 }
-                res = screenDataState.value.device?.colorsSend(screenDataState.value.colors) ?: res
+                res = screenDataState.value.client?.colorsSend(screenDataState.value.colors) ?: res
                 if (res.isSuccess) {
                     return res
                 }
@@ -104,11 +93,11 @@ class MainActivityViewModel(
     private fun changeStatus(status: Boolean, active: String, passive: String): Result<Unit> {
         val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
         if (status) {
-            screenDataState.value.device!!.sendMessage(active)
+            screenDataState.value.client!!.sendMessage(active)
         } else {
-            screenDataState.value.device!!.sendMessage(passive)
+            screenDataState.value.client!!.sendMessage(passive)
         }
-        val resp = screenDataState.value.device!!.takeMessage(2, 250)
+        val resp = screenDataState.value.client!!.takeMessage(2, 250)
         val mes = resp.getOrElse { return Result.failure(it) }
         if (mes == "OK") {
             return Result.success(Unit)
@@ -156,7 +145,7 @@ class MainActivityViewModel(
 
     private fun send(message: String, repeat: Int = 3, timeWait: Long = 100): Result<Unit> {
         val checkingDevice = checkDevice().getOrElse { return Result.failure(it) }
-        return screenDataState.value.device!!.sendMessage(
+        return screenDataState.value.client!!.sendMessage(
             message,
             repeat,
             timeWait
@@ -183,7 +172,7 @@ class MainActivityViewModel(
 
 
     fun disconnect() {
-        runCatching { screenDataState.value.device?.disconnect() }
-        _screenDataState.value = _screenDataState.value.copy(device = null)
+        runCatching { screenDataState.value.client?.disconnect() }
+        _screenDataState.value = _screenDataState.value.copy(client = null)
     }
 }
