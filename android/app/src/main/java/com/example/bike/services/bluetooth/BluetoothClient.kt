@@ -1,10 +1,12 @@
-package com.example.bike.BT
+package com.example.bike.services.bluetooth
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.graphics.Color
+import android.os.Parcelable
 import android.os.SystemClock
 import android.util.Log
+import kotlinx.android.parcel.Parcelize
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -13,10 +15,11 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-class BTClient(
+@Parcelize
+class BluetoothClient(
     val device: BluetoothDevice,
-) {
     var name: String = ""
+) : Parcelable {
     var bTSocket: BluetoothSocket? = null
     var inputStream: InputStream? = null
     var outputStream: OutputStream? = null
@@ -32,8 +35,6 @@ class BTClient(
     fun connect(check: Boolean = true): Result<Unit> {
         try {//Инициируем соединение с устройством
             Log.d("BikeBluetooth", "!!!connect")
-            /*bTSocket =
-                device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")) //защищенное соединение*/
             bTSocket =
                 device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")) //незащищенное соединение
             bTSocket!!.connect()
@@ -67,7 +68,6 @@ class BTClient(
         return runCatching {
             for (i in 0..count) {
                 sendMessage("Con\n")
-                SystemClock.sleep(time)
                 if (wait_answer) {
                     message = takeMessage().getOrNull() ?: ""
                     Log.d("BikeBluetooth", message)
@@ -76,6 +76,7 @@ class BTClient(
                         return Result.success(Unit)
                     }
                 }
+                SystemClock.sleep(time)
             }
         }
     }
@@ -83,7 +84,6 @@ class BTClient(
     fun getColors(
         timeOut: Int = 500
     ): Result<List<Int>> {
-        Log.d("BikeBluetooth", "$outputStream $inputStream")
         outputStream?.write("GC\n".toByteArray())
         var time = 0
         while (timeOut <= time && inputStream?.available() == 0) {
