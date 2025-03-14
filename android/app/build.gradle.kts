@@ -27,9 +27,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
             )
         }
     }
@@ -47,9 +46,10 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.androidx.compose)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.constraintlayout.compose)
+    //implementation(libs.ferfalk.numberpicker)
     debugImplementation(libs.androidx.ui.tooling)
-
-    implementation(libs.androidx.core.ktx)
+    implementation (libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)

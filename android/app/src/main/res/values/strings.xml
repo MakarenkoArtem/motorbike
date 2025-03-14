@@ -16,5 +16,8 @@
 
     <string name="emptyDeviceList">Нет устройств для подключения</string>
     <string name="bluetoothLocked">Блютуз выключен</string>
+    <string name="gradient">Градиент</string>
+    <string name="hsv">HSV</string>
+    <string name="synchrony">Синхронно</string>
 
 </resources>
