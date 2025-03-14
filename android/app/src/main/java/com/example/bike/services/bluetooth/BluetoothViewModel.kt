@@ -7,13 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 class BluetoothViewModel(application: Application) : AndroidViewModel(application) {
     var service: BluetoothService? = null
@@ -30,31 +30,37 @@ class BluetoothViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     init{
-        viewModelScope.launch{startBluetoothService()}
+        viewModelScope.launch{bindBluetoothService()}
     }
 
-    suspend fun waitForService() {
-        while (service == null) {
-            delay(100)
+    suspend fun waitForService(timeLimit:Long=5000):Result<Unit> {
+        val end= LocalTime.now().plus(timeLimit, ChronoUnit.MILLIS)
+        while (service == null && LocalTime.now()<end) {
+            delay(50)
+        }
+        return if(service==null){
+            Result.failure(Exception("Bluetooth service didn't connect"))
+        }else{
+            Result.success(Unit)
         }
     }
 
-    suspend fun startBluetoothService() {
+
+    suspend fun bindBluetoothService():Result<Unit> {
         val intent = Intent(getApplication(), BluetoothService::class.java)
         getApplication<Application>().bindService(
             intent, serviceConnection, Context.BIND_AUTO_CREATE
         )
-        waitForService()
+        return waitForService()
     }
-
 
     fun getRequiredPermissions() = service?.getRequiredPermissions() ?: emptyArray()
 
     fun checkBluetoothPermission() = service?.checkBluetoothPermission()
-        ?: Result.failure(Exception("BluetoothService еще не привязан"))
+        ?: Result.failure(Exception("BluetoothService does not bound"))
 
-    fun checkBluetoothAdapter() = service?.checkAdapter()
-        ?: Result.failure(Exception("BluetoothService еще не привязан"))
+    fun isConnected() = service?.checkAdapter()
+        ?: Result.failure(Exception("BluetoothService does not bound"))
 
     fun getDevicesFlow(): Result<StateFlow<List<BluetoothDevice>>> {
         val devices = service?.getDevicesFlow() ?: return Result.failure(Exception(""))

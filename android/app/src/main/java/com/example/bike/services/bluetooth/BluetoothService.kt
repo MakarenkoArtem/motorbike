@@ -17,14 +17,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class BluetoothService: Service() {
-    private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
 
-    private val _flow: MutableStateFlow<List<BluetoothDevice>> = MutableStateFlow(emptyList())
-    private val flow: StateFlow<List<BluetoothDevice>> = _flow
+    private val _devicesFlow: MutableStateFlow<List<BluetoothDevice>> =
+        MutableStateFlow(emptyList())
+    private val devicesFlow: StateFlow<List<BluetoothDevice>> = _devicesFlow
 
     override fun onCreate() {
         super.onCreate()
+        updateAdapter().onFailure {
+            Toast.makeText(this, it.message ?: it.toString(), Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         updateBondedDevices().onFailure {
             Log.d("BikeBluetooth", it.message ?: it.toString())
             Toast.makeText(this, it.message ?: it.toString(), Toast.LENGTH_SHORT
@@ -32,9 +37,13 @@ class BluetoothService: Service() {
         }
     }
 
-    private fun updateService() {
-        bluetoothManager = getSystemService(BluetoothManager::class.java)
-        bluetoothAdapter = bluetoothManager?.adapter
+    private fun updateAdapter(): Result<Unit> {
+        bluetoothAdapter = getSystemService(BluetoothManager::class.java)?.adapter
+        return if (bluetoothAdapter != null) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Bluetooth adapter not found"))
+        }
     }
 
     private val binder = LocalBinder()
@@ -89,7 +98,7 @@ class BluetoothService: Service() {
 
     fun checkAdapter(): Result<Unit> {
         if (bluetoothAdapter == null || !bluetoothAdapter!!.isEnabled) {
-            updateService()
+            updateAdapter()
         }
         if (bluetoothAdapter == null) {
             return Result.failure(IllegalStateException("The device does not have Bluetooth"))
@@ -101,10 +110,9 @@ class BluetoothService: Service() {
     }
 
 
-
     fun getDevicesFlow(): StateFlow<List<BluetoothDevice>> {
         updateBondedDevices()
-        return flow
+        return devicesFlow
     }
 
     fun updateBondedDevices(): Result<Unit> {
@@ -117,52 +125,13 @@ class BluetoothService: Service() {
         bondedDevices.forEach() {item ->
             Log.d("BikeBluetooth", "${item.name}: ${item.address}")
         }
-        _flow.value = bondedDevices.toList()
+        _devicesFlow.value = bondedDevices.toList()
         return Result.success(Unit)
     }
 
     fun getClient(device: BluetoothDevice): Result<BluetoothClient> {
-        return Result.success(BluetoothClient(device = device))
-    }/*val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-    val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(
-                "BikeBluetooth", intent?.action ?: ""
-            )
-            checkBluetoothPermission().onFailure { return }
-            val device: BluetoothDevice =
-                intent?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE) as? BluetoothDevice
-                    ?: return
-            val list = _flow.value.toMutableList()
-            list.add(device)
-            _flow.value = list.toList()
-            Log.d(
-                "BikeBluetooth",
-                "Найдено устройство: ${device.name}, Адрес: ${device.address}"
-            )
-
-        }
+        val client = BluetoothClient(device = device)
+        client.connect(true).onFailure {it -> return Result.failure<BluetoothClient>(it)}
+        return Result.success(client)
     }
-
-    fun discoveryDevices(period: Long = 10000) {
-        checkBluetoothPermission().onFailure {
-            Log.d(
-                "BikeBluetooth", it.message ?: ""
-            )
-            return
-        }
-        bluetoothAdapter?.startDiscovery() ?: return
-        this.registerReceiver(receiver, filter)
-        CoroutineScope(Dispatchers.IO).launch {
-            for (i in 0..period / 100) {
-                Log.d(
-                    "BikeBluetooth", "Discovering"
-                )
-                delay(100)
-            }
-            this@BluetoothService.unregisterReceiver(receiver)
-        }
-    }*/
-
-
 }

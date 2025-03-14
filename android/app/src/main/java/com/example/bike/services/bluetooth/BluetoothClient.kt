@@ -85,6 +85,8 @@ class BluetoothClient(
         timeOut: Int = 500
     ): Result<List<Int>> {
         outputStream?.write("GC\n".toByteArray())
+        Log.d("BikeBluetooth", "GC")
+        outputStream?.flush()
         var time = 0
         while (timeOut <= time && inputStream?.available() == 0) {
             SystemClock.sleep(100)
