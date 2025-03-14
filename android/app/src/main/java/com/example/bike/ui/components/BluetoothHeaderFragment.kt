@@ -3,15 +3,9 @@ package com.example.bike.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.magnifier
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.TabRowDefaults.Divider
@@ -25,12 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun BluetoothHeader(active: Boolean, func: (Boolean) -> Unit) {
+fun BluetoothHeaderFragment(active: Boolean, func: (Boolean) -> Unit) {
     Column() {
         Row(
                 modifier = Modifier
@@ -50,30 +45,13 @@ fun BluetoothHeader(active: Boolean, func: (Boolean) -> Unit) {
                     )
             )
         }
-        Divider(color = Color.Cyan, thickness = 2.dp, modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-fun LogViewer(logs: List<String>, modifier: Modifier = Modifier
-    .fillMaxSize()
-    .padding(16.dp)) {
-    Column(modifier = modifier
-    ) {
-        Spacer(modifier = Modifier.height(32.dp))
-
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(logs) {log ->
-                Text(log, modifier = Modifier.padding(4.dp))
-            }
-        }
+        Divider(color = Color.Cyan, thickness = 2.dp, modifier = Modifier.fillMaxWidth())
     }
 }
 
 @PreviewLightDark
 @Composable
-fun BluetoothHeaderViewer() {
+fun BluetoothHeaderFragmentViewer() {
     val active by remember {mutableStateOf(false)}
-    BluetoothHeader(active = active) {_ ->}
+    BluetoothHeaderFragment(active = active) {_ ->}
 }
