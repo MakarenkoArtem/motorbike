@@ -32,7 +32,7 @@ import com.example.bike.R
 import com.example.bike.ui.components.BluetoothHeaderFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
+@SuppressLint("MissingPermission")
 @Composable
 fun DeviceListScreen(switchEvent: (Boolean) -> Unit,
                      switchActiveFlow: StateFlow<Boolean>,
@@ -68,10 +68,10 @@ fun DeviceListScreen(switchEvent: (Boolean) -> Unit,
             ) {
                 BluetoothHeaderFragment(switchActive) {newState -> switchEvent(newState)}
                 if (switchActive) {
-                    if (devices.isEmpty()) {
+                    if (devices.filter {it.name!=null}.isEmpty()) {
                         EmptyBody(stringResource(id = R.string.emptyDeviceList))
                     } else {
-                        Body(devices, selectionFunc)
+                        Body(devices.filter {it.name!=null}, selectionFunc)
                     }
                 } else {
                     EmptyBody(stringResource(id = R.string.bluetoothLocked))

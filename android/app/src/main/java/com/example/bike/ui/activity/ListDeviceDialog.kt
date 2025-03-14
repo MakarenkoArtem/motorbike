@@ -10,10 +10,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.bike.factory.ListDeviceDialogViewModelFactory
 import com.example.bike.services.bluetooth.BluetoothViewModel
 import com.example.bike.ui.screens.DeviceListScreen
 import com.example.bike.ui.viewmodel.ListDeviceDialogViewModel
-import com.example.bike.factory.ListDeviceDialogViewModelFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class ListDeviceDialog: ComponentActivity() {
     private lateinit var viewModel: ListDeviceDialogViewModel
-    private lateinit var bluetoothViewModel:BluetoothViewModel
+    private lateinit var bluetoothViewModel: BluetoothViewModel
     private var bluetoothDevices: StateFlow<List<BluetoothDevice>> =
         MutableStateFlow(emptyList<BluetoothDevice>())
     private val bluetoothActive = MutableStateFlow(false)
@@ -41,7 +41,10 @@ class ListDeviceDialog: ComponentActivity() {
         lifecycleScope.launch {
             bluetoothViewModel.bindBluetoothService()
             bluetoothViewModel.checkBluetoothPermission().onFailure {cancel()}
-            bluetoothViewModel.getDevicesFlow().onSuccess {bluetoothDevices = it}
+            bluetoothViewModel.getDevicesFlow().onSuccess {
+                bluetoothDevices = it
+                bluetoothActive.value = bluetoothViewModel.isConnected().isSuccess
+            }
             setContent {
                 DeviceListScreen(switchEvent = {newStatus ->
                     if (newStatus) {
@@ -72,31 +75,7 @@ class ListDeviceDialog: ComponentActivity() {
             bluetoothViewModel.isConnected()
             bluetoothViewModel.getDevicesFlow()
             bluetoothActive.value = resultCode == RESULT_OK
+            recreate()
         }
-    }/*
-        list!!.setOnItemClickListener { parent, view, position, id ->
-            CoroutineScope(Dispatchers.Default).launch {
-                val selectedItem = devices[position]
-                Log.d("BikeBluetooth", devices.toString())
-                if (viewModel.connect(selectedItem).isFailure) {
-                    Log.d("BikeBluetooth", getString(R.string.connectionNotEstablished))
-                    viewModel.disconnect()
-                    withContext(Dispatchers.Main) {
-                        Log.d("BikeBluetooth", "1")
-                        Toast.makeText(
-                        applicationContext,
-                        getString(R.string.connectionNotEstablished), Toast.LENGTH_SHORT
-                    )
-                        .show()
-                        Log.d("BikeBluetooth", "2")
-                    }
-                    return@launch
-                }
-                val resultIntent = click(viewModel.device!!)
-                setResult(Activity.RESULT_OK, resultIntent)
-                viewModel.disconnect()
-                finish()
-            }
-        }
-    }*/
+    }
 }
