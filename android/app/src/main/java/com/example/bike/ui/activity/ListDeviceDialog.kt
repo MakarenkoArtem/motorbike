@@ -39,7 +39,7 @@ class ListDeviceDialog: ComponentActivity() {
         setFinishOnTouchOutside(true) //закрытие активити когда пользователь нажимает за переделы окна
 
         lifecycleScope.launch {
-            bluetoothViewModel.startBluetoothService()
+            bluetoothViewModel.bindBluetoothService()
             bluetoothViewModel.checkBluetoothPermission().onFailure {cancel()}
             bluetoothViewModel.getDevicesFlow().onSuccess {bluetoothDevices = it}
             setContent {
@@ -58,6 +58,7 @@ class ListDeviceDialog: ComponentActivity() {
                                     putExtra("SELECTED_DEVICE", client)
                                 }
                                 setResult(RESULT_OK, intent)
+                                client.disconnect()
                                 finish()
                             }
                         })
@@ -68,7 +69,7 @@ class ListDeviceDialog: ComponentActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BT) {
-            bluetoothViewModel.checkBluetoothAdapter()
+            bluetoothViewModel.isConnected()
             bluetoothViewModel.getDevicesFlow()
             bluetoothActive.value = resultCode == RESULT_OK
         }

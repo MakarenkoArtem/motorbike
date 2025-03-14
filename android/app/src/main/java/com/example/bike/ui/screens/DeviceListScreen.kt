@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bike.R
-import com.example.bike.ui.components.BluetoothHeader
+import com.example.bike.ui.components.BluetoothHeaderFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -66,7 +66,7 @@ fun DeviceListScreen(switchEvent: (Boolean) -> Unit,
                 .fillMaxWidth()
                 .heightIn(max=350.dp)
             ) {
-                BluetoothHeader(switchActive) {newState -> switchEvent(newState)}
+                BluetoothHeaderFragment(switchActive) {newState -> switchEvent(newState)}
                 if (switchActive) {
                     if (devices.isEmpty()) {
                         EmptyBody(stringResource(id = R.string.emptyDeviceList))
@@ -88,12 +88,13 @@ fun Body(devices: List<BluetoothDevice>, selectionFunc: (BluetoothDevice) -> (Un
     LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top =16.dp),
     ) {
         items(devices) {device ->
             Text(modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .heightIn(min=40.dp)
+                //.padding(vertical = 8.dp)
                 .clickable {selectionFunc(device)},
                     textAlign = TextAlign.Start,
                     style = TextStyle(
@@ -122,7 +123,7 @@ fun EmptyBody(text: String) {
 @PreviewLightDark
 @Preview(showBackground = true)
 @Composable
-fun DeviceListPreview() {
+fun DeviceListScreenPreview() {
     val active = MutableStateFlow(false)
     val devices = MutableStateFlow(emptyList<BluetoothDevice>())
     DeviceListScreen(switchEvent = {newStatus -> active.value = newStatus},
