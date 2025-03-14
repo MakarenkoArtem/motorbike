@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.alpha
 import androidx.lifecycle.ViewModel
-import com.example.bike.MainActivity.MainActivity
 import com.example.bike.model.CurrentColor
 import com.example.bike.model.ScreenViewData
 import com.example.bike.services.bluetooth.BluetoothClient
@@ -108,8 +107,8 @@ class MainActivityViewModel(val bluetoothViewModel: BluetoothViewModel): ViewMod
             val colors = screenDataState.value.colors.toMutableList()
             colors[screenDataState.value.curColor.index] =
                 colors[screenDataState.value.curColor.index].copy(pixel)
-            _screenDataState.value =
-                screenDataState.value.copy(colors = colors) //screenDataState.value.curColor.activeButton?.setBackgroundColor(pixel)
+            _screenDataState.value = _screenDataState.value.copy(colors = colors)
+            updateColors()
         }
     }
 

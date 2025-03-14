@@ -1,15 +1,12 @@
 package com.example.bike.model
 
 import android.graphics.Color
-import android.view.View.OnTouchListener
 import android.widget.Button
-import android.widget.NumberPicker
-import android.widget.NumberPicker.OnValueChangeListener
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 
-class CurrentColor(var index:Int=-1,
+data class CurrentColor(var index:Int=-1,
     var color: Int = Color.argb(0, 0, 0, 0), var activeButton: Button? = null,/*var redPicker: NumberPicker? = null,
                    var greenPicker: NumberPicker? = null,
                    var bluePicker: NumberPicker? = null,*/
