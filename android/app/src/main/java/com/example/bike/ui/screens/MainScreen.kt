@@ -1,147 +1,103 @@
 package com.example.bike.ui.screens
 
+import android.app.Application
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.example.bike.model.ScreenViewData
+import com.example.bike.services.bluetooth.BluetoothViewModel
+import com.example.bike.ui.components.ControlButtonFragment
+import com.example.bike.ui.components.NumberPickersFragment
+import com.example.bike.ui.components.PickerAndSliderFragment
+import com.example.bike.ui.components.SectionWithRegimsFragment
+import com.example.bike.ui.model.MainScreenActionsModel
+import com.example.bike.ui.viewmodel.MainActivityViewModel
 
-/*@Composable
-fun MainScreen() {
-    MaterialTheme {
+
+@Composable
+fun MainScreen(mainActivityViewModel: MainActivityViewModel, openDialog:()->Unit) {
+    val screenState by mainActivityViewModel.screenDataState.collectAsState()
+    val actionsModel = MainScreenActionsModel(mainActivityViewModel)
+    MainScreenContent(screenState, actionsModel, openDialog)
+}
+
+@Composable
+fun MainScreenContent(screenState: ScreenViewData, actionsModel: MainScreenActionsModel, openDialog:()->Unit) {
+    MaterialTheme(colors = darkColors()
+    ) {
         Surface(modifier = Modifier.fillMaxSize()) {
-            BigParts()
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                PickerAndSliderFragment(screenState, actionsModel)
+                NumberPickersFragment(screenState.curColor, actionsModel,modifier = Modifier.weight(1f, fill = true))
+                SectionWithRegimsFragment(screenState, actionsModel)
+                ControlButtonFragment(screenState, actionsModel, openDialog,modifier = Modifier
+                    .padding(top=8.dp)
+                    .align(                        Alignment.CenterHorizontally)
+                )
+            }
         }
     }
 }
-*/
-@Preview(showBackground = true)
-@PreviewLightDark
+@Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun BigParts() {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        PartWithCircle()
-    }
+fun MainScreenContentPreview() {
+    val viewModel by remember { mutableStateOf(MainActivityViewModel(BluetoothViewModel(Application())))}
+    MainScreen(viewModel, {})
 }
-
-@Preview(showBackground = true)
-@PreviewLightDark
-@Composable
-fun PartWithCircle() {
-    var sliderPosition by remember { mutableStateOf(5f) }
-    Text(text = sliderPosition.toString())
-    Button(onClick = { /*TODO*/ }, content={Text("njk")} )
-    Slider(
-        value = sliderPosition,
-        valueRange = 0f..100f,
-        onValueChange = {
-            println("11")
-            sliderPosition = it + 1
-        },
-        modifier = Modifier
-            .width(285.dp) // Высота слайдера
-            .rotate(270f),
-    )
-}
-
-
 /*
-@Preview(backgroundColor = true)
+@Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun MainScreen() {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        ConstraintLayout(
-            //modifier = Modifier.fillMaxWidth().weight(0.35f)
-        ) {
-            val brightnessSlider, colorPicker, barSlider) = createRefs()
+fun MainScreenContentPreview() {
+    val brightness = remember {mutableStateOf(100f)}
+    val bar = remember {mutableStateOf(200f)}
+    val (r, g, b) = remember {listOf(mutableStateOf(200), mutableStateOf(200), mutableStateOf(200))}
 
-            Slider(
-                value = 0f,
-                onValueChange = {},
-                valueRange = 0f..255f,
-                modifier = Modifier
-                    .height(285.dp)
-                    .rotate(270f)
-                    .constrainAs(brightnessSlider) {
-                        start.linkTo(parent.start)
-                        end.linkTo(colorPicker.start)
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                    }
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.color),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(0.7f)
-                    .constrainAs(colorPicker) {
-                        start.linkTo(brightnessSlider.end)
-                        end.linkTo(barSlider.start)
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                    }
-            )
-
-            Slider(
-                value = 0f,
-                onValueChange = {},
-                valueRange = 0f..100f,
-                modifier = Modifier
-                    .height(285.dp)
-                    .rotate(270f)
-                    .constrainAs(barSlider) {
-                        start.linkTo(colorPicker.end)
-                        end.linkTo(parent.end)
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                    }
-            )
-
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Button(onClick = { /* TODO */ }) {
-                Text(text = "Connect")
-            }
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(painterResource(id = R.drawable.bt), contentDescription = null)
-            }
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(painterResource(id = R.drawable.mute), contentDescription = null)
-            }
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(painterResource(id = R.drawable.start), contentDescription = null)
-            }
-        }
-    }
-}
-}}*/
+    val (indexType, indexMode) = remember {List(2, {mutableStateOf(0)})}
+    val (gradient, HSV, movement, synchrony) = remember {List(4, {mutableStateOf(false)})}
+    MainScreenContent(
+            brightness.value,
+            bar.value,
+            {value -> brightness.value = value},
+            {value -> bar.value = value},
+            r.value,
+            g.value,
+            b.value,
+            {value -> r.value = value},
+            {value -> g.value = value},
+            {value -> b.value = value},
+            listOf(Color.Red, Color.White, Color.Blue),
+            ColorButtonEvent(-1, {_ ->}, {_ ->}),
+            listOf("Основной", "Цвето-\nмузыка", "Цв.муз\n(частоты)", "Стробоскоп"),
+            indexType.value,
+            {value -> indexType.value = value},
+            listOf("База", "Мерцание"),
+            indexMode.value,
+            {value -> indexMode.value = value},
+            gradient.value,
+            {value -> gradient.value = value},
+            HSV.value,
+            {value -> HSV.value = value},
+            movement.value,
+            {value -> movement.value = value},
+            synchrony.value,
+            {value -> synchrony.value = value},
+    )
+}*/
