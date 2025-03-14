@@ -1,22 +1,14 @@
 package com.example.bike.ui.components
 
-import android.widget.Button
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.RadioButton
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
@@ -31,9 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColor
 import com.example.bike.R
 import com.example.bike.model.ScreenViewData
 import com.example.bike.ui.model.MainScreenActionsModel
@@ -59,7 +49,7 @@ fun SectionWithRegimsFragment(screenState: ScreenViewData, actionsModel: MainScr
         }
         Column {
             Row {
-                RadioGroupCustom(listOf("Основной", "Цветомузыка", "Цв.муз(частоты)", "Стробоскоп"),
+                RadioGroupCustom(listOf("Основной", "Цвето-\nмузыка", "Частотное", "Стробоскоп"),
                         screenState.type,
                         actionsModel.setTypeColors,
                         modifier = Modifier
