@@ -1,215 +1,200 @@
 package com.example.bike.services.bluetooth
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.graphics.Color
-import android.os.Parcelable
-import android.os.SystemClock
 import android.util.Log
-import kotlinx.android.parcel.Parcelize
-import java.io.IOException
+import com.example.bike.datasource.remote.model.BluetoothData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-@Parcelize
-class BluetoothClient(
-    val device: BluetoothDevice,
-    var name: String = ""
-) : Parcelable {
-    var bTSocket: BluetoothSocket? = null
-    var inputStream: InputStream? = null
-    var outputStream: OutputStream? = null
 
+class BluetoothClient(
+    var address: String,
+    private val bTSocket: BluetoothSocket,
+    var name: String = ""
+) {
+    private val inputStream: InputStream
+    private val outputStream: OutputStream
+    private val _bluetoothData: MutableStateFlow<BluetoothData> = MutableStateFlow(BluetoothData())
+    val bluetoothData: StateFlow<BluetoothData> = _bluetoothData
 
     init {
-        try {
-            name = device.name
-        } catch (e: SecurityException) {
-        }
+        inputStream = bTSocket.inputStream
+        outputStream = bTSocket.outputStream
     }
 
-    fun connect(check: Boolean = true): Result<Unit> {
-        try {//Инициируем соединение с устройством
-            Log.d("BikeBluetooth", "!!!connect")
-            bTSocket =
-                device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")) //незащищенное соединение
-            bTSocket!!.connect()
-            inputStream = bTSocket!!.inputStream
-            outputStream = bTSocket!!.outputStream
-            Log.d("BikeBluetooth", "!!!$outputStream $inputStream")
-        } catch (e: SecurityException) {
-            Log.d("BikeBluetooth", e.message!!)
-            return Result.failure(e)
-        } catch (closeException: IOException) {
-            Log.d("BikeBluetooth", "Could not close the client socket $closeException")
-            return Result.failure(closeException)
-        } catch (e: Exception) {
-            Log.d("BikeBluetooth", e.message!!)
-            return Result.failure(e)
-        }
+    fun getDataFlow() = bluetoothData
+
+    fun connect(check: Boolean = true): Result<StateFlow<BluetoothData>> {
         if (check) {
-            return connectRequest(5, 500, true)
+            CoroutineScope(Dispatchers.Default).launch {
+                _bluetoothData.value = _bluetoothData.value.copy(
+                    active = connectRequest(5, 500, true).isSuccess
+                )
+            }
         } else {
-            return Result.success(Unit)
+            _bluetoothData.value = _bluetoothData.value.copy(active = true)
         }
+        return Result.success(bluetoothData)
     }
 
-    fun connectRequest(
+    suspend private fun connectRequest(
         count: Int = 1,
         time: Long = 0,
-        wait_answer: Boolean = false
-    ): Result<Unit> {
-        Log.d("BikeBluetooth", "BTSend")
+        waitAnswer: Boolean = false
+    ): Result<Unit> = kotlin.runCatching {
         var message = ""
-        return runCatching {
-            for (i in 0..count) {
-                sendMessage("Con\n")
-                if (wait_answer) {
-                    message = takeMessage().getOrNull() ?: ""
-                    Log.d("BikeBluetooth", message)
-                    if (message.substring(0, 2) == "OK") {
-                        Log.d("BikeBluetooth", "Connect")
-                        return Result.success(Unit)
-                    }
+        for (i in 0..count) {
+            sendMessage("Con\n")
+            if (waitAnswer) {
+                message = takeMessage().getOrNull() ?: ""
+                Log.d("Bike.BluetoothClient", message)
+                if (message.substring(0, 2) == "OK") {
+                    Log.d("Bike.BluetoothClient", "Connect")
+                    return@runCatching
                 }
-                SystemClock.sleep(time)
             }
+            delay(time)
         }
+        throw Exception("Connection lost")
     }
 
-    fun getColors(
-        timeOut: Int = 500
-    ): Result<List<Int>> {
-        outputStream?.write("GC\n".toByteArray())
-        Log.d("BikeBluetooth", "GC")
-        outputStream?.flush()
+
+
+fun getColors(timeOut: Int = 500): Result<List<Int>> = kotlin.runCatching {
+    outputStream.write("GC\n".toByteArray())
+    outputStream.flush()
+    Log.d("Bike.BluetoothClient", "GC")
+    CoroutineScope(Dispatchers.Default).launch {
         var time = 0
-        while (timeOut <= time && inputStream?.available() == 0) {
-            SystemClock.sleep(100)
+        while (timeOut <= time && inputStream.available() == 0) {
+            delay(100)
             time += 100
         }
-        val buffer = ByteArray(1024)// буферный массив
-        val size = inputStream?.read(buffer) ?: 0
+        val buffer = ByteArray(1024)
+        val size = inputStream.read(buffer)
         val message = String(buffer, 0, size)
         Log.d("BikeBluetooth", "$size: $message")
-        if (size == 0) {
-            return Result.failure(IllegalStateException("Нет данных"))
+        if (size == 0) { // Result.failure(IllegalStateException("Нет данных"))
+            return@launch
         }
-        val data = message.split(Regex(",")).dropLastWhile { it.isEmpty() }
-        return runCatching {
-            val colors = Array(5, { Color.BLACK })
-            for (i in 0..4) {
-                val r = data[i * 4 + 1].toInt()
-                val g = data[i * 4 + 2].toInt()
-                val b = data[i * 4 + 3].toInt()
-                val pixels = Color.argb(255, r, g, b)
-                colors[i] = pixels
-                //colorButtons[i]!!.backgroundTintList = ColorStateList.valueOf(pixels)
-            }
-            Log.d("BikeBluetooth", colors.toString())
-            colors.toList()
+        val data = message.split(",") //Regex(","))
+            .dropLastWhile {it.isEmpty()}
+        val colors = MutableList(5, {Color.BLACK})
+        for (i in 0..4) {
+            val r = data[i * 4 + 1].toInt()
+            val g = data[i * 4 + 2].toInt()
+            val b = data[i * 4 + 3].toInt()
+            val pixels = Color.argb(255, r, g, b)
+            colors[i] = pixels
+        }
+        Log.d("Bike.BluetoothClient", bluetoothData.value.colors.toString())
+        _bluetoothData.value = _bluetoothData.value.copy(colors = colors)
+    }
+    bluetoothData.value.colors
+}
+
+
+fun sendMessage(
+    message: String,
+    repeat: Int = 1,
+    timeWait: Long = 100
+): Result<Unit> {
+    CoroutineScope(Dispatchers.Default).launch {
+        Log.d("BikeBluetooth", message)
+        outputStream.write(message.toByteArray())
+        repeat(repeat - 1) {
+            delay(timeWait)
+            outputStream.write(message.toByteArray())
         }
     }
+    return Result.success(Unit)
+}
 
-
-    fun sendMessage(
-        message: String,
-        repeat: Int = 1,
-        timeWait: Long = 100
-    ): Result<Unit> {
-        return runCatching {
-            Log.d("BikeBluetooth", message)
-            outputStream?.write(message.toByteArray())
-            repeat(repeat - 1) {
-                SystemClock.sleep(timeWait)
-                outputStream?.write(message.toByteArray())
-            }
-        }
-    }
-
-    fun takeMessage(
-        repeat: Int = 1,
-        timeWait: Long = 200
-    ): Result<String> {
-        val buffer = ByteArray(1024) // буферный массив
-        val executor = Executors.newSingleThreadExecutor() // создаем executor
-        return runCatching {
-            for (i in 0 until repeat) {
-                val future = executor.submit<String> {
-                    inputStream?.read(buffer)?.let { size ->
+suspend fun takeMessage(
+    repeat: Int = 1,
+    timeWait: Long = 200
+): Result<String> {
+    val buffer = ByteArray(1024) // буферный массив
+    val executor = Executors.newSingleThreadExecutor() // создаем executor
+    return runCatching {
+        repeat(repeat) {
+            val future = executor.submit<String> {
+                inputStream.read(buffer)
+                    .let {size ->
                         if (size > 0) {
                             String(buffer, 0, size)
                         } else {
                             null
                         }
-                    } ?: throw IllegalStateException("Нет входного потока")
-                }
-                try {
-                    // Ждем ответа с тайм-аутом
-                    val result = future.get(timeWait, TimeUnit.MILLISECONDS)
-                    if (result != null) {
-                        return@runCatching result
                     }
-                } catch (e: TimeoutException) {
-                    Log.d("BikeBluetooth", "Ошибка: ${e.message}")
-                    //throw IllegalStateException("Время ожидания истекло")
-                } catch (e: Exception) {
-                    // Обработка других исключений, если они возникают
-                    Log.d("BikeBluetooth", "Ошибка: ${e.message}")
+            }
+            try {
+                val result = future.get(timeWait, TimeUnit.MILLISECONDS)
+                if (result != null) {
+                    return@runCatching result
                 }
-                /*
-                // Задержка перед следующим чтением, если это не последний раз
-                if (i != repeat - 1) {
-                    SystemClock.sleep(timeWait)
-                }*/
+            } catch (e: TimeoutException) { //throw IllegalStateException("Время ожидания истекло")
             }
-            throw IllegalStateException("Время ожидания истекло")
-        }.also {
-            executor.shutdown() // Закрываем executor
+        }
+        throw IllegalStateException("Время ожидания истекло")
+    }.also {
+        executor.shutdown()
+    }
+}
+
+suspend fun colorSend(
+    color: Int,
+    index: Int
+): Result<Unit> = runCatching {
+    val message = String.format(
+        "Cr:%03d,%03d,%03d,%03d,\n",
+        51 * index + 26,
+        Color.red(color),
+        Color.green(color),
+        Color.blue(color)
+    )
+    sendMessage(message).getOrThrow()
+    CoroutineScope(Dispatchers.Default).launch {
+        if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
+            connect(true)
         }
     }
+}
 
-    fun colorSend(color: Int, index: Int): Result<Unit> {
-        return runCatching {
-            val message = "Cr:" + String.format(
+suspend fun colorsSend(colors: List<Int>): Result<Unit> {
+    var message = "Co:"
+    return runCatching {
+        for (i in 0..4) {
+            message += String.format(
                 "%03d,%03d,%03d,%03d,",
-                51 * index + 26, Color.red(color), Color.green(color), Color.blue(color)
-            ) + "\n"
-            sendMessage(message)
+                51 * i + 26,
+                Color.red(colors[i]),
+                Color.green(colors[i]),
+                Color.blue(colors[i])
+            )
+        }
+        message += "\n"
+        sendMessage(message).getOrThrow()
+        CoroutineScope(Dispatchers.Default).launch {
             if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
-                throw IllegalStateException("Damaged message")
+                connect(true)
             }
         }
     }
+}
 
-    fun colorsSend(colors: List<Int>): Result<Unit> {
-        var message = "Co:"
-        return runCatching {
-            for (i in 0..4) {
-                message += String.format(
-                    "%03d,%03d,%03d,%03d,",
-                    51 * i + 26, Color.red(colors[i]), Color.green(colors[i]), Color.blue(colors[i])
-                )
-            }
-            message += "\n"
-            sendMessage(message)
-            if ((takeMessage().getOrNull() ?: "") == "Damaged message") {
-                throw IllegalStateException("Damaged message")
-            }
-        }
-    }
-
-    fun disconnect(): Result<Unit> {
-        Log.d("BikeBluetooth", "disconnect")
-        try {
-            bTSocket!!.close()
-        } catch (e: Exception) {
-            return Result.failure(e)
-        }
-        return Result.success(Unit)
-    }
+fun disconnect(): Result<Unit> = kotlin.runCatching {
+    Log.d("Bike.BluetoothClient", "disconnect")
+    bTSocket.close()
+}
 }
