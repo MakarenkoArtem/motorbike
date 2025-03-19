@@ -1,80 +1,94 @@
 package com.example.bike.ui.activity
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.example.bike.factory.ListDeviceDialogViewModelFactory
-import com.example.bike.services.bluetooth.BluetoothViewModel
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.bike.ui.screens.DeviceListScreen
 import com.example.bike.ui.viewmodel.ListDeviceDialogViewModel
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 class ListDeviceDialog: ComponentActivity() {
     private lateinit var viewModel: ListDeviceDialogViewModel
-    private lateinit var bluetoothViewModel: BluetoothViewModel
-    private var bluetoothDevices: StateFlow<List<BluetoothDevice>> =
-        MutableStateFlow(emptyList<BluetoothDevice>())
-    private val bluetoothActive = MutableStateFlow(false)
     val REQUEST_ENABLE_BT = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         super.onCreateDescription()
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-        bluetoothViewModel = ViewModelProvider(this).get(BluetoothViewModel::class.java)
-        viewModel = ViewModelProvider(this, ListDeviceDialogViewModelFactory(bluetoothViewModel)
-        ).get(ListDeviceDialogViewModel::class.java)
-
         setFinishOnTouchOutside(true) //закрытие активити когда пользователь нажимает за переделы окна
 
-        lifecycleScope.launch {
-            bluetoothViewModel.bindBluetoothService()
-            bluetoothViewModel.checkBluetoothPermission().onFailure {cancel()}
-            bluetoothViewModel.getDevicesFlow().onSuccess {
-                bluetoothDevices = it
-                bluetoothActive.value = bluetoothViewModel.isConnected().isSuccess
+        /*
+                bluetoothViewModel = ViewModelProvider(this).get(BluetoothViewModel::class.java)
+                viewModel = ViewModelProvider(this, ListDeviceDialogViewModelFactory(bluetoothViewModel)
+                ).get(ListDeviceDialogViewModel::class.java)*/
+
+        val enableBtLauncher =
+            this.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    Log.d("Bike.ListDeviceDialog", "RESULT_OK")
+                    viewModel.switchEvent(true)
+                    recreate()
+                } else { // Пользователь отклонил запрос на включение Bluetooth
+                    Log.d("Bike.ListDeviceDialog", "RESULT_FAIL")
+                }
             }
-            setContent {
-                DeviceListScreen(switchEvent = {newStatus ->
-                    if (newStatus) {
-                        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+
+        setContent {
+            viewModel = koinViewModel()
+            LaunchedEffect(Unit) {
+                viewModel.screenDataState.collect {device ->
+                    if (device.connectedDevice != null) {
+                        val intent = Intent().putExtra("SELECTED_DEVICE", device.connectedDevice!!)
+                        setResult(RESULT_OK, intent)
+                        finish()
                     }
-                    bluetoothActive.value = newStatus
-                },
-                        switchActiveFlow = bluetoothActive,
-                        devicesFlow = bluetoothDevices,
-                        selectionFunc = {device ->
-                            viewModel.connect(device).onSuccess {client ->
-                                val intent = Intent().apply {
-                                    putExtra("SELECTED_DEVICE", client)
-                                }
-                                setResult(RESULT_OK, intent)
-                                client.disconnect()
-                                finish()
-                            }
-                        })
+                }
             }
+            val screenState by viewModel.screenDataState.collectAsState()
+
+            DeviceListScreen(screenState = screenState, switchEvent = {newStatus ->
+                Log.d(
+                    "Bike.ListDeviceDialog",
+                    viewModel.bluetoothRepository.checkBluetoothPermission()
+                        .toString()
+                )
+                if (newStatus && viewModel.bluetoothRepository.checkBluetoothPermission().isSuccess) { //                    bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
+                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    enableBtLauncher.launch(enableBtIntent)
+                    viewModel.switchEvent(true)
+                } else {
+                    viewModel.switchEvent(false)
+                }
+            }, selectionFunc = {device ->
+                viewModel.connect(device)
+                    .onSuccess {
+                        val intent = Intent().putExtra("SELECTED_DEVICE", device)
+                        setResult(RESULT_OK, intent)
+                        viewModel.disconnect()
+                        finish()
+                    }
+            })
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ENABLE_BT) {
-            bluetoothViewModel.isConnected()
-            bluetoothViewModel.getDevicesFlow()
-            bluetoothActive.value = resultCode == RESULT_OK
+        if (requestCode == REQUEST_ENABLE_BT && viewModel.getStatus().isSuccess) {
+            viewModel.switchEvent(resultCode == RESULT_OK)
             recreate()
         }
     }
