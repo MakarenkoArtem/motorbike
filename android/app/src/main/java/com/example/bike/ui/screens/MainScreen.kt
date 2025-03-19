@@ -1,6 +1,6 @@
 package com.example.bike.ui.screens
 
-import android.app.Application
+import android.app.Activity
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.bike.data.repository.BluetoothRepository
 import com.example.bike.model.ScreenViewData
-import com.example.bike.services.bluetooth.BluetoothViewModel
 import com.example.bike.ui.components.ControlButtonFragment
 import com.example.bike.ui.components.NumberPickersFragment
 import com.example.bike.ui.components.PickerAndSliderFragment
@@ -29,40 +29,56 @@ import com.example.bike.ui.viewmodel.MainActivityViewModel
 
 
 @Composable
-fun MainScreen(mainActivityViewModel: MainActivityViewModel, openDialog:()->Unit) {
+fun MainScreen(
+    mainActivityViewModel: MainActivityViewModel,
+    openDialog: () -> Unit
+) {
     val screenState by mainActivityViewModel.screenDataState.collectAsState()
     val actionsModel = MainScreenActionsModel(mainActivityViewModel)
     MainScreenContent(screenState, actionsModel, openDialog)
 }
 
 @Composable
-fun MainScreenContent(screenState: ScreenViewData, actionsModel: MainScreenActionsModel, openDialog:()->Unit) {
-    MaterialTheme(colors = darkColors()
+fun MainScreenContent(
+    screenState: ScreenViewData,
+    actionsModel: MainScreenActionsModel,
+    openDialog: () -> Unit
+) {
+    MaterialTheme(
+        colors = darkColors()
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 PickerAndSliderFragment(screenState, actionsModel)
-                NumberPickersFragment(screenState.curColor, actionsModel,modifier = Modifier.weight(1f, fill = true))
+                NumberPickersFragment(
+                    screenState.curColor,
+                    actionsModel,
+                    modifier = Modifier.weight(1f, fill = true)
+                )
                 SectionWithRegimsFragment(screenState, actionsModel)
-                ControlButtonFragment(screenState, actionsModel, openDialog,modifier = Modifier
-                    .padding(top=8.dp)
-                    .align(                        Alignment.CenterHorizontally)
+                ControlButtonFragment(
+                    screenState,
+                    actionsModel,
+                    openDialog,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
             }
         }
     }
 }
+
 @Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun MainScreenContentPreview() {
-    val viewModel by remember { mutableStateOf(MainActivityViewModel(BluetoothViewModel(Application())))}
+    val viewModel by remember {mutableStateOf(MainActivityViewModel(BluetoothRepository(Activity())))}
     MainScreen(viewModel, {})
-}
-/*
+}/*
 @Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun MainScreenContentPreview() {
