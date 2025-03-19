@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:scrollbarSize="50dp"
     android:theme="@style/Base.Theme.Bike"
-    tools:context=".MainActivity.MainActivity">
+    tools:context=".ui.activity.MainActivity">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

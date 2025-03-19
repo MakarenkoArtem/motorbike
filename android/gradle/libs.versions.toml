@@ -14,8 +14,10 @@ materialVersion = "1.7.8"
 activityCompose = "1.10.1"
 ui = "1.7.8"
 uiToolingPreview = "1.7.8"
-constraintlayoutCompose="1.0.1"
-numberpicker="1.0.3"
+constraintlayoutCompose = "1.0.1"
+koinAndroid = "3.4.0"
+koinCore = "3.4.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,8 +34,10 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayoutCompose" }
-#ferfalk-numberpicker = { group = "com.github.ferfalk", name = "compose-numberpicker", version.ref = "numberpicker" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
+koin-android = {module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCore" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

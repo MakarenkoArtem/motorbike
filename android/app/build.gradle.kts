@@ -47,7 +47,6 @@ dependencies {
     implementation(libs.androidx.compose)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.constraintlayout.compose)
-    //implementation(libs.ferfalk.numberpicker)
     debugImplementation(libs.androidx.ui.tooling)
     implementation (libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -58,4 +57,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 }
