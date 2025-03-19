@@ -103,7 +103,7 @@ class BluetoothService: Service() {
         }
     }
 
-    fun getDevicesFlow(): StateFlow<List<Device>> {
+    fun fetchDevicesFlow(): StateFlow<List<Device>> {
         updateBondedDevices()
         return devicesFlow
     }
