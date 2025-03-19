@@ -6,11 +6,14 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 
-data class CurrentColor(var index:Int=-1,
-    var color: Int = Color.argb(0, 0, 0, 0), var activeButton: Button? = null,/*var redPicker: NumberPicker? = null,
+data class CurrentColor(
+    var index: Int = -1,
+    var color: Int = Color.argb(0, 0, 0, 0),
+    var activeButton: Button? = null,/*var redPicker: NumberPicker? = null,
                    var greenPicker: NumberPicker? = null,
                    var bluePicker: NumberPicker? = null,*/
-                   var stepPicker: Int = 5) {
+    var stepPicker: Int = 5
+) {
 
     /*fun setPickers(pickers: List<NumberPicker>,
                    onTouchLis: OnTouchListener,
@@ -34,7 +37,10 @@ data class CurrentColor(var index:Int=-1,
         bluePicker = pickers[2]
     }*/
 
-    fun updatePicker(value: Int, colorChar: Char): Result<Int> {
+    fun updatePicker(
+        value: Int,
+        colorChar: Char
+    ): Result<Int> {
         if (!(value in 0..255)) {
             return Result.failure(Exception("Out of range"))
         }
@@ -43,9 +49,11 @@ data class CurrentColor(var index:Int=-1,
             'r' -> {
                 r = value
             }
+
             'g' -> {
                 g = value
             }
+
             'b' -> {
                 b = value
             }

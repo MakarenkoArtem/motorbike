@@ -1,6 +1,6 @@
 package com.example.bike.ui.components
 
-import android.app.Application
+import android.app.Activity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.SliderDefaults
@@ -15,10 +15,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.lifecycle.ViewModelProvider
 import com.example.bike.R
+import com.example.bike.data.repository.BluetoothRepository
 import com.example.bike.model.ScreenViewData
-import com.example.bike.services.bluetooth.BluetoothViewModel
 import com.example.bike.ui.model.MainScreenActionsModel
 import com.example.bike.ui.viewmodel.MainActivityViewModel
 
@@ -44,7 +43,7 @@ fun PickerAndSliderFragment(screenState: ScreenViewData, actionsModel: MainScree
                         end.linkTo(colorPicker.start)
                         bottom.linkTo(parent.bottom)
                     })
-        ColorPicker(painter = painterResource(id = R.drawable.color), move=actionsModel.setCurrentColor, moveUp = actionsModel.updateColors, imageHeightDp = imageHeight, modifier = Modifier.constrainAs(colorPicker) {
+        ColorPicker(painter = painterResource(id = R.drawable.color), move=actionsModel.colorPickerSend, moveUp = actionsModel.updateColors, imageHeightDp = imageHeight, modifier = Modifier.constrainAs(colorPicker) {
             width = Dimension.percent(0.7f)
             start.linkTo(brightSlider.end)
             end.linkTo(barSlider.start)
@@ -71,7 +70,7 @@ fun PickerAndSliderFragment(screenState: ScreenViewData, actionsModel: MainScree
 @Composable
 fun PickerAndSliderFragmentPreview() {
     val state by remember {mutableStateOf(ScreenViewData())}
-    val action = MainScreenActionsModel(MainActivityViewModel(BluetoothViewModel(Application())))
+    val action = MainScreenActionsModel(MainActivityViewModel(BluetoothRepository(Activity())))
     PickerAndSliderFragment(state, action)
 
     /*val bright = remember {mutableStateOf(50f)}

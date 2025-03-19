@@ -13,7 +13,6 @@ data class ScreenViewData(
     var ignition: Boolean = true,
     var amplifier: Boolean = false,
     var audioBT: Boolean = true,
-    var client: BluetoothClient? = null,
     var mode:Int=0,
     var hsv:Boolean=false,
     var gradient:Boolean=true,

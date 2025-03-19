@@ -107,7 +107,7 @@ fun GradientHSVButtons(gradient: Boolean = true,
                     .clickable {updateGradient(!gradient)}
                     .padding(0.dp)
                     .fillMaxWidth()) {
-            RadioButton(selected = gradient, onClick = {}, modifier = Modifier.padding(0.dp)
+            RadioButton(selected = gradient, onClick = {updateGradient(!gradient)}, modifier = Modifier.padding(0.dp)
             )
             Text(text = stringResource(R.string.gradient),
                     color = Color.White,
@@ -121,7 +121,7 @@ fun GradientHSVButtons(gradient: Boolean = true,
                     .clickable {updateHSV(!HSV)}
                     .padding(0.dp)
                     .fillMaxWidth()) {
-            RadioButton(selected = HSV, onClick = {}, modifier = Modifier.padding(0.dp)
+            RadioButton(selected = HSV, onClick = {updateHSV(!HSV)}, modifier = Modifier.padding(0.dp)
             )
             Text(text = stringResource(R.string.hsv),
                     color = Color.White,
@@ -148,7 +148,7 @@ fun MovementSynchronyButtons(movement: Boolean = true,
                     .clickable {updateMovement(!movement)}
                     .padding(0.dp)
                     .fillMaxWidth()) {
-            RadioButton(selected = movement, onClick = {}, modifier = Modifier.padding(0.dp)
+            RadioButton(selected = movement, onClick = {updateMovement(!movement)}, modifier = Modifier.padding(0.dp)
             )
             Text(text = stringResource(R.string.movement),
                     color = Color.White,
@@ -162,7 +162,7 @@ fun MovementSynchronyButtons(movement: Boolean = true,
                     .clickable {updateSynchrony(!synchrony)}
                     .padding(0.dp)
                     .fillMaxWidth()) {
-            RadioButton(selected = synchrony, onClick = {}, modifier = Modifier.padding(0.dp)
+            RadioButton(selected = synchrony, onClick = {updateSynchrony(!synchrony)}, modifier = Modifier.padding(0.dp)
             )
             Text(text = stringResource(R.string.synchrony),
                     color = Color.White,
