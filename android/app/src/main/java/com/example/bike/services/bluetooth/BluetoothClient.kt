@@ -127,8 +127,8 @@ class BluetoothClient(
     }
 
     suspend fun takeMessage(
-        repeat: Int = 1,
-        timeWait: Long = 200
+        repeat: Int = 3,
+        timeWait: Long = 50
     ): Result<String> {
         val buffer = ByteArray(1024) // буферный массив
         val executor = Executors.newSingleThreadExecutor() // создаем executor
@@ -145,8 +145,11 @@ class BluetoothClient(
                         }
                 }
                 try {
-                    val result = future.get(timeWait, TimeUnit.MILLISECONDS)
+                    var result = future.get(timeWait, TimeUnit.MILLISECONDS)
                     if (result != null) {
+                        if("OK" in result){
+                            result = "OK"
+                        }
                         return@runCatching result
                     }
                 } catch (e: TimeoutException) { //throw IllegalStateException("Время ожидания истекло")
