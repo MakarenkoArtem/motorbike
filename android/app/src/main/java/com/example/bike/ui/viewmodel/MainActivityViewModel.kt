@@ -74,9 +74,9 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
                     )
                     viewModelScope.launch {
                         if (data.enabled) {
-                            bluetoothRepository.colorSend(ind, Color.Black.toArgb())
+                            bluetoothRepository.colorSend(index=ind, color=Color.Black.toArgb())
                         } else {
-                            bluetoothRepository.colorSend(ind, data.color)
+                            bluetoothRepository.colorSend(index=ind, color=data.color)
                         }
                     } //setCurrentColor(ind)
                     return@mapIndexed data.copy(enabled = !data.enabled)
