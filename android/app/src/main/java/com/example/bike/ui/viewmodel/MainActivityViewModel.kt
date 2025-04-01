@@ -264,7 +264,7 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
     fun setAudioBTStatus() {
         viewModelScope.launch {
             val resp = withTimeoutOrNull(5000) {
-                changeStatus(!screenDataState.value.amplifier, "OnBT\n", "OffBT\n")
+                changeStatus(!screenDataState.value.audioBT, "OnBT\n", "OffBT\n")
             } ?: Result.failure(Exception("Time out"))
             Log.d("Bike.BluetoothClient", resp.toString())
             if (resp.isSuccess) {
