@@ -14,7 +14,7 @@
 #define BIKE_PIN A2
 #define SOUND_R_PIN A6
 #define SOUND_L_PIN A7
-#define NUM_LEDS 18//50
+#define NUM_LEDS 19//50
 
 //BTSerial part
 //      Messages
@@ -34,7 +34,7 @@
 //      DEBUGER
 #define DEBUGER false
 #if DEBUGER
-#define DEBUGBT true
+#define DEBUGBT false
 #define DEBUG_LEVEL_SOUND true
 #endif
 
