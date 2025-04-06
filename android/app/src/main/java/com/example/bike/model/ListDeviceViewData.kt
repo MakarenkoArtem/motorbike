@@ -7,5 +7,5 @@ data class ListDeviceViewData(
     val bluetoothStatus: Boolean = false,
     val connectionStatus: Boolean = false,
     val connectedDevice: Device?=null,
-    val updateVar: Boolean= false
-) {}
+    val updateVar: Boolean= false         // триггер для принудительного обновления UI
+)

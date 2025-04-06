@@ -19,16 +19,15 @@ import org.koin.androidx.compose.koinViewModel
 
 class ListDeviceDialog: ComponentActivity() {
     private lateinit var viewModel: ListDeviceDialogViewModel
-    val REQUEST_ENABLE_BT = 1
+    val REQUEST_ENABLE_BT = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         super.onCreateDescription()
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         setFinishOnTouchOutside(true) //закрытие активити когда пользователь нажимает за переделы окна
-
-        /*
-                bluetoothViewModel = ViewModelProvider(this).get(BluetoothViewModel::class.java)
+        /* Заменил провайдера на koinViewModel
+           bluetoothViewModel = ViewModelProvider(this).get(BluetoothViewModel::class.java)
                 viewModel = ViewModelProvider(this, ListDeviceDialogViewModelFactory(bluetoothViewModel)
                 ).get(ListDeviceDialogViewModel::class.java)*/
 
@@ -57,11 +56,7 @@ class ListDeviceDialog: ComponentActivity() {
             val screenState by viewModel.screenDataState.collectAsState()
 
             DeviceListScreen(screenState = screenState, switchEvent = {newStatus ->
-                Log.d(
-                    "ListDeviceDialog",
-                    viewModel.bluetoothRepository.checkBluetoothPermission()
-                        .toString()
-                )
+                viewModel.bluetoothRepository.checkBluetoothPermission()
                 if (newStatus && viewModel.bluetoothRepository.checkBluetoothPermission().isSuccess) { //                    bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     enableBtLauncher.launch(enableBtIntent)
