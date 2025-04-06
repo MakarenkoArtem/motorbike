@@ -2,21 +2,29 @@ package com.example.bike.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Colors
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -25,13 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bike.R
 import com.example.bike.domain.model.Device
+import com.example.bike.domain.model.DeviceStatus
 import com.example.bike.model.ListDeviceViewData
 import com.example.bike.ui.components.BluetoothHeaderFragment
 
 @Composable
-fun DeviceListScreen(screenState: ListDeviceViewData,
-                     switchEvent: (Boolean) -> Unit,
-                     selectionFunc: (Device) -> (Unit)
+fun DeviceListScreen(
+    screenState: ListDeviceViewData,
+    switchEvent: (Boolean) -> Unit,
+    selectionFunc: (Device) -> (Unit)
 ) {
     MaterialTheme(
         colors = Colors(
@@ -61,7 +71,11 @@ fun DeviceListScreen(screenState: ListDeviceViewData,
                     .fillMaxWidth()
                     .heightIn(max = 350.dp)
             ) {
-                BluetoothHeaderFragment(screenState.bluetoothStatus) {newState -> switchEvent(newState)}
+                BluetoothHeaderFragment(screenState.bluetoothStatus) {newState ->
+                    switchEvent(
+                        newState
+                    )
+                }
                 if (screenState.bluetoothStatus) {
                     if (screenState.devices.isEmpty()) {
                         EmptyBody(stringResource(id = R.string.emptyDeviceList))
@@ -88,18 +102,35 @@ fun Body(
             .fillMaxWidth()
             .padding(top = 16.dp),
     ) {
-        items(devices) {device ->
-            Text(
+        itemsIndexed(devices) {ind, device ->
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 40.dp) //.padding(vertical = 8.dp)
                     .clickable {selectionFunc(device)},
-                textAlign = TextAlign.Start,
-                style = TextStyle(
-                    fontSize = 18.sp,
-                ),
-                text = device.name
-            )
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier
+                        .heightIn(min = 40.dp)
+                        .wrapContentHeight(Alignment.CenterVertically), //.padding(vertical = 8.dp)
+                    textAlign = TextAlign.End, style = TextStyle(
+                        fontSize = 18.sp
+                    ), text = device.name
+                )
+                if (device.status == DeviceStatus.DISCOVERING) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp), strokeWidth = 2.dp, color = Color.White
+                    )
+                } else if (device.status == DeviceStatus.CONNECTED) {
+                    Icon(
+                        painter = painterResource(R.drawable.checkmark),
+                        contentDescription = "checkMark",
+                        tint = Color.Unspecified, // Оставляет оригинальные цвета
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
         }
     }
 
@@ -115,8 +146,7 @@ fun EmptyBody(text: String) {
         ), text = text
     )
 
-}
-/*
+}/*
 @PreviewLightDark
 @Preview(showBackground = true)
 @Composable
