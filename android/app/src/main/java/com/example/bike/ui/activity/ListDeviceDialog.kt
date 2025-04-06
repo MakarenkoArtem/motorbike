@@ -35,11 +35,11 @@ class ListDeviceDialog: ComponentActivity() {
         val enableBtLauncher =
             this.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    Log.d("Bike.ListDeviceDialog", "RESULT_OK")
+                    Log.d("ListDeviceDialog", "RESULT_OK")
                     viewModel.switchEvent(true)
                     recreate()
                 } else { // Пользователь отклонил запрос на включение Bluetooth
-                    Log.d("Bike.ListDeviceDialog", "RESULT_FAIL")
+                    Log.d("ListDeviceDialog", "RESULT_FAIL")
                 }
             }
 
@@ -58,7 +58,7 @@ class ListDeviceDialog: ComponentActivity() {
 
             DeviceListScreen(screenState = screenState, switchEvent = {newStatus ->
                 Log.d(
-                    "Bike.ListDeviceDialog",
+                    "ListDeviceDialog",
                     viewModel.bluetoothRepository.checkBluetoothPermission()
                         .toString()
                 )
@@ -69,15 +69,7 @@ class ListDeviceDialog: ComponentActivity() {
                 } else {
                     viewModel.switchEvent(false)
                 }
-            }, selectionFunc = {device ->
-                viewModel.connect(device)
-                    .onSuccess {
-                        val intent = Intent().putExtra("SELECTED_DEVICE", device)
-                        setResult(RESULT_OK, intent)
-                        viewModel.disconnect()
-                        finish()
-                    }
-            })
+            }, selectionFunc = {device -> viewModel.connect(device)})
         }
     }
 
@@ -91,5 +83,10 @@ class ListDeviceDialog: ComponentActivity() {
             viewModel.switchEvent(resultCode == RESULT_OK)
             recreate()
         }
+    }
+
+    override fun onDestroy() {
+        viewModel.disconnect()
+        super.onDestroy()
     }
 }
