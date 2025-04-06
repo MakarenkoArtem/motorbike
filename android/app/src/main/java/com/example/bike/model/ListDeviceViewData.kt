@@ -6,6 +6,5 @@ data class ListDeviceViewData(
     val devices: List<Device> = emptyList(),
     val bluetoothStatus: Boolean = false,
     val connectionStatus: Boolean = false,
-    val connectedDevice: Device?=null,
-    val updateVar: Boolean= false         // триггер для принудительного обновления UI
-)
+    val connectedDevice: Device?=null
+) {}

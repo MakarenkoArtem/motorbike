@@ -85,10 +85,10 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
             })
     }
 
-    fun connect(device: Device) = kotlin.runCatching{
-        viewModelScope.launch {bluetoothRepository.connect(device)
-            .getOrElse {return@launch}
-            checkConnection()}
+    fun connect(device: Device) = kotlin.runCatching {
+        bluetoothRepository.connect(device)
+            .getOrThrow()
+        checkConnection()
     }
 
     fun checkDevice(): Result<Unit> = bluetoothRepository.getDevice() as Result<Unit>

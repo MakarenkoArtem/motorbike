@@ -9,7 +9,7 @@ interface IBluetoothRepository {
     fun getDevicesFlow(): Result<StateFlow<List<Device>>>
     fun getRequiredPermissions(): Array<String>
     fun checkBluetoothPermission(): Result<Unit>
-    suspend fun connect(device: Device, check:Boolean=false): Result<StateFlow<BluetoothData>>
+    fun connect(device: Device, check:Boolean=false): Result<StateFlow<BluetoothData>>
     fun getDevice(): Result<Device>
     fun getDataFlow() : Result<StateFlow<BluetoothData>>
     fun send(

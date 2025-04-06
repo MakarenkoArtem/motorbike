@@ -69,7 +69,7 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
         service?.fetchDevicesFlow() ?: throw Exception("Device flow not exist")
     }
 
-    suspend override fun connect(
+    override fun connect(
         device: Device,
         check: Boolean
     ): Result<StateFlow<BluetoothData>> {
