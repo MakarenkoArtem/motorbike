@@ -44,12 +44,13 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
         connectionScope.launch {
             _deviceQueue.collect {devices ->
                 if (devices.size > 0) {
-                    createConnection(devices[0])
+                    createConnection(devices[0]).onFailure {
+                        updateDeviceStatus(devices[0], DeviceStatus.NOTHING)
+                    }
                     val list = _deviceQueue.value.toMutableList()
                     list.removeAt(0)
                     _deviceQueue.value = list.toList()
                 }
-
             }
         }
     }
@@ -77,7 +78,6 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
         val state = bluetoothRepository.connect(device = device)
             .getOrElse {
                 Log.d("ListDeviceDialogViewModel", it.message ?: "Unknown error")
-                updateDeviceStatus(device, DeviceStatus.NOTHING)
                 throw it
             }
         updateDeviceStatus(device, DeviceStatus.CONNECTED)
@@ -96,10 +96,12 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
     }
 
     fun connect(curDevice: Device): Result<Unit> = kotlin.runCatching {
-        updateDeviceStatus(curDevice, DeviceStatus.DISCOVERING)
-        _deviceQueue.value = _deviceQueue.value.toMutableList()
-            .plus(curDevice)
-            .toList()
+        if (curDevice.status == DeviceStatus.NOTHING) {
+            updateDeviceStatus(curDevice, DeviceStatus.DISCOVERING)
+            _deviceQueue.value = _deviceQueue.value.toMutableList()
+                .plus(curDevice)
+                .toList()
+        }
     }
 
     fun disconnect(): Result<Unit> {
