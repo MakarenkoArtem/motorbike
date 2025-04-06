@@ -116,17 +116,18 @@ class BluetoothService: Service() {
         _devicesFlow.value = bondedDevices.mapNotNull {it -> getDevice(it).getOrNull()}
     }
 
-    fun getClient(device: Device): Result<BluetoothClient> = kotlin.runCatching {
+    suspend fun getClient(device: Device): Result<BluetoothClient> = kotlin.runCatching {
         checkBluetoothPermission().getOrThrow()
-        val device = _bluetoothDevicesFlow.value.filter {getDevice(it).getOrNull() == device}
+        val btDevice = _bluetoothDevicesFlow.value.filter {
+            device.sameDevice(getDevice(it).getOrNull())}
             .getOrNull(0) ?: throw Exception("Device not found")
         val bTSocket: BluetoothSocket =
-            device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")) //незащищенное соединение
+            btDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")) //незащищенное соединение
         bTSocket.connect()
         val client = BluetoothClient(
-            address = device.address,
+            address = btDevice.address,
             bTSocket = bTSocket,
-            name = device.name
+            name = btDevice.name
         )
         return@runCatching client
     }
