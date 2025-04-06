@@ -12,4 +12,12 @@
     <string name="twoColors">2 цвета</string>
     <string name="threeColors" >3 цвета</string>
     <string name="sixColors">6 цвета</string>
+
+
+    <string name="emptyDeviceList">Нет устройств для подключения</string>
+    <string name="bluetoothLocked">Блютуз выключен</string>
+    <string name="gradient">Градиент</string>
+    <string name="hsv">HSV</string>
+    <string name="synchrony">Синхронно</string>
+
 </resources>

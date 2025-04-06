@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:scrollbarSize="50dp"
     android:theme="@style/Base.Theme.Bike"
-    tools:context=".screens.MainActivity.MainActivity">
+    tools:context=".ui.activity.MainActivity">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -110,7 +110,7 @@
                 android:id="@+id/buttonColor0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton0"
+                android:backgroundTint="@color/colorButton"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
@@ -121,7 +121,7 @@
                 android:id="@+id/buttonColor1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton50"
+                android:backgroundTint="@color/colorButton"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
@@ -132,7 +132,7 @@
                 android:id="@+id/buttonColor2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton100"
+                android:backgroundTint="@color/colorButton"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
@@ -143,7 +143,7 @@
                 android:id="@+id/buttonColor3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton150"
+                android:backgroundTint="@color/colorButton"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
@@ -154,7 +154,7 @@
                 android:id="@+id/buttonColor4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorButton200"
+                android:backgroundTint="@color/colorButton"
                 android:text=""
                 app:cornerRadius="20sp"
                 app:strokeColor="@color/white"
