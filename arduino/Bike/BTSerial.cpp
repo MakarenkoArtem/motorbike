@@ -65,18 +65,26 @@ short BTSerial::getCommands(Parameters& parameters) {
     return messageProcessing(parameters);
 }
 
+short BTSerial::sendingColors(Stream& serial, byte* colors) {
+    for (int row = 1; row < 6; ++row) {
+        serial.print(map(colors[row * 4], 0, 200, 0, 256));
+        serial.print(F(","));
+        for (int col = 1; col < 4; ++col) {
+            serial.print(colors[row * 4 + col]);
+            serial.print(F(","));
+        }
+    }
+    return GET_COLOR;
+}
+
+
 short BTSerial::messageProcessing(Parameters& parameters) {
     short ans = OK;
     if (compareStr(buf, "GC")) {
-        ans = GET_COLOR;
-        for (int row = 1; row < 6; ++row) {
-            this->print(map(parameters.colors[row * 4], 0, 200, 0, 256));
-            this->print(F(","));
-            for (int col = 1; col < 4; ++col) {
-                this->print(parameters.colors[row * 4 + col]);
-                this->print(F(","));
-            }
-        }
+#if DEBUGBT
+        whatListOfColors();
+#endif
+        ans = sendingColors(*this, parameters.colors);
     } else if (compareStr(buf, "Con")) {
     } else if (compareStr(buf, "OFF")) {
         ans = OFF;
@@ -191,6 +199,12 @@ void BTSerial::whatDel() {
 void BTSerial::whyError() {
     Serial.print(F("Error due to this message:"));
     Serial.print(buf);
+}
+
+void BTSerial::whatListOfColors(Parameters &parameters) {
+    Serial.print(F("Colors in palette: "));
+    sendingColors(Serial, parameters.colors);
+    Serial.println();
 }
 
 //verified 11.02.25

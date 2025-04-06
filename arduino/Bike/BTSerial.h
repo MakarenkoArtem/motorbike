@@ -20,8 +20,10 @@ public:
     short getCommands(Parameters& parameters);
 
 private:
+    short sendingColors(Stream& serial, byte* colors);
+
     short messageProcessing(Parameters& parameters);
-    
+
     short calculateFirstAndLastColors(byte* colors);
 
     short changeColor(char* buf, byte* colors);
@@ -32,6 +34,8 @@ private:
     void whatDel();
 
     void whyError();
+
+    void whatListOfColors(Parameters& parameters);
 };
 
 //verified 11.02.25

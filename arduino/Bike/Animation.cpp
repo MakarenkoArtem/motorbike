@@ -1,15 +1,16 @@
 #include "Animation.h"
 
-Animation::Animation(Parameters &params, SoundLevelMeter &sound, SoundDecomposition &fht) :
-        params(params), sound(sound), fht(fht) {}
+Animation::Animation(Parameters& params, SoundLevelMeter& sound, SoundDecomposition& fht) :
+    params(params), sound(sound), fht(fht) {
+}
 
 
 byte Animation::strode(int period, byte maxBright) {
     int halfPeriod = period / 2;
-    int curBright = ((millis() % period / halfPeriod) ?     //0-возрастает, 1-убывает
-                     halfPeriod - millis() % halfPeriod :
-                     millis() % halfPeriod) *
-                    255 * 2 / period;
+    int curBright = ((millis() % period > halfPeriod) ?
+                         //0-возрастает, 1-убывает
+                         halfPeriod - millis() % halfPeriod :
+                         millis() % halfPeriod);
     return map(curBright, 0, halfPeriod, 0, maxBright);
 }
 
@@ -23,8 +24,25 @@ void Animation::convertAmplitudeToListOutput(byte amplitude) {
     }
 }
 
+void Animation::runningLineMode() {
+    if (timerRunLine < millis()) {
+        for (byte i = params.outCount - 1; i; --i) {
+            params.output[i] = params.output[i - 1];
+        }
+        timerRunLine = millis();
+        int step = (100 - params.frequency)+25;
+        timerRunLine = timerRunLine + step >= timerRunLine ? timerRunLine + step : 0;
+        params.output[0] = sound.getLevelAmplitude();
+        if (params.output[0] != 0) {
+            average = (average * 10 + params.output[0]) / 11;
+            params.output[0] = map(params.output[0], average * 0.7, min(average * 1.45, 255), 0, 255);
+        }
+    }
+    sound.getLevelAmplitude();
+}
+
 bool Animation::processing() {
-    if (!(timer < millis() - 50 || timer > millis())) {
+    if (timer+50 > millis()) {
         return false;
     }
     timer = millis();
@@ -34,25 +52,24 @@ bool Animation::processing() {
             break;
         }
         case 12: {
-            params.bright = strode(params.strobePeriod * 10, params.maxBright);
+            params.bright = strode(params.strobePeriod, params.maxBright);
             break;
         }
         case 21: {
-            params.bright = sound.getLevelAmplitude();
+            params.output[0] = sound.getLevelAmplitude();
+            params.bright = params.maxBright;
             break;
         }
         case 22: {
-            for (byte i = 1; i < params.outCount; ++i) {
-                params.output[i] = params.output[i - 1];
-            }
-            params.output[0] = sound.getLevelAmplitude();
+            params.bright = params.maxBright;
+            runningLineMode();
             break;
         }
         case 23: {
             byte amplitude = sound.getSmoothedAmplitude();
             convertAmplitudeToListOutput(amplitude);
             break;
-        }//verified 1.02.25
+        } //verified 1.02.25
         case 31: {
             break;
         }

@@ -11,6 +11,8 @@ class RGBLine {
     Parameters& params;
     CFastLED* fastLED = nullptr;
 
+    int speedCoef = 2;
+
 public:
     int count;
     CRGB* line;

@@ -1,17 +1,19 @@
 #include "Parameters.h"
 
-Parameters::Parameters(byte *colors) :
-        maxBright(0), mode(11), colors(colors), frequency(0),
-        input(malloc(inpCount * sizeof(byte))), output(malloc(outCount * sizeof(byte))) {}
+Parameters::Parameters(byte* colors) :
+    colors(colors),
+    input(malloc(inpCount * sizeof(byte))), output(malloc(outCount * sizeof(byte))) {
+}
 
 void Parameters::setFrequency(byte frequency) {
-    this->frequency=frequency;
-    switch (mode/10) {
-        case 4:{
+    this->frequency = frequency;
+    switch (mode / 10) {
+        case 4: {
             strobePeriod = MIN_STROBE_PERIOD + frequency * 2;
             break;
-        }default:{
-            strobePeriod = MIN_STROBE_PERIOD + frequency * 10;
+        }
+        default: {
+            strobePeriod = MIN_STROBE_PERIOD * pow(100.0, (100 - frequency) / 100.0);
         }
     }
     step = 1 + frequency;
@@ -25,13 +27,14 @@ void Parameters::setMode(byte mode) {
     this->mode = mode;
     setFrequency(frequency);
     switch (mode) {
-        case 22: {
+        case 21: {
             outCount = 1;
             break;
         }
+        case 22:
         case 23:
         case 24: {
-            outCount = 15;
+            outCount = 9;
             break;
         }
         default: {
