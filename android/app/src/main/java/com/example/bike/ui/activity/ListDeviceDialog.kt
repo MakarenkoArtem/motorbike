@@ -19,7 +19,6 @@ import org.koin.androidx.compose.koinViewModel
 
 class ListDeviceDialog: ComponentActivity() {
     private lateinit var viewModel: ListDeviceDialogViewModel
-    val REQUEST_ENABLE_BT = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +34,10 @@ class ListDeviceDialog: ComponentActivity() {
             this.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     Log.d("ListDeviceDialog", "RESULT_OK")
-                    viewModel.switchEvent(true)
-                    recreate()
+                    viewModel.switchEvent(viewModel.getStatus().isSuccess)
                 } else { // Пользователь отклонил запрос на включение Bluetooth
                     Log.d("ListDeviceDialog", "RESULT_FAIL")
+                    viewModel.switchEvent(false)
                 }
             }
 
@@ -60,23 +59,10 @@ class ListDeviceDialog: ComponentActivity() {
                 if (newStatus && viewModel.bluetoothRepository.checkBluetoothPermission().isSuccess) { //                    bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     enableBtLauncher.launch(enableBtIntent)
-                    viewModel.switchEvent(true)
                 } else {
                     viewModel.switchEvent(false)
                 }
             }, selectionFunc = {device -> viewModel.connect(device)})
-        }
-    }
-
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ENABLE_BT && viewModel.getStatus().isSuccess) {
-            viewModel.switchEvent(resultCode == RESULT_OK)
-            recreate()
         }
     }
 
