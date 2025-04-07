@@ -1,7 +1,6 @@
 package com.example.bike.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -26,12 +25,14 @@ import androidx.compose.ui.unit.sp
 import com.example.bike.R
 import com.example.bike.domain.model.Device
 import com.example.bike.model.ListDeviceViewData
+import com.example.bike.ui.components.BTDeviceItem
 import com.example.bike.ui.components.BluetoothHeaderFragment
 
 @Composable
-fun DeviceListScreen(screenState: ListDeviceViewData,
-                     switchEvent: (Boolean) -> Unit,
-                     selectionFunc: (Device) -> (Unit)
+fun DeviceListScreen(
+    screenState: ListDeviceViewData,
+    switchEvent: (Boolean) -> Unit,
+    selectionFunc: (Device) -> (Unit)
 ) {
     MaterialTheme(
         colors = Colors(
@@ -61,7 +62,11 @@ fun DeviceListScreen(screenState: ListDeviceViewData,
                     .fillMaxWidth()
                     .heightIn(max = 350.dp)
             ) {
-                BluetoothHeaderFragment(screenState.bluetoothStatus) {newState -> switchEvent(newState)}
+                BluetoothHeaderFragment(screenState.bluetoothStatus) {newState ->
+                    switchEvent(
+                        newState
+                    )
+                }
                 if (screenState.bluetoothStatus) {
                     if (screenState.devices.isEmpty()) {
                         EmptyBody(stringResource(id = R.string.emptyDeviceList))
@@ -88,19 +93,7 @@ fun Body(
             .fillMaxWidth()
             .padding(top = 16.dp),
     ) {
-        items(devices) {device ->
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 40.dp) //.padding(vertical = 8.dp)
-                    .clickable {selectionFunc(device)},
-                textAlign = TextAlign.Start,
-                style = TextStyle(
-                    fontSize = 18.sp,
-                ),
-                text = device.name
-            )
-        }
+        items(devices) {device -> BTDeviceItem(device, selectionFunc)}
     }
 
 }
@@ -115,8 +108,7 @@ fun EmptyBody(text: String) {
         ), text = text
     )
 
-}
-/*
+}/*
 @PreviewLightDark
 @Preview(showBackground = true)
 @Composable
