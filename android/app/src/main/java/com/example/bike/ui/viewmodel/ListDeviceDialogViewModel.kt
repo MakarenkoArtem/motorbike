@@ -35,7 +35,8 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
                     delay(1000)
                 }
             } while (flowResult.isFailure)
-            _screenDataState.value = _screenDataState.value.copy(bluetoothStatus = true)
+            Log.d("ListDeviceDialogViewModel", "init: ${getStatus().isSuccess}")
+            switchEvent(getStatus().isSuccess)
             flowResult.getOrNull()
                 ?.collect {devices ->
                     _screenDataState.value = _screenDataState.value.copy(devices = devices)
@@ -43,7 +44,8 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
         }
         connectionScope.launch {
             _deviceQueue.collect {devices ->
-                if (devices.size > 0) {
+                if (devices.isNotEmpty()) {
+                    Log.d("ListDeviceDialogViewModel", "in process: ${devices[0]}")
                     createConnection(devices[0]).onFailure {
                         updateDeviceStatus(devices[0], DeviceStatus.NOTHING)
                     }
@@ -55,8 +57,9 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
         }
     }
 
-    fun switchEvent(value: Boolean) {
+    fun switchEvent(value: Boolean) = kotlin.runCatching {
         bluetoothRepository.getDevicesFlow()
+            .getOrThrow()
         _screenDataState.value = _screenDataState.value.copy(bluetoothStatus = value)
     }
 
@@ -96,11 +99,13 @@ class ListDeviceDialogViewModel(val bluetoothRepository: IBluetoothRepository): 
     }
 
     fun connect(curDevice: Device): Result<Unit> = kotlin.runCatching {
+        Log.d(
+            "ListDeviceDialogViewModel",
+            "add to queue: ${curDevice}\n        queue: ${_deviceQueue.value}"
+        )
         if (curDevice.status == DeviceStatus.NOTHING) {
             updateDeviceStatus(curDevice, DeviceStatus.DISCOVERING)
-            _deviceQueue.value = _deviceQueue.value.toMutableList()
-                .plus(curDevice)
-                .toList()
+            _deviceQueue.value = _deviceQueue.value + curDevice
         }
     }
 
