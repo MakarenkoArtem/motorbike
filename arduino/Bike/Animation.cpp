@@ -17,9 +17,9 @@ byte Animation::strode(int period, byte maxBright) {
 void Animation::convertAmplitudeToListOutput(byte amplitude) {
     for (byte i = 0; i < params.outCount; ++i) {
         if (i < map(amplitude, 0, 255, 0, params.outCount)) {
-            params.output[0] = amplitude;
+            params.output[i] = map(i, 0, params.outCount-1, 0, 255);//amplitude;
         } else {
-            params.output[0] = 0;
+            params.output[i] = 0;
         }
     }
 }
@@ -66,8 +66,10 @@ bool Animation::processing() {
             break;
         }
         case 23: {
-            byte amplitude = sound.getSmoothedAmplitude();
-            convertAmplitudeToListOutput(amplitude);
+            //byte amplitude = sound.getLevelAmplitude();//getSmoothedAmplitude();
+            //convertAmplitudeToListOutput(amplitude);
+            params.output[0] = sound.getSmoothedAmplitude();
+            params.bright = params.maxBright;
             break;
         } //verified 1.02.25
         case 31: {

@@ -33,11 +33,11 @@ class SoundLevelMeter {
     long long currentTimer = 0;
     float avegareTimeLight = 200.0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
     float averageLevel = 0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
-    byte currentAmplitude = 0;
-    byte levelAmplitude = 0;
-    byte smoothedAmplitude = 0;
-    float fastAverageTop=0.0;
-    float fastAverageBottom=0.0;
+    byte currentAmplitude = 0;            //в границах [0, 255]
+    byte levelAmplitude = 0;              //в границах [0, 255]
+    byte smoothedAmplitude = 0;           //в границах [0, 255]
+    float fastAverageTop=0.0;             //в границах [0, 255]
+    float fastAverageBottom=0.0;          //в границах [0, 255]
 
     byte currentLevelOfSound();
 

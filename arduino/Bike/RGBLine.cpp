@@ -129,10 +129,10 @@ void RGBLine::renderColumn(byte amplitude) { //23
     if (!amplitude) return;
     for (int index = 0; index < amplitude * count / 255; index++) {
         if (params.hsv) {
-            line[index] = CHSV(calculatePhaseByAmplitude(amplitude, index), 255, params.bright);
+            line[index] = CHSV(calculatePhase(index*255/count, index), 255, params.bright);
         } else {
             //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
-            line[index] = ColorFromPalette(myPal, map(calculatePhaseByAmplitude(amplitude, index), 0, 255, 0, 200));
+            line[index] = ColorFromPalette(myPal, map(calculatePhase(index*255/count, index), 0, 255, 0, 200));
         }
     }
 }
