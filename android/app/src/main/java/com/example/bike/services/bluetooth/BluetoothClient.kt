@@ -93,7 +93,9 @@ class BluetoothClient(
             }
             val data = message.split(",") //Regex(","))
                 .dropLastWhile {it.isEmpty()}
-            if(data.size<20){return@launch}
+            if (data.size < 20) {
+                return@launch
+            }
             Log.d("Bike.BluetoothClient", "${data.size} ${data.toString()}")
             val colors = MutableList(5, {Color.BLACK})
             for (i in 0..4) {
@@ -114,16 +116,18 @@ class BluetoothClient(
         message: String,
         repeat: Int = 1,
         timeWait: Long = 100
-    ): Result<Unit> {
+    ) = kotlin.runCatching {
+        Log.d("BikeBluetooth", message)
+        outputStream.write(message.toByteArray())
         clientScope.launch {
-            Log.d("BikeBluetooth", message)
-            outputStream.write(message.toByteArray())
-            repeat(repeat - 1) {
-                delay(timeWait)
-                outputStream.write(message.toByteArray())
+            kotlin.runCatching { //на случай разрыва соединения
+                repeat(repeat - 1) {
+                    delay(timeWait)
+                    outputStream.write(message.toByteArray())
+                }
             }
         }
-        return Result.success(Unit)
+        Unit
     }
 
     suspend fun takeMessage(
@@ -147,7 +151,7 @@ class BluetoothClient(
                 try {
                     var result = future.get(timeWait, TimeUnit.MILLISECONDS)
                     if (result != null) {
-                        if("OK" in result){
+                        if ("OK" in result) {
                             result = "OK"
                         }
                         return@runCatching result
