@@ -36,6 +36,7 @@
 #if DEBUGER
 #define DEBUGBT false
 #define DEBUG_LEVEL_SOUND true
+#define DEBUG_ANIMATION true
 #endif
 
 //      SETTINGS

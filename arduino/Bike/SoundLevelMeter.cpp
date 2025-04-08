@@ -4,8 +4,9 @@ void setADCPrescaler(uint8_t prescaler) {
     ADCSRA = (ADCSRA & 0b11111000) | prescaler;
 }
 
-SoundLevelMeter::SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int))
-    : pinR(pinR), pinL(pinL), pinMode(pinMode), analogRead(analogRead) {
+SoundLevelMeter::SoundLevelMeter(int pinR, int pinL, void (*pinMode)(int, int),
+                                 int (*analogRead)(int))
+        : pinR(pinR), pinL(pinL), pinMode(pinMode), analogRead(analogRead) {
     pinMode(pinR, INPUT);
     pinMode(pinL, INPUT);
 }
@@ -18,22 +19,22 @@ byte SoundLevelMeter::currentLevelOfSound() {
         top = cur > top ? cur : top;
         bottom = cur < bottom ? cur : bottom;
     }
-    fastAverageTop = (fastAverageTop * 9 + top * 1) / 10;
-    fastAverageBottom = (fastAverageBottom * 9 + bottom * 1) / 10;
+    _fastAverageTop = (_fastAverageTop * 9 + top * 1) / 10;
+    _fastAverageBottom = (_fastAverageBottom * 9 + bottom * 1) / 10;
 #if DEBUG_LEVEL_SOUND
     Serial.print(" bottom:");
     Serial.print(bottom);
-    Serial.print(" max:");
+    Serial.print(" top:");
     Serial.print(top);
-    Serial.print(" bottomAver:");
-    Serial.print(fastAverageBottom);
-    Serial.print(" maxAver:");
-    Serial.println(fastAverageTop);
+    Serial.print(" _bottomAver:");
+    Serial.print(_fastAverageBottom);
+    Serial.print(" _topAver:");
+    Serial.println(_fastAverageTop);
 #endif
-    if (fastAverageTop - fastAverageBottom < 40) { //отсекаем шумы при отсутсвии сигнала
+    if (_fastAverageTop - _fastAverageBottom < 40) { //отсекаем шумы при отсутсвии сигнала
         return 0;
     }
-    top = map(top, fastAverageBottom, max(fastAverageTop * 1.3, top), 0, 255);
+    top = map(top, (_fastAverageBottom * 4 + _fastAverageTop) / 5, max(_fastAverageTop * 1.3, top), 0, 255); //ver2
     //300-800, т.к <250-шумы, >800-aux не выдает большее напряжение
     averageLevel = (averageLevel * 20 + top * 1) / 21; //(averageLevel * 100 + top * 5) / 105;
     return top;
@@ -70,8 +71,21 @@ void SoundLevelMeter::amplitudeUpdate() {
         currentAmplitude = 0;
     }
     if (currentAmplitude < smoothedAmplitude) {
-        smoothedAmplitude -= 5;
+        smoothedAmplitude -= 20;
     } else { smoothedAmplitude = currentAmplitude; }
+}
+
+byte SoundLevelMeter::getExpLikeAmplitude(byte coef) {// значения должны быть в рамках [0, 100]
+    amplitudeUpdate();
+    //задачем основание показательной функции в пределах [1.1, 1.9]
+    float e = 1.1+coef*0.008;
+    float ampl = map(pow(e, static_cast<float>(currentAmplitude) * 20 / 255), 1, pow(e, 20), 0, 255);
+    if (ampl < expLikeAmplitude) {
+        if (expLikeAmplitude > 20) { expLikeAmplitude -= 20; } else { expLikeAmplitude = 0; }
+    } else {
+        expLikeAmplitude = ampl;
+    }
+    return expLikeAmplitude;
 }
 
 byte SoundLevelMeter::getCurAmplitude() {
@@ -91,7 +105,7 @@ byte SoundLevelMeter::getSmoothedAmplitude() {
 void SoundLevelMeter::fhtSound() {
     int RcurrentLevel, LcurrentLevel;
     setADCPrescaler(
-        ADC_PRESCALER_2); //изменение времени анализа напряжения, сама операция 3 машинных операции(analogRead ~200мо)
+            ADC_PRESCALER_2); //изменение времени анализа напряжения, сама операция 3 машинных операции(analogRead ~200мо)
     for (int i = 0; i < 100; i++) { // делаем 100 измерений
         RcurrentLevel = analogRead(pinR); // с правого
         LcurrentLevel = analogRead(pinL); // и левого каналов
