@@ -75,8 +75,10 @@ void SoundLevelMeter::amplitudeUpdate() {
     } else { smoothedAmplitude = currentAmplitude; }
 }
 
-byte SoundLevelMeter::getExpLikeAmplitude(float e) {// значения должны быть в рамках [1.2, 2.7]
+byte SoundLevelMeter::getExpLikeAmplitude(byte coef) {// значения должны быть в рамках [0, 100]
     amplitudeUpdate();
+    //задачем основание показательной функции в пределах [1.1, 1.9]
+    float e = 1.1+coef*0.008;
     float ampl = map(pow(e, static_cast<float>(currentAmplitude) * 20 / 255), 1, pow(e, 20), 0, 255);
     if (ampl < expLikeAmplitude) {
         if (expLikeAmplitude > 20) { expLikeAmplitude -= 20; } else { expLikeAmplitude = 0; }
@@ -84,10 +86,6 @@ byte SoundLevelMeter::getExpLikeAmplitude(float e) {// значения долж
         expLikeAmplitude = ampl;
     }
     return expLikeAmplitude;
-}
-
-byte SoundLevelMeter::getExpLikeAmplitude() {
-    getExpLikeAmplitude(1.7)
 }
 
 byte SoundLevelMeter::getCurAmplitude() {

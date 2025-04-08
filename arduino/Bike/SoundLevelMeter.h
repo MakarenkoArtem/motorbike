@@ -53,10 +53,8 @@ public:
     byte getSmoothedAmplitude();
 
     // применяем показательную функцию для большей чувствительности на больших амплитудах
-    // e в границах [1.4, 2.7] иначел либо переполнение(3^ampl->inf), либо константа (1^ampl)
-    byte getExpLikeAmplitude(float e);
-
-    byte getExpLikeAmplitude();
+    // coef в границах [0, 100] иначел либо переполнение(f(coef)^ampl->inf)
+    byte getExpLikeAmplitude(byte coef);
 
     void whichCurrentLevel(int curVal);
 

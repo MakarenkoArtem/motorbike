@@ -66,9 +66,7 @@ bool Animation::processing() {
             break;
         }
         case 23: {
-            //задачем основание показательной функции в пределах [1.4, 2.7]
-            float e = 1.4+params.frequency*0.013
-            params.output[0] = sound.getExpLikeAmplitude(e);
+            params.output[0] = sound.getExpLikeAmplitude(params.frequency);
             params.bright = params.maxBright;
             #if DEBUG_ANIMATION
                 Serial.print("Exp amplitude:");
