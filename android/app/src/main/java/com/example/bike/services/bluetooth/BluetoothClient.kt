@@ -9,8 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.io.OutputStream
@@ -35,7 +37,8 @@ class BluetoothClient(
         outputStream = bTSocket.outputStream
     }
 
-    fun getDataFlow() = bluetoothData
+    fun getDataFlow(): Flow<BluetoothData> = bluetoothData
+        .takeWhile { it.connected }//поток существует пока connected==true
 
     fun connect(check: Boolean = true): Result<StateFlow<BluetoothData>> {
         if (check) {

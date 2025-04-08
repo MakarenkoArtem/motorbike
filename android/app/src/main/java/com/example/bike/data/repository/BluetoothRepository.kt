@@ -15,6 +15,8 @@ import com.example.bike.services.bluetooth.BluetoothService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -44,7 +46,7 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
                 if (service != null) {
                     service!!.getStatus()
                         .onFailure {
-                            Log.d("Bike.BluetoothRepository", it.message ?: it.toString())
+                            Log.d("BluetoothRepository", it.message ?: it.toString())
                         }
                     return@launch
                 }
@@ -61,7 +63,7 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
             intent, serviceConnection, Context.BIND_AUTO_CREATE
         )
         if (!bound) {
-            Log.e("Bike.BluetoothRepository", "Failed to bind BluetoothService")
+            Log.e("BluetoothRepository", "Failed to bind BluetoothService")
         }
     }
 
@@ -91,11 +93,15 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
         return@runCatching client!!.toDomain()
     }
 
-    override fun getDataFlow(): Result<StateFlow<BluetoothData>> = kotlin.runCatching {
-        if (client == null) {
-            throw Exception("Device doesn't exist")
+    override fun getDataFlow(): Result<Flow<BluetoothData>> = kotlin.runCatching {
+        val flow = client?.getDataFlow() ?: throw Exception("Device doesn't exist")
+        CoroutineScope(Dispatchers.IO).launch {
+            flow.onCompletion { // Этот блок гарантированно выполнится после завершения потока (когда мы отключили клиента)
+                client = null
+            }
+                .collect {}
         }
-        return@runCatching client!!.getDataFlow()
+        return@runCatching flow
     }
 
     override fun send(
@@ -109,16 +115,18 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
     suspend override fun takeMessage(
         repeat: Int,
         timeWait: Long
-    ): Result<String> = client?.takeMessage(repeat, timeWait) ?: Result.failure(Exception("Device doesn't exist"))
+    ): Result<String> =
+        client?.takeMessage(repeat, timeWait) ?: Result.failure(Exception("Device doesn't exist"))
 
-    override fun getColors(): Result<List<Int>>  {
+    override fun getColors(): Result<List<Int>> {
         return client?.getColors() ?: Result.failure(Exception("Device doesn't exist"))
     }
 
     override suspend fun colorSend(
         color: Int,
         index: Int
-    ): Result<Unit> = client?.colorSend(color, index) ?: Result.failure(Exception("Device doesn't exist"))
+    ): Result<Unit> =
+        client?.colorSend(color, index) ?: Result.failure(Exception("Device doesn't exist"))
 
     override suspend fun colorsSend(colors: List<Int>): Result<Unit> =
         client?.colorsSend(colors) ?: Result.failure(Exception("Device doesn't exist"))
@@ -130,7 +138,7 @@ class BluetoothRepository(private val context: Context): IBluetoothRepository {
     override fun checkBluetoothPermission(): Result<Unit> =
         service?.checkBluetoothPermission() ?: getStatus()
 
-    override fun disconnect():Result<Unit> {
+    override fun disconnect(): Result<Unit> {
         val ans = client?.disconnect() ?: Result.success(Unit)
         client = null
         return ans
