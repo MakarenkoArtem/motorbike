@@ -37,13 +37,11 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
                     delay(1000)
                     data = bluetoothRepository.getDataFlow()
                 }
-                val dataState = data.getOrNull() ?: return@launch
+                val dataState = data.getOrNull() ?: continue
                 dataState.collect {newData ->
-                    if (!newData.connected) { //если сигнал потерян отписываемся от потока
-                        return@collect
-                    }
                     _screenDataState.value = _screenDataState.value.updateByBluetoothData(newData)
                 }
+                Log.d("MainViewModel", "after collect")
             }
         }
     }

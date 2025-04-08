@@ -9,8 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.io.OutputStream
@@ -35,7 +37,8 @@ class BluetoothClient(
         outputStream = bTSocket.outputStream
     }
 
-    fun getDataFlow() = bluetoothData
+    fun getDataFlow(): Flow<BluetoothData> = bluetoothData
+        .takeWhile { it.connected }//поток существует пока connected==true
 
     fun connect(check: Boolean = true): Result<StateFlow<BluetoothData>> {
         if (check) {
@@ -93,7 +96,9 @@ class BluetoothClient(
             }
             val data = message.split(",") //Regex(","))
                 .dropLastWhile {it.isEmpty()}
-            if(data.size<20){return@launch}
+            if (data.size < 20) {
+                return@launch
+            }
             Log.d("Bike.BluetoothClient", "${data.size} ${data.toString()}")
             val colors = MutableList(5, {Color.BLACK})
             for (i in 0..4) {
@@ -114,16 +119,18 @@ class BluetoothClient(
         message: String,
         repeat: Int = 1,
         timeWait: Long = 100
-    ): Result<Unit> {
+    ) = kotlin.runCatching {
+        Log.d("BikeBluetooth", message)
+        outputStream.write(message.toByteArray())
         clientScope.launch {
-            Log.d("BikeBluetooth", message)
-            outputStream.write(message.toByteArray())
-            repeat(repeat - 1) {
-                delay(timeWait)
-                outputStream.write(message.toByteArray())
+            kotlin.runCatching { //на случай разрыва соединения
+                repeat(repeat - 1) {
+                    delay(timeWait)
+                    outputStream.write(message.toByteArray())
+                }
             }
         }
-        return Result.success(Unit)
+        Unit
     }
 
     suspend fun takeMessage(
@@ -147,7 +154,7 @@ class BluetoothClient(
                 try {
                     var result = future.get(timeWait, TimeUnit.MILLISECONDS)
                     if (result != null) {
-                        if("OK" in result){
+                        if ("OK" in result) {
                             result = "OK"
                         }
                         return@runCatching result
