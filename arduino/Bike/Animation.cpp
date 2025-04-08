@@ -66,12 +66,16 @@ bool Animation::processing() {
             break;
         }
         case 23: {
-            //byte amplitude = sound.getLevelAmplitude();//getSmoothedAmplitude();
-            //convertAmplitudeToListOutput(amplitude);
-            params.output[0] = sound.getSmoothedAmplitude();
+            //задачем основание показательной функции в пределах [1.4, 2.7]
+            float e = 1.4+params.frequency*0.013
+            params.output[0] = sound.getExpLikeAmplitude(e);
             params.bright = params.maxBright;
+            #if DEBUG_ANIMATION
+                Serial.print("Exp amplitude:");
+                Serial.println(params.output[0]);
+            #endif
             break;
-        } //verified 1.02.25
+        } //verified 8.04.25
         case 31: {
             break;
         }

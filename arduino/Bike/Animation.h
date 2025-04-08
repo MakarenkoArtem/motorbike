@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "config.h"
 #include "Parameters.h"
 #include "SoundLevelMeter.h"
 #include "SoundDecomposition.h"
