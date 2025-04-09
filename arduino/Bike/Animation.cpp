@@ -17,9 +17,9 @@ byte Animation::strode(int period, byte maxBright) {
 void Animation::convertAmplitudeToListOutput(byte amplitude) {
     for (byte i = 0; i < params.outCount; ++i) {
         if (i < map(amplitude, 0, 255, 0, params.outCount)) {
-            params.output[0] = amplitude;
+            params.output[i] = map(i, 0, params.outCount-1, 0, 255);//amplitude;
         } else {
-            params.output[0] = 0;
+            params.output[i] = 0;
         }
     }
 }
@@ -66,10 +66,14 @@ bool Animation::processing() {
             break;
         }
         case 23: {
-            byte amplitude = sound.getSmoothedAmplitude();
-            convertAmplitudeToListOutput(amplitude);
+            params.output[0] = sound.getExpLikeAmplitude(params.frequency);
+            params.bright = params.maxBright;
+            #if DEBUG_ANIMATION
+                Serial.print("Exp amplitude:");
+                Serial.println(params.output[0]);
+            #endif
             break;
-        } //verified 1.02.25
+        } //verified 8.04.25
         case 31: {
             break;
         }
