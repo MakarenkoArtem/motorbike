@@ -2,6 +2,7 @@ package com.example.bike.domain.repository
 
 import com.example.bike.datasource.remote.model.BluetoothData
 import com.example.bike.domain.model.Device
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface IBluetoothRepository {
@@ -11,7 +12,7 @@ interface IBluetoothRepository {
     fun checkBluetoothPermission(): Result<Unit>
     suspend fun connect(device: Device, check:Boolean=false): Result<StateFlow<BluetoothData>>
     fun getDevice(): Result<Device>
-    fun getDataFlow() : Result<StateFlow<BluetoothData>>
+    fun getDataFlow() : Result<Flow<BluetoothData>>
     fun send(
         message: String,
         repeat: Int = 3,

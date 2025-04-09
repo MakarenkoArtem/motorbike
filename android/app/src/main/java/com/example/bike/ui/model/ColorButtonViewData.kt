@@ -6,4 +6,4 @@ import androidx.compose.ui.graphics.toArgb
 data class ColorButtonViewData(
         val color:Int= Color.DarkGray.toArgb(),
         val enabled:Boolean=true
-) {}
+)
