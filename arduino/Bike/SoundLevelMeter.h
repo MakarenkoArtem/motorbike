@@ -29,15 +29,16 @@ class SoundLevelMeter {
 
     int (*analogRead)(int);
 
-    float filterValue = 1.1;
-    long long currentTimer = 0;
-    float avegareTimeLight = 200.0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
-    float averageLevel = 0;// обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
-    byte currentAmplitude = 0;
-    byte levelAmplitude = 0;
-    byte smoothedAmplitude = 0;
-    float fastAverageTop=0.0;
-    float fastAverageBottom=0.0;
+    float filterValue = 1.1;         //пороговый коэффициент пропускает только сигналы которые в filterValue раз больше среднего
+    long long currentTimer = 0;      //время начала пика сигнала(когда он стал больше фильтрующего значения)
+    float avegareTimeLight = 200.0;  //обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение
+    float averageLevel = 0;          //средний уровень входного сигнала(обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение)
+    byte currentAmplitude = 0;       //максимальная амплитуда полученная в рез-те измерений (значения в границах [0, 255])
+    byte levelAmplitude = 0;         //в границах [0, 255]
+    byte smoothedAmplitude = 0;      //в границах [0, 255]
+    float _fastAverageTop=0.0;       //примерная верхняя граница по полученным данным(в границах [0, 255])
+    float _fastAverageBottom=0.0;    //примерная нижняя  граница по полученным данным(в границах [0, 255])
+    byte expLikeAmplitude = 0;       //уровень после функции по типу экспоненцирования, но медленнее для больших скачков на больших амплитудах
 
     byte currentLevelOfSound();
 
@@ -50,6 +51,10 @@ public:
     byte getLevelAmplitude();
 
     byte getSmoothedAmplitude();
+
+    // применяем показательную функцию для большей чувствительности на больших амплитудах
+    // coef в границах [0, 100] иначел либо переполнение(f(coef)^ampl->inf)
+    byte getExpLikeAmplitude(byte coef);
 
     void whichCurrentLevel(int curVal);
 
