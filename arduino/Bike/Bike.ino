@@ -2,78 +2,75 @@
 #include "IgnitionKey.h"
 #include "initialization.h"
 #include "SoundLevelMeter.h"
-//#include "SoundDecomposition.h"
+#include "SoundDecomposition.h"
+#include "Animation.h"
 
 
 
-BTSerial serial(RX_BLUETOOTH, TX_BLUETOOTH); // подключаем объект класса работы с блютуз
+BTSerial serial(RX_BLUETOOTH_PIN, TX_BLUETOOTH_PIN); // подключаем объект класса работы с блютуз
 
 RGBLine *leftLine;//указатель на объект класса работы с лентой
 RGBLine *rightLine;
 
-iarduino_RTC time(RTC_DS1302, RST_CLOCK, CLK_CLOCK, DATA_CLOCK);  // для модуля DS1302 - RST, CLK, DAT
+iarduino_RTC time(RTC_DS1302, RST_CLOCK_PIN, CLK_CLOCK_PIN, DATA_CLOCK_PIN);  // для модуля DS1302 - RST, CLK, DAT
 
-IgnitionKey ignKey(BIKE_OFF, pinMode, digitalWrite);
+IgnitionKey ignKey(BIKE_PIN, pinMode, digitalWrite);
 
-Parameters *parameters;
+Parameters params(colors);  //объект, где хранятся все параметры для взаиводействия разных частей кода
 
-SoundLevelMeter sound(SOUND_R, SOUND_L, pinMode, analogRead);
-//SoundDecomposition FHT(SOUND_R, SOUND_L, pinMode, analogRead);
+
+SoundLevelMeter sound(SOUND_R_PIN, SOUND_L_PIN, pinMode, analogRead);
+SoundDecomposition fht(SOUND_R_PIN, SOUND_L_PIN, pinMode, analogRead);
+
+Animation animation(params, sound, fht);
 
 void setup() {
     initAssembly();
-    initAudio();
     initSerial();
-    initSwitchAudio();
-    leftLine = initLedLine(LLine_pin, NUM_LEDS, colors, 0);
-    rightLine = initLedLine(RLine_pin, NUM_LEDS, colors, 1);
+    initAudio();
+    initSwitchAudio(AMPLIFIER_PIN, AUDIO_BT_PIN);
+    leftLine = initLedLine(LLINE_PIN, NUM_LEDS, params, 0);
+    rightLine = initLedLine(RLINE_PIN, NUM_LEDS, params, 1);
     initClock(time);
-    parameters = new Parameters(*leftLine);
+    Serial.println("End setup");
 };
 
-unsigned long timer = 0;
-float amplitude = 1.0;
 
 int resultProcessing(int resp) {
     switch (resp) {
-        case ON: {
-            Serial.println(F("ON"));
-            ignKey.setVal(true);
-            break;
-        }
         case OFF: {
             Serial.println(F("OFF"));
             ignKey.setVal(false);
             break;
         }
-        case SOUND_OFF: {
-            Serial.println(F("LOW"));
-            digitalWrite(AUDIO_OFF, LOW);
+        case ON: {
+            Serial.println(F("ON"));
+            ignKey.setVal(true);
             break;
         }
-        case SOUND_ON: {
-            Serial.println(F("HIGH"));
-            digitalWrite(AUDIO_OFF, HIGH);
+        case AMPLIFIER_OFF: {
+            Serial.println(F("Amplifier: LOW"));
+            digitalWrite(AMPLIFIER_PIN, LOW);
+            break;
+        }
+        case AMPLIFIER_ON: {
+            Serial.println(F("Amplifier: HIGH"));
+            digitalWrite(AMPLIFIER_PIN, HIGH);
+            break;
+        }
+        case AUDIO_BT_OFF: {
+            Serial.println(F("BT: inactiv"));
+            digitalWrite(AUDIO_BT_PIN, HIGH);
+            break;
+        }
+        case AUDIO_BT_ON: {
+            Serial.println(F("BT: activ"));
+            digitalWrite(AUDIO_BT_PIN, LOW);
             break;
         }
         case COLORS: {
-            rightLine->setColors(parameters->colors);
-            leftLine->setColors(parameters->colors);
-            break;
-        }
-        case BRIGHT: {
-            rightLine->setMaxBrightness(parameters->maxBright);
-            leftLine->setMaxBrightness(parameters->maxBright);
-            break;
-        }
-        case LINE_MODE: {
-            rightLine->setMode(parameters->mode);
-            leftLine->setMode(parameters->mode);
-            break;
-        }
-        case FREQUENCY: {
-            rightLine->setFrequency(parameters->frequency);
-            leftLine->setFrequency(parameters->frequency);
+            rightLine->setColors(params.colors);
+            leftLine->setColors(params.colors);
             break;
         }
         case WAIT_INPUT: {
@@ -84,30 +81,19 @@ int resultProcessing(int resp) {
 }
 
 void updateRGBLine() {
-    if (leftLine->needAmplitude) {
-        amplitude = sound.amplitudeLight();
-    } 
-    /*    uint8_t* fht = FHT.analyzeAudio();
-        for (int i = 0; i < 64; ++i) {
-            Serial.print(fht[i]);
-            Serial.print(",");
-        }
-        Serial.println("");
-    */
     FastLED.clear();//очищаем адресную ленту
-    leftLine->show(amplitude);
-    rightLine->show(amplitude);
-    //rightLine->data();
+    leftLine->show();
+    rightLine->show();
     FastLED.show();//обновляем адресную ленту
 }
 
 void loop() {
-    int resp = serial.getCommands(*parameters);
+    int resp = serial.getCommands(params);
     if (resultProcessing(resp)) {
         return;
     }
-    if (timer < millis() - 50 || timer > millis()) {
+    if (animation.processing()){
         updateRGBLine();
-        timer = millis();
     }
 }
+//verified 1.02.25

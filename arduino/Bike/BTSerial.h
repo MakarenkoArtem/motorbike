@@ -9,28 +9,6 @@
 
 #define COMMAND "Co"
 
-#ifndef CONFIG
-#define ERROR -1
-#define OK 0
-#define OFF 1
-#define ON 2
-#define END 3
-#define BRIGHT 4
-#define TYPE 5
-#define COLORS 6
-#define SOUND_OFF 7
-#define SOUND_ON 8
-#define BRIGHT 9
-#define MODE 10
-#define FREQUENCY 11
-#define WAIT_INPUT 101
-
-#define TIMEOUT 200
-#define SPEED 9600
-#define DELAY 1000
-#define MAXSZ 100
-#endif
-
 class BTSerial : public SoftwareSerial {
     char buf[MAXSZ];
     short sz = -1;
@@ -39,11 +17,25 @@ class BTSerial : public SoftwareSerial {
 public:
     BTSerial(int RX, int TX);
 
-    short getCommands(Parameters &parameters);
+    short getCommands(Parameters& parameters);
 
 private:
-    short messageProcessing(Parameters &parameters);
+    short sendingColors(Stream& serial, byte* colors);
 
-    short changeColors(char *buf, byte *colors);
+    short messageProcessing(Parameters& parameters);
+
+    short calculateFirstAndLastColors(byte* colors);
+
+    short changeColor(char* buf, byte* colors);
+
+    short changeColors(char* buf, byte* colors);
+
+    //DEBUG
+    void whatDel();
+
+    void whyError();
+
+    void whatListOfColors(Parameters& parameters);
 };
 
+//verified 11.02.25
