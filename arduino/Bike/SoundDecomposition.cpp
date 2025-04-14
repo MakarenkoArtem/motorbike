@@ -1,6 +1,5 @@
 #include "SoundDecomposition.h"
 #define LOG_OUT 1
-#define FHT_N 128
 #include<FHT.h>
 
 void setADCPrescaler(uint8_t prescaler) {
@@ -39,17 +38,17 @@ uint8_t* SoundDecomposition::fhtMethods() {
     return fht_log_out;
 }
 
-int SoundDecomposition::maxFrequency() {
+uint8_t SoundDecomposition::frequencyWithMaxAmplitude() {
     uint8_t* input = fhtMethods();
     int maxVal = input[0];
     int index = 0;
-    for (int i = 1; i < FHT_N; i++) {
+    for (int i = 1; i < COUNT_FREQ; i++) {
         if (maxVal < input[i]) {
             maxVal = input[i];
             index = i;
         }
     }
-    return index * 255 / (FHT_N - 1);
+    return static_cast<uint8_t>(index * 255 / (COUNT_FREQ - 1));
 }
 
 void SoundDecomposition::frequencyGrouping(uint8_t* input, uint8_t* output) {

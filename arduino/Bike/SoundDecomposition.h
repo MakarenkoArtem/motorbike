@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduino.h>
 #include "config.h"
+#define FHT_N 128
+#define COUNT_FREQ 60
 
 //============варианты предделителя(количество тактов для analogRead)========
 #define ADC_PRESCALER_2 0x01    //лучшая скорость, но малое качество
@@ -29,7 +31,7 @@ class SoundDecomposition {
             {4, 6}, // Низкие
             {6, 10}, // Средние
             {10, 19}, // Высокие
-            {19, 60} // Очень высокие 60 примерно 15 кГц
+            {19, COUNT_FREQ} // Очень высокие (60 примерно 15 кГц)
         };
 
     void lowLevelFiltration(uint8_t* output);
@@ -38,7 +40,7 @@ class SoundDecomposition {
 
 public:
     SoundDecomposition(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int));
-    int maxFrequency();
+    uint8_t frequencyWithMaxAmplitude(); //вернет примерное расположение макс чатсоты
     uint8_t* analyzeAudio(uint8_t* output, int size);
     void getGroup(uint8_t* output);
 };
