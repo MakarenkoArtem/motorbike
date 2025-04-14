@@ -58,8 +58,21 @@ void SoundDecomposition::frequencyGrouping(uint8_t* input, uint8_t* output) {
         for (int i = groups[level][0]; i != groups[level][1]; ++i) {
             if (input[i] > output[level]) output[level] = input[i];
         }
-        if (output[level] < 70) output[level] = 0;
     }
+}
+
+void SoundDecomposition::lowLevelFiltration(uint8_t* output) {
+    uint8_t minVal = 255;
+    for (int level = 0; level != 5; ++level) {
+        output[level] = 0;
+        if (output[level] < averageMinLevel) {
+            output[level] = 0;
+        } else if (output[level] < minVal) {
+            minVal = output[level];
+        }
+    }
+    if (minVal == 255) minVal = 0;
+    averageMinLevel = max(70,(averageMinLevel * 9 + minVal) / 10);
 }
 
 void applyCustomExponent(uint8_t* input, int size, float base) {
@@ -72,6 +85,7 @@ void applyCustomExponent(uint8_t* input, int size, float base) {
 void SoundDecomposition::getGroup(uint8_t* output) {
     uint8_t* input = fhtMethods();
     frequencyGrouping(input, output);
+    lowLevelFiltration(output);
 #if Sound_FHT_DEBUG
         Serial.print("FHT befor:");
         for (byte i = 0;i<5;i++) {

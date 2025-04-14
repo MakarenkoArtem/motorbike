@@ -32,6 +32,10 @@ class SoundDecomposition {
             {19, 60} // Очень высокие 60 примерно 15 кГц
         };
 
+    void lowLevelFiltration(uint8_t* output);
+
+    float averageMinLevel = 0 ; //средний уровень минимальной амплитуды из значений group(обязательно с плавающей точкой, тк иначени из-за округления вниз неполучается среднее значение)
+
 public:
     SoundDecomposition(int pinR, int pinL, void (*pinMode)(int, int), int (*analogRead)(int));
     int maxFrequency();
