@@ -5,7 +5,7 @@ Animation::Animation(Parameters& params, SoundLevelMeter& sound, SoundDecomposit
 }
 
 
-byte Animation::strode(int period, byte maxBright) {
+uint8_t Animation::strode(int period, uint8_t maxBright) {
     int halfPeriod = period / 2;
     int curBright = ((millis() % period > halfPeriod) ?
                          //0-возрастает, 1-убывает
@@ -14,8 +14,8 @@ byte Animation::strode(int period, byte maxBright) {
     return map(curBright, 0, halfPeriod, 0, maxBright);
 }
 
-void Animation::convertAmplitudeToListOutput(byte amplitude) {
-    for (byte i = 0; i < params.outCount; ++i) {
+void Animation::convertAmplitudeToListOutput(uint8_t amplitude) {
+    for (uint8_t i = 0; i < params.outCount; ++i) {
         if (i < map(amplitude, 0, 255, 0, params.outCount)) {
             params.output[i] = map(i, 0, params.outCount-1, 0, 255);//amplitude;
         } else {
@@ -24,15 +24,15 @@ void Animation::convertAmplitudeToListOutput(byte amplitude) {
     }
 }
 
-void Animation::runningLineMode() {
+void Animation::runningLineMode(uint8_t getValue()) {
     if (timerRunLine < millis()) {
-        for (byte i = params.outCount - 1; i; --i) {
+        for (uint8_t i = params.outCount - 1; i; --i) {
             params.output[i] = params.output[i - 1];
         }
         timerRunLine = millis();
         int step = (100 - params.frequency)+25;
         timerRunLine = timerRunLine + step >= timerRunLine ? timerRunLine + step : 0;
-        params.output[0] = sound.getLevelAmplitude();
+        params.output[0] = getValue();
         if (params.output[0] != 0) {
             average = (average * 10 + params.output[0]) / 11;
             params.output[0] = map(params.output[0], average * 0.7, min(average * 1.45, 255), 0, 255);
@@ -62,7 +62,7 @@ bool Animation::processing() {
         }
         case 22: {
             params.bright = params.maxBright;
-            runningLineMode();
+            runningLineMode(sound.getLevelAmplitude());
             break;
         }
         case 23: {
@@ -81,6 +81,8 @@ bool Animation::processing() {
             break;
         }
         case 32: {
+            params.bright = params.maxBright;
+            runningLineMode(fht.frequencyWithMaxAmplitude());
             break;
         }
         case 33: {
