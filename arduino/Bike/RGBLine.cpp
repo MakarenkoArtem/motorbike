@@ -46,7 +46,8 @@ void RGBLine::show() {
             break;
         }
         case 31: {
-            //renderFlashByFrequency(params.outCount, params.output);
+            renderFlashByFrequency(params.outCount, params.output);
+            break;
         }
         default: {
             renderStaticPattern();
@@ -139,17 +140,17 @@ void RGBLine::renderColumn(byte amplitude) { //23
 
 //verified 18.02.25
 
-/*
+
 void RGBLine::renderFlashByFrequency(int countFreq, byte* frequencies) { //22
     for (int index = 0; index < count; index++) {
         byte curIndex = index * countFreq / (count - 1);
         byte amplitude = frequencies[curIndex];
         if (!amplitude) continue;
-        if (params.hsv) {
-            line[index] = CHSV(curIndex, 255, amplitude);
-        } else {
+        //if (params.hsv) {
+            line[index] = CHSV(index*255/count, 255, amplitude);
+        /*} else {
             //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
             line[index] = ColorFromPalette(myPal, map(curIndex * amplitude, 0, 255, 0, 200);
-        }
+        }*/
     }
-}*/
+}

@@ -1,9 +1,10 @@
 #include "initialization.h"
 
 void initAssembly() {//увеличение частоты оцифровки
-    sbi(ADCSRA, ADPS2);
+    //предположительно её можно заменить setADCPrescaler установив вместо ADC_PRESCALER_128 ADC_PRESCALER_32
+    /*sbi(ADCSRA, ADPS2);
     cbi(ADCSRA, ADPS1);
-    sbi(ADCSRA, ADPS0);
+    sbi(ADCSRA, ADPS0);*/
 }
 
 void initAudio() {

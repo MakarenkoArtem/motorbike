@@ -32,6 +32,7 @@ void setup() {
     leftLine = initLedLine(LLINE_PIN, NUM_LEDS, params, 0);
     rightLine = initLedLine(RLINE_PIN, NUM_LEDS, params, 1);
     initClock(time);
+    params.setMode(params.mode);
     Serial.println("End setup");
 };
 

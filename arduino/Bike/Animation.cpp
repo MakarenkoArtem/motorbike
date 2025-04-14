@@ -75,6 +75,9 @@ bool Animation::processing() {
             break;
         } //verified 8.04.25
         case 31: {
+            params.outCount=5;
+            fht.getGroup(params.output);
+            params.bright = params.maxBright;
             break;
         }
         case 32: {
