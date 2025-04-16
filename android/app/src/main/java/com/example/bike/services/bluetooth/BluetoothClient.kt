@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.Executors
@@ -37,8 +38,14 @@ class BluetoothClient(
         outputStream = bTSocket.outputStream
     }
 
-    fun getDataFlow(): Flow<BluetoothData> = bluetoothData
-        .takeWhile { it.connected }//поток существует пока connected==true
+    fun getDataFlow(): Flow<BluetoothData> =
+        bluetoothData.takeWhile {it.connected} //поток существует пока connected==true
+
+    fun isActive() = kotlin.runCatching {
+        if (bluetoothData.value.connected == false) {
+            throw IOException()
+        }
+    }
 
     fun connect(check: Boolean = true): Result<StateFlow<BluetoothData>> {
         if (check) {
@@ -46,7 +53,7 @@ class BluetoothClient(
                 _bluetoothData.value = _bluetoothData.value.copy(
                     active = connectRequest(5, 500, true).isSuccess
                 )
-                Log.d("Bike.BluetoothClient", "connect()")
+                Log.d("BluetoothClient", "connect()")
                 disconnect()
             }
         } else {
@@ -65,9 +72,9 @@ class BluetoothClient(
             sendMessage("Con\n")
             if (waitAnswer) {
                 message = takeMessage().getOrNull() ?: ""
-                Log.d("Bike.BluetoothClient", message)
+                Log.d("BluetoothClient", message)
                 if (message.substring(0, 2) == "OK") {
-                    Log.d("Bike.BluetoothClient", "Connect")
+                    Log.d("BluetoothClient", "Connect")
                     return@runCatching
                 }
             }
@@ -76,11 +83,11 @@ class BluetoothClient(
         throw Exception("Connection lost")
     }
 
-
     fun getColors(timeOut: Int = 500): Result<List<Int>> = kotlin.runCatching {
+        isActive().getOrThrow()
         outputStream.write("GC\n".toByteArray())
         outputStream.flush()
-        Log.d("Bike.BluetoothClient", "GC")
+        Log.d("BluetoothClient", "GC")
         clientScope.launch {
             var time = 0
             while (timeOut <= time && inputStream.available() == 0) {
@@ -89,6 +96,10 @@ class BluetoothClient(
             }
             val buffer = ByteArray(1024)
             val size = inputStream.read(buffer)
+            if (size == -1) {
+                disconnect()
+                return@launch
+            }
             val message = String(buffer, 0, size)
             Log.d("BikeBluetooth", "$size: $message")
             if (size == 0) { // Result.failure(IllegalStateException("Нет данных"))
@@ -120,6 +131,7 @@ class BluetoothClient(
         repeat: Int = 1,
         timeWait: Long = 100
     ) = kotlin.runCatching {
+        isActive().getOrThrow()
         Log.d("BikeBluetooth", message)
         outputStream.write(message.toByteArray())
         clientScope.launch {
@@ -137,6 +149,7 @@ class BluetoothClient(
         repeat: Int = 3,
         timeWait: Long = 50
     ): Result<String> {
+        isActive().getOrThrow()
         val buffer = ByteArray(1024) // буферный массив
         val executor = Executors.newSingleThreadExecutor() // создаем executor
         return runCatching {
@@ -145,10 +158,12 @@ class BluetoothClient(
                     inputStream.read(buffer)
                         .let {size ->
                             if (size > 0) {
-                                String(buffer, 0, size)
-                            } else {
-                                null
+                                return@let String(buffer, 0, size)
+                            } else if (size < 0) {
+                                disconnect()
+                                isActive().getOrThrow()
                             }
+                            null
                         }
                 }
                 try {
@@ -212,7 +227,7 @@ class BluetoothClient(
     fun disconnect(): Result<Unit> = kotlin.runCatching {
         _bluetoothData.value = _bluetoothData.value.copy(connected = false)
         clientScope.cancel()
-        Log.d("Bike.BluetoothClient", "disconnect")
+        Log.d("BluetoothClient", "disconnect")
         bTSocket.close()
     }
 }
