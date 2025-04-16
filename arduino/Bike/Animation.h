@@ -14,7 +14,8 @@ class Animation {
     float average = 0;
 
     uint8_t strode(int period, uint8_t maxBright);
-    void runningLineMode(uint8_t getValue());
+
+    void runningLineMode(uint8_t value);
 
     void convertAmplitudeToListOutput(uint8_t amplitude);
 

@@ -49,6 +49,10 @@ void RGBLine::show() {
             renderFlashByFrequency(params.outCount, params.output);
             break;
         }
+        /*case 32: {
+            renderRunningFlashByAmplitude(params.outCount, params.output);
+            break;
+        }*/
         default: {
             renderStaticPattern();
             break;
@@ -139,7 +143,6 @@ void RGBLine::renderColumn(byte amplitude) { //23
 }
 
 //verified 18.02.25
-
 
 void RGBLine::renderFlashByFrequency(int countFreq, byte* frequencies) { //22
     for (int index = 0; index < count; index++) {

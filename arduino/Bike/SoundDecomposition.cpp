@@ -40,15 +40,13 @@ uint8_t* SoundDecomposition::fhtMethods() {
 
 uint8_t SoundDecomposition::frequencyWithMaxAmplitude() {
     uint8_t* input = fhtMethods();
-    int maxVal = input[0];
-    int index = 0;
-    for (int i = 1; i < COUNT_FREQ; i++) {
-        if (maxVal < input[i]) {
-            maxVal = input[i];
+    int index = 2;
+    for (int i = 2; i < COUNT_FREQ; i++) {
+        if (input[index]+index/15 < input[i]+i/15) {
             index = i;
         }
     }
-    return static_cast<uint8_t>(index * 255 / (COUNT_FREQ - 1));
+    return static_cast<uint8_t>(index * 255 / (COUNT_FREQ - 3));
 }
 
 void SoundDecomposition::frequencyGrouping(uint8_t* input, uint8_t* output) {
@@ -63,43 +61,57 @@ void SoundDecomposition::frequencyGrouping(uint8_t* input, uint8_t* output) {
 void SoundDecomposition::lowLevelFiltration(uint8_t* output) {
     uint8_t minVal = 255;
     for (int level = 0; level != 5; ++level) {
-        output[level] = 0;
         if (output[level] < averageMinLevel) {
             output[level] = 0;
-        } else if (output[level] < minVal) {
+        } else {
+          if (output[level] < minVal) {
             minVal = output[level];
         }
-    }
+        output[level]=map(output[level], averageMinLevel, 170, 0, 255);
+    }}
     if (minVal == 255) minVal = 0;
-    averageMinLevel = max(70,(averageMinLevel * 9 + minVal) / 10);
+    averageMinLevel = max(70.0,(averageMinLevel * 19 + minVal) / 20)+0.5;
+#if Sound_FHT_DEBUG
+    Serial.print(F("averageMinLevel: "));
+    Serial.print(averageMinLevel);
+    #endif
 }
 
 void applyCustomExponent(uint8_t* input, int size, float base) {
     for (int i = 0; i < size; i++) {
         input[i] = pow(base, input[i] / 10.0);
-        input[i] = constrain(map(input[i], 1, pow(base, 10), 0, 255), 0, 255); // Ограничиваем диапазон
+        input[i] = constrain(map(input[i], 1, pow(base, 9), 0, 255), 0, 3)*85; // Ограничиваем диапазон
     }
 }
 
 void SoundDecomposition::getGroup(uint8_t* output) {
     uint8_t* input = fhtMethods();
     frequencyGrouping(input, output);
+    output[0]=output[0]*0.85;
+    output[1]=output[1]*0.95;
+#if Sound_FHT_DEBUG
+        Serial.print(F(" FHT unfiltered:"));
+        for (byte i = 0;i<5;i++) {
+            Serial.print(output[i]);
+            Serial.print(F(","));
+        }
+        Serial.println();
+#endif
     lowLevelFiltration(output);
 #if Sound_FHT_DEBUG
-        Serial.print("FHT befor:");
+        Serial.print(F(" FHT before:"));
         for (byte i = 0;i<5;i++) {
             Serial.print(output[i]);
-            Serial.print(",");
+            Serial.print(F(","));
         }
 #endif
-    applyCustomExponent(input, 5, 2.7);
+    applyCustomExponent(input, 5, 3.0);
 #if Sound_FHT_DEBUG
-        Serial.print(" FHT after:");
+        Serial.print(F(" FHT after:"));
         for (byte i = 0;i<5;i++) {
             Serial.print(output[i]);
-            Serial.print(",");
+            Serial.print(F(","));
         }
-        Serial.println("");
 #endif
 }
 

@@ -24,7 +24,7 @@ void Animation::convertAmplitudeToListOutput(uint8_t amplitude) {
     }
 }
 
-void Animation::runningLineMode(uint8_t getValue()) {
+void Animation::runningLineMode(uint8_t value) {
     if (timerRunLine < millis()) {
         for (uint8_t i = params.outCount - 1; i; --i) {
             params.output[i] = params.output[i - 1];
@@ -32,13 +32,12 @@ void Animation::runningLineMode(uint8_t getValue()) {
         timerRunLine = millis();
         int step = (100 - params.frequency)+25;
         timerRunLine = timerRunLine + step >= timerRunLine ? timerRunLine + step : 0;
-        params.output[0] = getValue();
+        params.output[0] = value;
         if (params.output[0] != 0) {
             average = (average * 10 + params.output[0]) / 11;
             params.output[0] = map(params.output[0], average * 0.7, min(average * 1.45, 255), 0, 255);
         }
     }
-    sound.getLevelAmplitude();
 }
 
 bool Animation::processing() {
@@ -63,6 +62,7 @@ bool Animation::processing() {
         case 22: {
             params.bright = params.maxBright;
             runningLineMode(sound.getLevelAmplitude());
+            sound.getLevelAmplitude();
             break;
         }
         case 23: {
@@ -80,11 +80,11 @@ bool Animation::processing() {
             params.bright = params.maxBright;
             break;
         }
-        case 32: {
+        /*case 32: {
             params.bright = params.maxBright;
-            runningLineMode(fht.frequencyWithMaxAmplitude());
+            runningLineMode(v);
             break;
-        }
+        }*/
         case 33: {
             break;
         }

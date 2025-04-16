@@ -25,15 +25,13 @@ SoundDecomposition fht(SOUND_R_PIN, SOUND_L_PIN, pinMode, analogRead);
 Animation animation(params, sound, fht);
 
 void setup() {
-    initAssembly();
     initSerial();
     initAudio();
     initSwitchAudio(AMPLIFIER_PIN, AUDIO_BT_PIN);
     leftLine = initLedLine(LLINE_PIN, NUM_LEDS, params, 0);
     rightLine = initLedLine(RLINE_PIN, NUM_LEDS, params, 1);
     initClock(time);
-    params.setMode(params.mode);
-    Serial.println("End setup");
+    Serial.println(F("End setup"));
 };
 
 
