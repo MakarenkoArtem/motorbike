@@ -37,6 +37,10 @@ void Parameters::setMode(byte mode) {
             outCount = 9;
             break;
         }
+        case 31: {
+            outCount = 5;
+            break;
+        }
         default: {
             outCount = 0;
             break;

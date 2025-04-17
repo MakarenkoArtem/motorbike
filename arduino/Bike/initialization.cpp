@@ -1,11 +1,5 @@
 #include "initialization.h"
 
-void initAssembly() {//увеличение частоты оцифровки
-    sbi(ADCSRA, ADPS2);
-    cbi(ADCSRA, ADPS1);
-    sbi(ADCSRA, ADPS0);
-}
-
 void initAudio() {
     analogReference(EXTERNAL);
 /*#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
@@ -17,7 +11,7 @@ void initAudio() {
 
 void initSerial() {
     Serial.begin(9600);
-    Serial.println("Setup");
+    Serial.println(F("Setup"));
 }
 
 void initSwitchAudio(int amplifier, int btSource) {
