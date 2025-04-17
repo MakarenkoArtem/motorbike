@@ -50,7 +50,7 @@ void RGBLine::show() {
             break;
         }
         /*case 32: {
-            renderRunningFlashByAmplitude(params.outCount, params.output);
+            //renderRunningFlashByAmplitude(params.outCount, params.output);
             break;
         }*/
         default: {
@@ -149,11 +149,11 @@ void RGBLine::renderFlashByFrequency(int countFreq, byte* frequencies) { //22
         byte curIndex = index * countFreq / (count - 1);
         byte amplitude = frequencies[curIndex];
         if (!amplitude) continue;
-        //if (params.hsv) {
+        if (params.hsv) {
             line[index] = CHSV(index*255/count, 255, amplitude);
-        /*} else {
+        } else {
             //рассматриваем только индексы с 0 по 200(объяснение в config.cpp)
-            line[index] = ColorFromPalette(myPal, map(curIndex * amplitude, 0, 255, 0, 200);
-        }*/
+            line[index] = ColorFromPalette(myPal, map(curIndex, 0, 255, 0, 200));
+        }
     }
 }

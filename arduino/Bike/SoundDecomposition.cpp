@@ -80,7 +80,7 @@ void SoundDecomposition::lowLevelFiltration(uint8_t* output) {
 void applyCustomExponent(uint8_t* input, int size, float base) {
     for (int i = 0; i < size; i++) {
         input[i] = pow(base, input[i] / 10.0);
-        input[i] = constrain(map(input[i], 1, pow(base, 9), 0, 255), 0, 3)*85; // Ограничиваем диапазон
+        input[i] = constrain(map(input[i], 1, pow(base, 9.5), 0, 5)*51, 0,255); // Ограничиваем диапазон
     }
 }
 

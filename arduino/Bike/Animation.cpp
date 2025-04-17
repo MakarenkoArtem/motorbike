@@ -17,7 +17,7 @@ uint8_t Animation::strode(int period, uint8_t maxBright) {
 void Animation::convertAmplitudeToListOutput(uint8_t amplitude) {
     for (uint8_t i = 0; i < params.outCount; ++i) {
         if (i < map(amplitude, 0, 255, 0, params.outCount)) {
-            params.output[i] = map(i, 0, params.outCount-1, 0, 255);//amplitude;
+            params.output[i] = map(i, 0, params.outCount - 1, 0, 255); //amplitude;
         } else {
             params.output[i] = 0;
         }
@@ -30,7 +30,7 @@ void Animation::runningLineMode(uint8_t value) {
             params.output[i] = params.output[i - 1];
         }
         timerRunLine = millis();
-        int step = (100 - params.frequency)+25;
+        int step = (100 - params.frequency) + 25;
         timerRunLine = timerRunLine + step >= timerRunLine ? timerRunLine + step : 0;
         params.output[0] = value;
         if (params.output[0] != 0) {
@@ -41,57 +41,61 @@ void Animation::runningLineMode(uint8_t value) {
 }
 
 bool Animation::processing() {
-    if (timer+50 > millis()) {
+    if (timer + 50 > millis()) {
         return false;
     }
     timer = millis();
     switch (params.mode) {
-        case 11: {
-            params.bright = params.maxBright;
-            break;
-        }
-        case 12: {
-            params.bright = strode(params.strobePeriod, params.maxBright);
-            break;
-        }
-        case 21: {
-            params.output[0] = sound.getLevelAmplitude();
-            params.bright = params.maxBright;
-            break;
-        }
-        case 22: {
-            params.bright = params.maxBright;
-            runningLineMode(sound.getLevelAmplitude());
-            sound.getLevelAmplitude();
-            break;
-        }
-        case 23: {
-            params.output[0] = sound.getExpLikeAmplitude(params.frequency);
-            params.bright = params.maxBright;
-            #if DEBUG_ANIMATION
+    case 11: {
+        params.bright = params.maxBright;
+        break;
+    }
+    case 12: {
+        params.bright = strode(params.strobePeriod, params.maxBright);
+        break;
+    }
+    case 21: {
+        params.output[0] = sound.getLevelAmplitude();
+        params.bright = params.maxBright;
+        break;
+    }
+    case 22: {
+        params.bright = params.maxBright;
+        runningLineMode(sound.getLevelAmplitude());
+        sound.getLevelAmplitude();
+        break;
+    }
+    case 23: {
+        params.output[0] = sound.getExpLikeAmplitude(params.frequency);
+        params.bright = params.maxBright;
+#if DEBUG_ANIMATION
                 Serial.print("Exp amplitude:");
                 Serial.println(params.output[0]);
-            #endif
-            break;
-        } //verified 8.04.25
-        case 31: {
-            params.outCount=5;
-            fht.getGroup(params.output);
-            params.bright = params.maxBright;
-            break;
+#endif
+        break;
+    } //verified 8.04.25
+    case 31: {
+        fht.getGroup(params.output);
+        for (int i = 0; i < params.outCount; i++) {
+            if (params.output[i] < 85) {
+                params.output[i] *= 3;
+            } else { params.output[i] = 255; }
         }
-        /*case 32: {
-            params.bright = params.maxBright;
-            runningLineMode(v);
-            break;
-        }*/
-        case 33: {
-            break;
-        }
-        case 41: {
-            params.bright = strode(params.strobePeriod, params.maxBright);
-            break;
-        }
+        params.bright = params.maxBright;
+        break;
+    }
+    case 32: {
+        /*params.bright = params.maxBright;
+        runningLineMode(fht.frequencyWithMaxAmplitude());*/
+        break;
+    }
+    case 33: {
+        break;
+    }
+    case 41: {
+        params.bright = strode(params.strobePeriod, params.maxBright);
+        break;
+    }
     }
     return true;
 }
