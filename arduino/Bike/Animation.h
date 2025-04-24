@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Arduino.h>
 #include "config.h"
 #include "Parameters.h"
 #include "SoundLevelMeter.h"
@@ -14,10 +13,11 @@ class Animation {
     unsigned long timerRunLine = 0;
     float average = 0;
 
-    byte strode(int period, byte maxBright);
-    void runningLineMode();
+    uint8_t strode(int period, uint8_t maxBright);
 
-    void convertAmplitudeToListOutput(byte amplitude);
+    void runningLineMode(uint8_t value);
+
+    void convertAmplitudeToListOutput(uint8_t amplitude);
 
 public:
     Animation(Parameters& params, SoundLevelMeter& sound, SoundDecomposition& fht);

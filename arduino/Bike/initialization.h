@@ -9,9 +9,6 @@
 #include "config.h"
 #include "RGBLine.h"
 
-
-void initAssembly();
-
 void initAudio();
 
 void initSerial();
