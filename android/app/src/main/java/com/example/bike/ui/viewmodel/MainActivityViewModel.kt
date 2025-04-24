@@ -122,6 +122,7 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
     }
 
     fun updateColors() {
+        if(screenDataState.value.curColor.index !in 0..4){return}
         val colors = screenDataState.value.colors.toMutableList()
         colors[screenDataState.value.curColor.index] =
             colors[screenDataState.value.curColor.index].copy(color = screenDataState.value.curColor.color)
@@ -180,7 +181,7 @@ class MainActivityViewModel(val bluetoothRepository: IBluetoothRepository): View
             val resp = withTimeoutOrNull(5000) {
                 changeStatus(!screenDataState.value.ignition, "ON\n", "OFF\n")
             } ?: Result.failure(Exception("Time out"))
-            Log.d("Bike.BluetoothClient", resp.toString())
+            Log.d("BluetoothClient", resp.toString())
             if (resp.isSuccess) {
                 _screenDataState.value =
                     _screenDataState.value.copy(ignition = !screenDataState.value.ignition)
