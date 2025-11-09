@@ -14,8 +14,9 @@ jobs:
             echo "ERROR: config file not found!"
             exit 1
           fi  
+          echo "Config file exist"
           g++ arduino/Bike/tests/testBTSerial.cpp \
-          ../BTSerial.cpp
+          ../BTSerial.cpp \
           ../Parameters.cpp \
           ../mystring.cpp \
           ../config.cpp \
