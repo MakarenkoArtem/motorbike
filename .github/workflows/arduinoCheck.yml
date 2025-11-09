@@ -2,7 +2,7 @@ name: Arduino check
 on: push
 jobs:
   test:
-    runs-on: ubuntu-24.04 [Beta]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
