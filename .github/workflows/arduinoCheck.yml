@@ -20,7 +20,7 @@ jobs:
           arduino/Bike/Parameters.cpp \
           arduino/Bike/mystring.cpp \
           arduino/Bike/config.cpp \
-          -I include \
+          -I arduino/Bike/tests/include \
           include/Arduino.cpp \
           include/SoftwareSerial.cpp \
           -o testBTSerial
