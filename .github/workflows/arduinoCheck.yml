@@ -21,8 +21,8 @@ jobs:
           arduino/Bike/mystring.cpp \
           arduino/Bike/config.cpp \
           -I arduino/Bike/tests/include \
-          include/Arduino.cpp \
-          include/SoftwareSerial.cpp \
+          arduino/Bike/tests/include/Arduino.cpp \
+          arduino/Bike/tests/include/SoftwareSerial.cpp \
           -o testBTSerial
           ./testBTSerial
           rm testBTSerial
