@@ -15,14 +15,6 @@ jobs:
             exit 1
           fi  
           echo "Config file exist"
-          g++ arduino/Bike/tests/testBTSerial.cpp \
-          ../BTSerial.cpp \
-          ../Parameters.cpp \
-          ../mystring.cpp \
-          ../config.cpp \
-          include/Arduino.cpp \
-          include/SoftwareSerial.cpp \
-          -isystem include \
-          -o testBTSerial
+          g++ arduino/Bike/tests/testBTSerial.cpp ../BTSerial.cpp ../Parameters.cpp ../mystring.cpp ../config.cpp -isystem include include/Arduino.cpp include/SoftwareSerial.cpp  -o testBTSerial
           ./testBTSerial
           rm testBTSerial

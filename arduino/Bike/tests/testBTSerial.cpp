@@ -20,7 +20,7 @@ Parameters params(colors);
 BTSerial bt(0, 0); // подключаем объект класса работы с блютуз
 int main() {
     const short N = 5;
-    char *inputs[N] = {"ON\n", "CON\n", "Con\ndfs", "HighAmp", "HighAm"};
+    char *inputs[N] = {"ON\n", "CON\n", "Con\ndfs", "HighAmp\n", "HighAm"};
     short answers[N] = {ON, ERROR,OK, AMPLIFIER_ON, WAIT_INPUT};
     for (int i = 0; i != N; ++i) {
         tests(bt, params, inputs[i], answers[i]);
