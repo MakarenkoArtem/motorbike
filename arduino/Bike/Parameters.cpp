@@ -2,7 +2,7 @@
 
 Parameters::Parameters(byte* colors) :
     colors(colors),
-    input(malloc(inpCount * sizeof(byte))), output(malloc(outCount * sizeof(byte))) {
+    input((byte*)malloc(inpCount * sizeof(byte))), output((byte*)malloc(outCount * sizeof(byte))) {
 }
 
 void Parameters::setFrequency(byte frequency) {

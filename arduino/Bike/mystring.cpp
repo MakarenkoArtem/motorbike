@@ -138,7 +138,7 @@ char *toStr(char s) {
     return createNewString(1, s);
 }
 
-int lenStr(char *str) {
+int lenStr(const char *str) {
     int i = -1;
     for (; str[++i];);
     return i;
@@ -205,7 +205,7 @@ char *charInSyms(char s, char *syms) {
     return *syms == s ? syms : 0;
 }
 
-char *replace(char *str, char *lastValue, char *newValue, int count) {
+char *replace(char *str, char *lastValue, const char *newValue, int count) {
     int k, h, i = 0, lenLastValue = lenStr(lastValue), lenNewValue = lenStr(
             newValue);
     char *help_;
@@ -221,7 +221,7 @@ char *replace(char *str, char *lastValue, char *newValue, int count) {
                 //for (; k--; delChar(str, i + lenNewValue));
                 k = 0;
             } else {
-                addStrOnIndex(str, subStr(newValue, 0, -k), i);
+                addStrOnIndex(str, subStr((char*)newValue, 0, -k), i);
                 //for (h = -k; h--; addChar(str, i, newValue[h]));//check the buffer size for the line
                 for (int j = -k;
                      j < lenLastValue - k; str[i + j] = newValue[j++]);

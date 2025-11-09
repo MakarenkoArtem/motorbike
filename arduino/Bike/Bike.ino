@@ -1,10 +1,10 @@
+#include <SoftwareSerial.h>
 #include "BTSerial.h"
 #include "IgnitionKey.h"
 #include "initialization.h"
 #include "SoundLevelMeter.h"
 #include "SoundDecomposition.h"
 #include "Animation.h"
-
 
 
 BTSerial serial(RX_BLUETOOTH_PIN, TX_BLUETOOTH_PIN); // подключаем объект класса работы с блютуз

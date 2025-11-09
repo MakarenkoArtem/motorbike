@@ -1,7 +1,7 @@
 #include "BTSerial.h"
 
 int freeMemory() {
-    // Для платформы AVR (например, Arduino Uno или Nano)
+    /*// Для платформы AVR (например, Arduino Uno или Nano)
     extern int __heap_start;
     extern int __brkval;
     int v = (int)&v;
@@ -9,7 +9,8 @@ int freeMemory() {
         return ((int)&v - (int)&__heap_start); // Если нет кучи, возвращаем память от начала стека
     } else {
         return ((int)&v - (int)&__brkval); // Для других случаев возвращаем память от конца кучи
-    }
+    }*/
+    return 0;
 }
 
 
@@ -39,7 +40,7 @@ short BTSerial::getCommands(Parameters& parameters) {
         timer = millis();
     }
     do {
-        buf[++sz] = this->read();
+        buf[++sz] = read();
     } while (available() and buf[sz] != '\n' and sz < MAXSZ);
     if (MAXSZ == sz) {
 #if DEBUGBT

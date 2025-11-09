@@ -1,0 +1,27 @@
+name: Arduino check
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-24.04 [Beta]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: test
+        run: |
+          # Проверяем существование конфиг-файла
+          ls
+          if [ ! -f arduino/Bike/config.h ]; then
+            echo "ERROR: config file not found!"
+            exit 1
+          fi  
+          g++ arduino/Bike/tests/testBTSerial.cpp \
+          ../BTSerial.cpp
+          ../Parameters.cpp \
+          ../mystring.cpp \
+          ../config.cpp \
+          include/Arduino.cpp \
+          include/SoftwareSerial.cpp \
+          -isystem include \
+          -o testBTSerial
+          ./testBTSerial
+          rm testBTSerial

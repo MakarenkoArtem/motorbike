@@ -1,7 +1,6 @@
 #pragma once
 
 #include "config.h"
-#include <Arduino.h>
 
 class Parameters {
 public:
