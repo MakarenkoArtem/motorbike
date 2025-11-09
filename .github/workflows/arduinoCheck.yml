@@ -16,10 +16,10 @@ jobs:
           fi  
           echo "Config file exist"
           g++ arduino/Bike/tests/testBTSerial.cpp \
-          ../BTSerial.cpp \
-          ../Parameters.cpp \
-          ../mystring.cpp \
-          ../config.cpp \
+          arduino/Bike/BTSerial.cpp \
+          arduino/Bike/Parameters.cpp \
+          arduino/Bike/mystring.cpp \
+          arduino/Bike/config.cpp \
           -I include \
           include/Arduino.cpp \
           include/SoftwareSerial.cpp \
